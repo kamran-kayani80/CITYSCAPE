@@ -1,0 +1,104 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function incoming() {
+      return request.resource.data;
+    }
+    
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidReport(data) {
+      return data.title is string && data.title.size() > 0 && data.title.size() <= 150 &&
+             data.description is string && data.description.size() <= 2000 &&
+             data.category is string && data.category.size() <= 50 &&
+             data.status is string && data.status.size() <= 50 &&
+             data.severity is string && data.severity.size() <= 50 &&
+             data.addressText is string && data.addressText.size() <= 300;
+    }
+
+    function isValidComment(data) {
+      return data.reportId is string &&
+             data.userName is string && data.userName.size() <= 100 &&
+             data.content is string && data.content.size() > 0 && data.content.size() <= 1000;
+    }
+
+    function isValidVerification(data) {
+      return data.reportId is string &&
+             data.userName is string && data.userName.size() <= 100 &&
+             data.statusConfirmed is string && data.statusConfirmed.size() <= 50;
+    }
+
+    function isValidUserProfile(data) {
+      return data.username is string && data.username.size() <= 50 &&
+             data.fullName is string && data.fullName.size() <= 100;
+    }
+
+    function isValidHashtag(data) {
+      return data.name is string && data.name.size() <= 100 &&
+             data.displayName is string && data.displayName.size() <= 100;
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reports collection
+    match /reports/{reportId} {
+      allow read: if true;
+      allow create: if isValidId(reportId) && isValidReport(incoming());
+      allow update: if isValidId(reportId) && (
+        (incoming().diff(existing()).affectedKeys().hasOnly(['upvotesCount', 'userHasUpvoted', 'updatedAt'])) ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'officialNote', 'resolvedAt', 'assignedWorker', 'updatedAt', 'resolutionImageUrl'])) ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['verificationsCount', 'updatedAt'])) ||
+        (isSignedIn() && existing().userId == request.auth.uid && isValidReport(incoming()))
+      );
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isValidId(commentId) && isValidComment(incoming());
+        allow update, delete: if false;
+      }
+
+      // Verifications subcollection
+      match /verifications/{verificationId} {
+        allow read: if true;
+        allow create: if isValidId(verificationId) && isValidVerification(incoming());
+        allow update, delete: if false;
+      }
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isValidId(userId) && isOwner(userId) && isValidUserProfile(incoming());
+      allow delete: if isOwner(userId);
+    }
+
+    // Hashtags
+    match /hashtags/{hashtagId} {
+      allow read: if true;
+      allow create, update: if isValidId(hashtagId) && isValidHashtag(incoming());
+      allow delete: if false;
+    }
+  }
+}

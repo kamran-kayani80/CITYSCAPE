@@ -1,0 +1,6 @@
+{
+  "name": "CITYSCAPE - Let's Fix Our City",
+  "description": "CITYSCAPE: A community civic engagement platform for reporting, mapping, upvoting, and tracking local infrastructure resolutions. Let's fix our city together!",
+  "requestFramePermissions": ["geolocation", "camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

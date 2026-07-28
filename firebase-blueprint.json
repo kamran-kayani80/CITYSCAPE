@@ -1,0 +1,112 @@
+{
+  "entities": {
+    "Report": {
+      "title": "Report",
+      "description": "Civic issue report filed by a user or guest.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string", "maxLength": 100 },
+        "userEmail": { "type": "string", "maxLength": 200 },
+        "isGuest": { "type": "boolean" },
+        "title": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "category": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "maxLength": 50 },
+        "severity": { "type": "string", "maxLength": 50 },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "addressText": { "type": "string", "maxLength": 300 },
+        "imageUrls": { "type": "array" },
+        "upvotesCount": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "description", "category", "status", "severity", "latitude", "longitude", "addressText", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "Comment or official update on a report.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "reportId": { "type": "string" },
+        "userName": { "type": "string", "maxLength": 100 },
+        "userRole": { "type": "string", "maxLength": 50 },
+        "content": { "type": "string", "maxLength": 1000 },
+        "isOfficialUpdate": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["reportId", "userName", "content", "createdAt"]
+    },
+    "IssueVerification": {
+      "title": "IssueVerification",
+      "description": "Crowdsourced verification of a report status.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "reportId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string", "maxLength": 100 },
+        "statusConfirmed": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["reportId", "userName", "statusConfirmed", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Public user civic identity and karma profile.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string", "maxLength": 50 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 200 },
+        "avatarUrl": { "type": "string", "maxLength": 500 },
+        "civicKarma": { "type": "number" },
+        "trustScore": { "type": "number" },
+        "joinedDate": { "type": "string" }
+      },
+      "required": ["username", "fullName"]
+    },
+    "Hashtag": {
+      "title": "Hashtag",
+      "description": "Hashtag record for civic categorization and trending score.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "usageCount": { "type": "number" },
+        "recentCount": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "displayName", "usageCount", "recentCount"]
+    }
+  },
+  "firestore": {
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/Report" },
+      "description": "Civic issue reports collection"
+    },
+    "/reports/{reportId}/comments/{commentId}": {
+      "schema": { "$ref": "#/entities/Comment" },
+      "description": "Comments on reports"
+    },
+    "/reports/{reportId}/verifications/{verificationId}": {
+      "schema": { "$ref": "#/entities/IssueVerification" },
+      "description": "Citizen verifications for report resolution"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Civic user profile data"
+    },
+    "/hashtags/{hashtagId}": {
+      "schema": { "$ref": "#/entities/Hashtag" },
+      "description": "Trending hashtags index"
+    }
+  }
+}

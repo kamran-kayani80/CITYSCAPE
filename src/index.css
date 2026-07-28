@@ -1,0 +1,376 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/* Soft Periwinkle & Dark Midnight Indigo Custom Theme Styles */
+:root {
+  --bg-periwinkle: #e5e3f7;
+  --bg-periwinkle-light: #f2f0fd;
+  --bg-periwinkle-dark: #1b1938;
+  --bg-periwinkle-card: #f5f4fd;
+  --font-display: 'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--bg-periwinkle);
+  color: #242242;
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+}
+
+/* Headings Typography Refinement */
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.heading-gradient {
+  background: linear-gradient(135deg, #1c1a3b 0%, #4338ca 50%, #6d28d9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heading-gradient-light {
+  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 60%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Designer Button Styles */
+.btn-primary-designer {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6d28d9 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  box-shadow: 0 6px 20px -2px rgba(79, 70, 229, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary-designer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px -2px rgba(79, 70, 229, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  filter: brightness(1.06);
+}
+
+.btn-primary-designer:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 3px 12px rgba(79, 70, 229, 0.4);
+}
+
+.btn-glow-cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  box-shadow: 0 6px 20px -2px rgba(6, 182, 212, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-glow-cyan:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px -2px rgba(6, 182, 212, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.btn-soft-tactile {
+  background: #f5f4fd;
+  color: #1c1a3b;
+  font-family: var(--font-display);
+  font-weight: 700;
+  box-shadow: 4px 4px 12px rgba(155, 146, 202, 0.38), -4px -4px 12px rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-soft-tactile:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 6px 6px 16px rgba(145, 135, 196, 0.48), -6px -6px 16px rgba(255, 255, 255, 1);
+  color: #4338ca;
+}
+
+.btn-soft-tactile:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: inset 2px 2px 5px rgba(155, 146, 202, 0.4), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+}
+
+.btn-amber-accent {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  box-shadow: 0 6px 18px -2px rgba(245, 158, 11, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-amber-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -2px rgba(245, 158, 11, 0.6);
+}
+
+/* Custom Soft Tactile / Neumorphic Glass Classes */
+.soft-card {
+  background: #f5f4fe;
+  box-shadow: 8px 8px 20px rgba(155, 146, 202, 0.45), -8px -8px 20px rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 24px;
+}
+
+.soft-card-hover {
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.soft-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 12px 12px 26px rgba(145, 135, 196, 0.52), -12px -12px 26px rgba(255, 255, 255, 1);
+}
+
+.soft-inset {
+  background: #e2dff4;
+  box-shadow: inset 3px 3px 8px rgba(155, 146, 202, 0.45), inset -3px -3px 8px rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+}
+
+.soft-pill {
+  background: #f5f4fd;
+  box-shadow: 4px 4px 10px rgba(155, 146, 202, 0.38), -4px -4px 10px rgba(255, 255, 255, 0.92);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.dark-indigo-card {
+  background: linear-gradient(155deg, #1b1938 0%, #232049 100%);
+  color: #ffffff;
+  border-radius: 28px;
+  box-shadow: 8px 12px 28px rgba(22, 19, 52, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glowing-bar {
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.65);
+}
+
+.icon-tile-indigo {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  box-shadow: 3px 3px 8px rgba(99, 102, 241, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.9);
+  color: #4338ca;
+}
+
+.icon-tile-amber {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  box-shadow: 3px 3px 8px rgba(245, 158, 11, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.9);
+  color: #d97706;
+}
+
+.icon-tile-sky {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  box-shadow: 3px 3px 8px rgba(99, 102, 241, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.9);
+  color: #4338ca;
+}
+
+.icon-tile-violet {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  box-shadow: 3px 3px 8px rgba(99, 102, 241, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.9);
+  color: #4338ca;
+}
+
+.icon-tile-rose {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  box-shadow: 3px 3px 8px rgba(245, 158, 11, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.9);
+  color: #d97706;
+}
+
+.icon-tile-emerald {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  box-shadow: 3px 3px 8px rgba(99, 102, 241, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.9);
+  color: #4338ca;
+}
+
+/* Leaflet map custom resets and glassmorphic periwinkle overlays */
+.leaflet-container {
+  font-family: inherit;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: #e2dff4;
+  border-radius: 28px;
+}
+
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 8px 12px 28px rgba(22, 19, 52, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: #f5f4fd;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.5;
+}
+
+.leaflet-popup-tip {
+  background: #f5f4fd;
+}
+
+/* Custom Marker Pin Animation */
+.custom-pin-drop {
+  animation: pinBounce 0.4s ease-out;
+}
+
+@keyframes pinBounce {
+  0% {
+    transform: translateY(-20px) scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(4px) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* High-End Micro-Animations & Settled Transitions for Expensive & Professional UI */
+
+/* Smooth Default Transitions */
+button, a, .card-interactive, .btn-interactive {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s ease,
+              border-color 0.2s ease,
+              opacity 0.2s ease;
+}
+
+/* Pro Card Lift & Subtle Depth */
+.pro-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease;
+}
+
+.pro-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -4px rgba(27, 25, 56, 0.12), 0 4px 12px -2px rgba(27, 25, 56, 0.08);
+}
+
+.pro-card:active {
+  transform: translateY(0) scale(0.995);
+  box-shadow: 0 4px 14px -2px rgba(27, 25, 56, 0.08);
+}
+
+/* Pro Button Settled Click & Tactile Spring */
+.pro-button {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.18s ease;
+  will-change: transform;
+}
+
+.pro-button:hover {
+  transform: translateY(-1.5px);
+  filter: brightness(1.04);
+}
+
+.pro-button:active {
+  transform: translateY(0.5px) scale(0.975);
+  filter: brightness(0.97);
+}
+
+/* Settled Glass Glow */
+.pro-glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 30px rgba(31, 28, 66, 0.06);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .pro-glass-card {
+  background: rgba(27, 25, 56, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.pro-glass-card:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 14px 38px rgba(31, 28, 66, 0.12);
+}
+
+/* Heartbeat Animation for Cards */
+@keyframes cardHeartbeat {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 6px 20px rgba(31, 28, 66, 0.08);
+  }
+  14% {
+    transform: scale(1.018);
+    box-shadow: 0 14px 32px rgba(99, 102, 241, 0.18), 0 0 12px rgba(99, 102, 241, 0.12);
+  }
+  28% {
+    transform: scale(1);
+    box-shadow: 0 6px 20px rgba(31, 28, 66, 0.08);
+  }
+  42% {
+    transform: scale(1.012);
+    box-shadow: 0 10px 26px rgba(99, 102, 241, 0.14);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 6px 20px rgba(31, 28, 66, 0.08);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 6px 20px rgba(31, 28, 66, 0.08);
+  }
+}
+
+.animate-card-heartbeat {
+  animation: cardHeartbeat 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.card-heartbeat-hover:hover {
+  animation: cardHeartbeat 1.6s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.soft-card-hover:hover {
+  animation: cardHeartbeat 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  box-shadow: 12px 12px 26px rgba(145, 135, 196, 0.52), -12px -12px 26px rgba(255, 255, 255, 1);
+}
+
+/* Gentle Entrance Keyframe */
+@keyframes settledFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-settled-in {
+  animation: settledFadeUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Subtle Shimmer for High-End Badges */
+@keyframes subtleShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-badge {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: subtleShimmer 3s infinite linear;
+}
+
+
+
