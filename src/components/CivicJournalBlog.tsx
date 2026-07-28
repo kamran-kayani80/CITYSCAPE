@@ -187,7 +187,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
   };
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText('contact@cityscape.com');
+    navigator.clipboard.writeText('contact@cityscape.solutions');
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2500);
   };
@@ -198,8 +198,8 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
     const body = encodeURIComponent(
       `Hello CITYSCAPE Editorial Team,\n\nI would like to submit a guest article pitch for the CITYSCAPE Journal.\n\nAuthor: ${pitchAuthor || 'Anonymous Resident'}\nCategory: ${pitchCategory}\nProposed Title: ${pitchTitle}\n\nArticle Summary / Outline:\n${pitchOutline}\n\nLooking forward to hearing from you!\n`
     );
-    window.location.href = `mailto:contact@cityscape.com?subject=${subject}&body=${body}`;
-    alert(`📧 Pitch draft formatted! Opening your email client to send to contact@cityscape.com`);
+    window.location.href = `mailto:contact@cityscape.solutions?subject=${subject}&body=${body}`;
+    alert(`📧 Pitch draft formatted! Opening your email client to send to contact@cityscape.solutions`);
     setIsContactModalOpen(false);
   };
 
@@ -533,7 +533,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                   <h3 className="font-heading font-black text-base text-[#1c1a3b] dark:text-white">
                     Guest Post Submissions
                   </h3>
-                  <p className="text-[11px] text-slate-500">Contact Editorial Team at contact@cityscape.com</p>
+                  <p className="text-[11px] text-slate-500">Contact Editorial Team at contact@cityscape.solutions</p>
                 </div>
               </div>
 
@@ -554,7 +554,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                     Official Submissions Email
                   </div>
                   <div className="text-base sm:text-lg font-mono font-bold text-white tracking-wide">
-                    contact@cityscape.com
+                    contact@cityscape.solutions
                   </div>
                   <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
                     Direct online publishing is disabled. Please submit your guest article pitch or draft to our editorial team via email.
@@ -564,11 +564,11 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
               <div className="flex flex-wrap gap-2.5 pt-1">
                 <a
-                  href="mailto:contact@cityscape.com?subject=CITYSCAPE%20Guest%20Post%20Pitch"
+                  href="mailto:contact@cityscape.solutions?subject=CITYSCAPE%20Guest%20Post%20Pitch"
                   className="px-3.5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>Send Email to contact@cityscape.com</span>
+                  <span>Send Email to contact@cityscape.solutions</span>
                 </a>
 
                 <button
@@ -653,7 +653,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                 className="w-full py-3.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-2"
               >
                 <Send className="w-4 h-4 text-amber-300" />
-                <span>Send Email Pitch to contact@cityscape.com</span>
+                <span>Send Email Pitch to contact@cityscape.solutions</span>
               </button>
             </form>
           </div>
