@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Header } from './components/Header';
 import { CommunityMap } from './components/CommunityMap';
 import { IssueList } from './components/IssueList';
@@ -12,6 +13,11 @@ import { UserProfileView } from './components/UserProfileView';
 import { CivicJournalBlog } from './components/CivicJournalBlog';
 import { CommunityEventsHub } from './components/CommunityEventsHub';
 import { CommunityVerificationModal } from './components/CommunityVerificationModal';
+import { AccessibilityToolbar } from './components/AccessibilityToolbar';
+import { CivicBulletinHub } from './components/CivicBulletinHub';
+import { SlaDashboard } from './components/SlaDashboard';
+import { CitizenPrideBanner } from './components/CitizenPrideBanner';
+import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile } from './types';
 import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map, List } from 'lucide-react';
 
@@ -22,7 +28,9 @@ export default function App() {
   const [cityStats, setCityStats] = useState<CityStats | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-  const [activeView, setActiveView] = useState<'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events'>('map');
+  const [activeView, setActiveView] = useState<
+    'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events' | 'bulletin' | 'sla'
+  >('map');
   const [mobileTab, setMobileTab] = useState<'map' | 'list'>('map');
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -234,7 +242,10 @@ export default function App() {
     try {
       const res = await fetch(`/api/reports/${reportId}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Role': isAdminMode ? 'admin' : 'citizen',
+        },
         body: JSON.stringify({
           status,
           officialNote,
@@ -253,142 +264,192 @@ export default function App() {
     }
   };
 
+  // Confirm or Dispute Resolution Handler
+  const handleConfirmResolution = async (reportId: string, confirmed: boolean, disputeReason?: string) => {
+    setReports((prev) =>
+      prev.map((r) => {
+        if (r.id === reportId) {
+          return {
+            ...r,
+            resolutionConfirmedByReporter: confirmed,
+            resolutionDisputeReason: disputeReason,
+            slaStatus: confirmed ? ('ON_TRACK' as any) : ('DISPUTED' as any),
+            status: confirmed ? 'CLOSED' : 'IN_PROGRESS',
+          };
+        }
+        return r;
+      })
+    );
+
+    if (confirmed) {
+      setUserKarma((k) => k + 25);
+      showToast('🎉 Resolution Confirmed! +25 Civic Karma awarded!');
+    } else {
+      showToast('🚨 Resolution Disputed! Ticket re-opened & escalated to Municipal Lead.');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#e5e3f7] dark:bg-[#121026] text-[#242242] dark:text-[#e5e3f7] flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
-      {/* Navigation Header */}
-      <Header
-        activeView={activeView}
-        setActiveView={setActiveView}
-        filter={filter}
-        setFilter={setFilter}
-        onOpenReportModal={() => setIsReportModalOpen(true)}
-        isAdminMode={isAdminMode}
-        setIsAdminMode={setIsAdminMode}
-        totalReportsCount={reports.length}
-        userKarma={userKarma}
-        userProfile={userProfile}
-        onUserProfileChange={(updated) => {
-          setUserProfile(updated);
-          setUserKarma(updated.civicKarma);
-        }}
-      />
+    <AccessibilityProvider>
+      <div className="min-h-screen bg-[#e5e3f7] dark:bg-[#121026] text-[#242242] dark:text-[#e5e3f7] flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+        {/* Sticky WCAG AAA Accessibility Toolbar */}
+        <AccessibilityToolbar />
 
-      {/* Main View Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
-        {/* VIEW 1: DUAL MAP & LIST SPLIT VIEW */}
-        {activeView === 'map' && (
-          <div className="space-y-4">
-            {/* Mobile View Switcher Pill */}
-            <div className="flex md:hidden items-center justify-center p-1 bg-slate-200 dark:bg-slate-800 rounded-xl max-w-xs mx-auto">
-              <button
-                onClick={() => setMobileTab('map')}
-                className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
-                  mobileTab === 'map' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-xs' : 'text-slate-600'
-                }`}
-              >
-                <Map className="w-3.5 h-3.5" />
-                <span>Map View</span>
-              </button>
-              <button
-                onClick={() => setMobileTab('list')}
-                className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
-                  mobileTab === 'list' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-xs' : 'text-slate-600'
-                }`}
-              >
-                <List className="w-3.5 h-3.5" />
-                <span>Issue List ({reports.length})</span>
-              </button>
-            </div>
+        {/* Navigation Header */}
+        <Header
+          activeView={activeView}
+          setActiveView={setActiveView}
+          filter={filter}
+          setFilter={setFilter}
+          onOpenReportModal={() => setIsReportModalOpen(true)}
+          isAdminMode={isAdminMode}
+          setIsAdminMode={setIsAdminMode}
+          totalReportsCount={reports.length}
+          userKarma={userKarma}
+          userProfile={userProfile}
+          onUserProfileChange={(updated) => {
+            setUserProfile(updated);
+            setUserKarma(updated.civicKarma);
+          }}
+        />
 
-            {/* Split Screen Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 h-[calc(100vh-170px)] min-h-[500px]">
-              {/* Interactive Map Side */}
-              <div
-                className={`md:col-span-7 lg:col-span-8 h-full rounded-3xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 ${
-                  mobileTab === 'list' ? 'hidden md:block' : 'block'
-                }`}
-              >
-                <CommunityMap
-                  reports={reports}
-                  selectedReportId={selectedReport?.id}
-                  onSelectReport={handleSelectReport}
-                  onUpvoteReport={handleUpvoteReport}
+        {/* Main View Container */}
+        <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
+          {/* Dynamic Citizen Pride Banner */}
+          <CitizenPrideBanner />
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeView}
+              initial={{ opacity: 0, y: 12, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.99 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {/* VIEW 1: DUAL MAP & LIST SPLIT VIEW */}
+              {activeView === 'map' && (
+                <div className="space-y-4">
+                  {/* Mobile View Switcher Pill */}
+                  <div className="flex md:hidden items-center justify-center p-1 bg-slate-200 dark:bg-slate-800 rounded-xl max-w-xs mx-auto">
+                    <button
+                      onClick={() => setMobileTab('map')}
+                      className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
+                        mobileTab === 'map' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-xs' : 'text-slate-600'
+                      }`}
+                    >
+                      <Map className="w-3.5 h-3.5" />
+                      <span>Map View</span>
+                    </button>
+                    <button
+                      onClick={() => setMobileTab('list')}
+                      className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
+                        mobileTab === 'list' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-xs' : 'text-slate-600'
+                      }`}
+                    >
+                      <List className="w-3.5 h-3.5" />
+                      <span>Issue List ({reports.length})</span>
+                    </button>
+                  </div>
+
+                  {/* Split Screen Layout */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 h-[calc(100vh-170px)] min-h-[500px]">
+                    {/* Interactive Map Side */}
+                    <div
+                      className={`md:col-span-7 lg:col-span-8 h-full rounded-3xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 ${
+                        mobileTab === 'list' ? 'hidden md:block' : 'block'
+                      }`}
+                    >
+                      <CommunityMap
+                        reports={reports}
+                        selectedReportId={selectedReport?.id}
+                        onSelectReport={handleSelectReport}
+                        onUpvoteReport={handleUpvoteReport}
+                      />
+                    </div>
+
+                    {/* Reported Issues Feed Side */}
+                    <div
+                      className={`md:col-span-5 lg:col-span-4 h-full overflow-y-auto pr-1 ${
+                        mobileTab === 'map' ? 'hidden md:block' : 'block'
+                      }`}
+                    >
+                      <IssueList
+                        reports={reports}
+                        selectedReportId={selectedReport?.id}
+                        onSelectReport={handleSelectReport}
+                        onUpvoteReport={handleUpvoteReport}
+                        isLoading={isLoading}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* VIEW 2: CIVIC BULLETIN & ANNOUNCEMENTS */}
+              {activeView === 'bulletin' && <CivicBulletinHub />}
+
+              {/* VIEW 3: AUTOMATED SLA RESOLUTION ENGINE */}
+              {activeView === 'sla' && (
+                <SlaDashboard reports={reports} onConfirmResolution={handleConfirmResolution} />
+              )}
+
+              {/* VIEW 4: COMMUNITY GRATITUDE & WALL OF FAME */}
+              {activeView === 'gratitude' && (
+                <CommunityGratitudeFeed
+                  onSelectReport={(report) => {
+                    setSelectedReport(report);
+                    setActiveView('map');
+                  }}
+                  onOpenVerificationModal={(report) => setVerificationReport(report)}
                 />
-              </div>
+              )}
 
-              {/* Reported Issues Feed Side */}
-              <div
-                className={`md:col-span-5 lg:col-span-4 h-full overflow-y-auto pr-1 ${
-                  mobileTab === 'map' ? 'hidden md:block' : 'block'
-                }`}
-              >
-                <IssueList
-                  reports={reports}
-                  selectedReportId={selectedReport?.id}
-                  onSelectReport={handleSelectReport}
-                  onUpvoteReport={handleUpvoteReport}
-                  isLoading={isLoading}
+              {/* VIEW 5: CIVIC PASSPORT & USER PROFILE */}
+              {activeView === 'profile' && (
+                <UserProfileView
+                  onSelectReport={(report) => {
+                    setSelectedReport(report);
+                    setActiveView('map');
+                  }}
                 />
-              </div>
-            </div>
-          </div>
-        )}
+              )}
 
-        {/* VIEW 2: COMMUNITY GRATITUDE & WALL OF FAME */}
-        {activeView === 'gratitude' && (
-          <CommunityGratitudeFeed
-            onSelectReport={(report) => {
-              setSelectedReport(report);
-              setActiveView('map');
-            }}
-            onOpenVerificationModal={(report) => setVerificationReport(report)}
-          />
-        )}
+              {/* VIEW 6: SEPARATE PASSWORD-PROTECTED & SAAS-SUBSCRIBED MUNICIPAL DESK */}
+              {activeView === 'admin' && (
+                <MunicipalDeskPortal
+                  reports={reports}
+                  onUpdateStatus={handleUpdateStatus}
+                  onSelectReport={handleSelectReport}
+                  isAdminMode={isAdminMode}
+                  setIsAdminMode={setIsAdminMode}
+                />
+              )}
 
-        {/* VIEW 3: CIVIC PASSPORT & USER PROFILE */}
-        {activeView === 'profile' && (
-          <UserProfileView
-            onSelectReport={(report) => {
-              setSelectedReport(report);
-              setActiveView('map');
-            }}
-          />
-        )}
+              {/* VIEW 7: CIVIC JOURNAL & GUEST BLOGGING HUB */}
+              {activeView === 'blog' && (
+                <CivicJournalBlog
+                  onAwardKarma={(amount, reason) => {
+                    setUserKarma((prev) => prev + amount);
+                    showToast(`+${amount} Karma Earned! ${reason}`);
+                  }}
+                />
+              )}
 
-        {/* VIEW 4: SEPARATE PASSWORD-PROTECTED & SAAS-SUBSCRIBED MUNICIPAL DESK */}
-        {activeView === 'admin' && (
-          <MunicipalDeskPortal
-            reports={reports}
-            onUpdateStatus={handleUpdateStatus}
-            onSelectReport={handleSelectReport}
-            isAdminMode={isAdminMode}
-            setIsAdminMode={setIsAdminMode}
-          />
-        )}
+              {/* VIEW 8: COMMUNITY EVENTS & LOCAL BUSINESS AD MARKETPLACE */}
+              {activeView === 'events' && (
+                <CommunityEventsHub
+                  onAwardKarma={(amount, reason) => {
+                    setUserKarma((prev) => prev + amount);
+                    showToast(`+${amount} Karma Earned! ${reason}`);
+                  }}
+                />
+              )}
 
-        {/* VIEW 5: CIVIC JOURNAL & GUEST BLOGGING HUB */}
-        {activeView === 'blog' && (
-          <CivicJournalBlog
-            onAwardKarma={(amount, reason) => {
-              setUserKarma((prev) => prev + amount);
-              showToast(`+${amount} Karma Earned! ${reason}`);
-            }}
-          />
-        )}
-
-        {/* VIEW 6: COMMUNITY EVENTS & LOCAL BUSINESS AD MARKETPLACE */}
-        {activeView === 'events' && (
-          <CommunityEventsHub
-            onAwardKarma={(amount, reason) => {
-              setUserKarma((prev) => prev + amount);
-              showToast(`+${amount} Karma Earned! ${reason}`);
-            }}
-          />
-        )}
-
-        {/* VIEW 7: CITY INSIGHTS & ANALYTICS */}
-        {activeView === 'analytics' && <AnalyticsView stats={cityStats} reports={reports} />}
-      </main>
+              {/* VIEW 9: CITY INSIGHTS & ANALYTICS */}
+              {activeView === 'analytics' && <AnalyticsView stats={cityStats} reports={reports} />}
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
       {/* Multi-Step Issue Reporting Modal */}
       <ReportModal
@@ -423,13 +484,23 @@ export default function App() {
         />
       )}
 
-      {/* Toast Notification Popup */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center space-x-2 text-xs font-bold animate-bounce">
-          <CheckCircle className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-    </div>
+      {/* Toast Notification Popup with Spring Entrance */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 32, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+            className="fixed bottom-6 right-6 z-50 bg-[#0A2540] text-white px-4 py-3 rounded-2xl shadow-2xl border border-indigo-500/40 flex items-center space-x-3 text-xs font-bold"
+          >
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
+    </AccessibilityProvider>
   );
 }

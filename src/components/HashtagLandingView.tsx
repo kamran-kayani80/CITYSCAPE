@@ -17,11 +17,14 @@ import {
   AlertOctagon,
   ShieldCheck,
   Check,
+  Navigation,
 } from 'lucide-react';
 import { Report } from '../types';
 import { RichPostContent } from './RichPostContent';
 import { formatTimeAgo } from '../lib/utils';
 import { CATEGORY_CONFIG, STATUS_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
+import { useUserLocation } from '../hooks/useUserLocation';
+import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
 
 interface HashtagLandingViewProps {
   tag: string;
@@ -53,6 +56,7 @@ export const HashtagLandingView: React.FC<HashtagLandingViewProps> = ({
   });
 
   const [copiedLink, setCopiedLink] = useState(false);
+  const { userCoords } = useUserLocation();
 
   const normalizedTag = tag.toLowerCase().replace(/^#/, '');
   const displayTag = tag.startsWith('#') ? tag : `#${tag}`;
@@ -294,41 +298,62 @@ export const HashtagLandingView: React.FC<HashtagLandingViewProps> = ({
               )}
             </div>
           ) : (
-            sortedReports.map((report) => (
-              <div
-                key={report.id}
-                onClick={() => onSelectReport(report)}
-                className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-indigo-300 transition-all cursor-pointer space-y-3 card-heartbeat-hover"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs">
-                      {report.userName[0]}
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                        <span>{report.userName}</span>
-                        {report.isGuest ? (
-                          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.2 rounded font-mono">Guest</span>
-                        ) : (
-                          <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-                        )}
-                      </div>
-                      <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                        <span>{formatTimeAgo(report.createdAt)}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-0.5">
-                          <MapPin className="w-2.5 h-2.5 text-indigo-500" />
-                          {report.addressText}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+            sortedReports.map((report) => {
+              let distanceTag: string | null = null;
+              if (userCoords && report.latitude && report.longitude) {
+                const distKm = calculateDistanceKm(
+                  userCoords.latitude,
+                  userCoords.longitude,
+                  report.latitude,
+                  report.longitude
+                );
+                distanceTag = formatDistanceTag(distKm);
+              }
 
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                    {report.category.replace('_', ' ')}
-                  </span>
-                </div>
+              return (
+                <div
+                  key={report.id}
+                  onClick={() => onSelectReport(report)}
+                  className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-indigo-300 transition-all cursor-pointer space-y-3 card-heartbeat-hover"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs">
+                        {report.userName[0]}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <span>{report.userName}</span>
+                          {report.isGuest ? (
+                            <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.2 rounded font-mono">Guest</span>
+                          ) : (
+                            <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+                          )}
+                        </div>
+                        <div className="text-[10px] text-slate-400 flex items-center gap-1.5 flex-wrap">
+                          <span>{formatTimeAgo(report.createdAt)}</span>
+                          <span>•</span>
+                          <span className="flex items-center gap-0.5">
+                            <MapPin className="w-2.5 h-2.5 text-indigo-500" />
+                            {report.addressText}
+                          </span>
+                          {distanceTag && (
+                            <>
+                              <span>•</span>
+                              <span className="px-2 py-0.2 rounded-full text-[9px] font-extrabold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800 flex items-center gap-0.5">
+                                <Navigation className="w-2.5 h-2.5 text-indigo-600 dark:text-indigo-400" />
+                                <span>{distanceTag}</span>
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      {report.category.replace('_', ' ')}
+                    </span>
+                  </div>
 
                 <div className="space-y-1.5">
                   <h3 className="font-heading font-black text-base text-[#1c1a3b] dark:text-white">
@@ -365,8 +390,9 @@ export const HashtagLandingView: React.FC<HashtagLandingViewProps> = ({
                   </span>
                 </div>
               </div>
-            ))
-          )}
+            );
+          })
+        )}
         </div>
       )}
     </div>

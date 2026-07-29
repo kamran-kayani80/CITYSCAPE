@@ -161,13 +161,14 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
   const handleLikePost = (postId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    const targetPost = posts.find((p) => p.id === postId);
+    if (!targetPost) return;
+
+    const newLiked = !targetPost.userHasLiked;
+
     setPosts((prev) =>
       prev.map((post) => {
         if (post.id === postId) {
-          const newLiked = !post.userHasLiked;
-          if (newLiked && onAwardKarma) {
-            onAwardKarma(5, 'Engaging with Civic Guest Journal');
-          }
           return {
             ...post,
             userHasLiked: newLiked,
@@ -177,6 +178,10 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
         return post;
       })
     );
+
+    if (newLiked && onAwardKarma) {
+      onAwardKarma(5, 'Engaging with Civic Guest Journal');
+    }
   };
 
   const handleBookmark = (postId: string, e: React.MouseEvent) => {

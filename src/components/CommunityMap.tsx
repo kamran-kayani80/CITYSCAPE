@@ -114,9 +114,21 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
     if (mapMode === 'heatmap') {
       reports.forEach((report) => {
+        const lat = Number(report.latitude);
+        const lng = Number(report.longitude);
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        const upvotes = typeof report.upvotesCount === 'number' && !isNaN(report.upvotesCount)
+          ? report.upvotesCount
+          : typeof (report as any).upvotes === 'number' && !isNaN((report as any).upvotes)
+          ? (report as any).upvotes
+          : 0;
+
         const baseRadius = report.severity === 'CRITICAL' ? 240 : report.severity === 'HIGH' ? 180 : 120;
-        const upvoteBoost = Math.min(report.upvotes * 15, 150);
-        const totalRadius = baseRadius + upvoteBoost;
+        const upvoteBoost = Math.min(upvotes * 15, 150);
+        const totalRadius = Number(baseRadius + upvoteBoost);
+
+        if (isNaN(totalRadius) || totalRadius <= 0) return;
 
         const color = report.status === 'RESOLVED'
           ? '#10b981'
@@ -127,7 +139,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           : '#06b6d4';
 
         // Outer radial halo
-        const heatCircle = L.circle([report.latitude, report.longitude], {
+        const heatCircle = L.circle([lat, lng], {
           radius: totalRadius,
           stroke: false,
           fillColor: color,
@@ -135,7 +147,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
         });
 
         // Mid-intensity core
-        const innerCircle = L.circle([report.latitude, report.longitude], {
+        const innerCircle = L.circle([lat, lng], {
           radius: totalRadius * 0.45,
           stroke: false,
           fillColor: color,
@@ -143,7 +155,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
         });
 
         // Hotspot center point
-        const coreCircle = L.circle([report.latitude, report.longitude], {
+        const coreCircle = L.circle([lat, lng], {
           radius: totalRadius * 0.15,
           color: '#ffffff',
           weight: 1.5,

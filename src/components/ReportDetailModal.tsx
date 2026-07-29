@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
   ThumbsUp,
@@ -18,12 +19,17 @@ import {
   Siren,
   ShieldAlert,
   Scan,
+  Download,
+  Navigation,
 } from 'lucide-react';
 import { Report, Comment } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 import { CategoryIcon } from './CategoryIcon';
 import { formatTimeAgo, formatFullDate } from '../lib/utils';
+import { downloadReportPDF } from '../lib/pdfExporter';
 import { AiForensicModal } from './AiForensicModal';
+import { useUserLocation } from '../hooks/useUserLocation';
+import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
 
 interface ReportDetailModalProps {
   report: Report | null;
@@ -50,12 +56,24 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [showResolvedPhoto, setShowResolvedPhoto] = useState(false);
   const [isForensicsOpen, setIsForensicsOpen] = useState(false);
+  const { userCoords } = useUserLocation();
 
   if (!report) return null;
 
   const statusConf = STATUS_CONFIG[report.status] || STATUS_CONFIG.OPEN;
   const catConf = CATEGORY_CONFIG[report.category] || CATEGORY_CONFIG.OTHER;
   const sevConf = SEVERITY_CONFIG[report.severity] || SEVERITY_CONFIG.MEDIUM;
+
+  let distanceTag: string | null = null;
+  if (userCoords && report.latitude && report.longitude) {
+    const distKm = calculateDistanceKm(
+      userCoords.latitude,
+      userCoords.longitude,
+      report.latitude,
+      report.longitude
+    );
+    distanceTag = formatDistanceTag(distKm);
+  }
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,8 +102,20 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col animate-settled-in">
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 12 }}
+          transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+          className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        >
         {/* Header bar */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
           <div className="flex items-center space-x-2">
@@ -101,6 +131,16 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
+            {/* Export PDF Button */}
+            <button
+              onClick={() => downloadReportPDF(report)}
+              title="Download official PDF report"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:hover:bg-indigo-900 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer active:scale-95 shadow-2xs"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export PDF</span>
+            </button>
+
             {/* Prominent Copy Link Button */}
             <button
               onClick={handleCopyLink}
@@ -174,10 +214,21 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
             <h1 className="text-xl sm:text-2xl font-heading font-black text-[#1c1a3b] dark:text-white leading-tight">
               {report.title}
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center space-x-1">
-              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span>{report.addressText}</span>
-              <span className="mx-1">•</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center space-x-1.5 flex-wrap">
+              <span className="flex items-center space-x-1">
+                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span>{report.addressText}</span>
+              </span>
+              {distanceTag && (
+                <>
+                  <span>•</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1 shadow-2xs">
+                    <Navigation className="w-2.5 h-2.5 text-indigo-600 dark:text-indigo-400" />
+                    <span>{distanceTag}</span>
+                  </span>
+                </>
+              )}
+              <span>•</span>
               <span>Reported {formatTimeAgo(report.createdAt)}</span>
             </p>
           </div>
@@ -424,13 +475,14 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
             </form>
           </div>
         </div>
-      </div>
+        </motion.div>
 
-      <AiForensicModal
-        isOpen={isForensicsOpen}
-        onClose={() => setIsForensicsOpen(false)}
-        report={report}
-      />
-    </div>
+        <AiForensicModal
+          isOpen={isForensicsOpen}
+          onClose={() => setIsForensicsOpen(false)}
+          report={report}
+        />
+      </motion.div>
+    </AnimatePresence>
   );
 };

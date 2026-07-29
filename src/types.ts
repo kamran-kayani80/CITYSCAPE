@@ -10,6 +10,8 @@ export type ReportCategory =
 
 export type ReportStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED';
 
+export type SlaStatus = 'ON_TRACK' | 'APPROACHING_DUE' | 'OVERDUE' | 'DISPUTED';
+
 export type SeverityLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export interface IssueVerification {
@@ -52,6 +54,28 @@ export interface Report {
   verifications?: IssueVerification[];
   aiForensics?: AiForensicResult;
   isFlaggedAsAiFake?: boolean;
+  wardZone?: string;
+  isProxyReport?: boolean;
+  proxyResidentName?: string;
+  proxyResidentContact?: string;
+  slaHoursTarget?: number;
+  slaDueDate?: string;
+  slaStatus?: 'ON_TRACK' | 'AT_RISK' | 'EXPIRED' | 'MET_SLA';
+  resolutionNotes?: string;
+  resolutionConfirmedByReporter?: boolean | null;
+  resolutionDisputeReason?: string;
+}
+
+export interface CivicAnnouncement {
+  id: string;
+  title: string;
+  department: string;
+  category: string;
+  priority: 'CRITICAL' | 'URGENT' | 'INFO';
+  description: string;
+  effectiveDates?: string;
+  publishedAt: string;
+  wardZone?: string;
 }
 
 export interface Comment {

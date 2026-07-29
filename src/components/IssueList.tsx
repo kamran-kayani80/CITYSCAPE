@@ -1,9 +1,12 @@
 import React from 'react';
-import { ThumbsUp, MapPin, MessageSquare, Clock, ArrowUpRight, ShieldCheck, CheckCircle2, Siren, AlertOctagon, ShieldAlert } from 'lucide-react';
+import { motion } from 'motion/react';
+import { ThumbsUp, MapPin, MessageSquare, Clock, ArrowUpRight, ShieldCheck, CheckCircle2, Siren, AlertOctagon, ShieldAlert, Navigation, Locate } from 'lucide-react';
 import { Report } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 import { CategoryIcon } from './CategoryIcon';
 import { formatTimeAgo } from '../lib/utils';
+import { useUserLocation } from '../hooks/useUserLocation';
+import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
 
 interface IssueListProps {
   reports: Report[];
@@ -20,6 +23,8 @@ export const IssueList: React.FC<IssueListProps> = ({
   onUpvoteReport,
   isLoading = false,
 }) => {
+  const { userCoords, isLocating, hasPermission, requestLocation } = useUserLocation();
+
   if (isLoading) {
     return (
       <div className="space-y-4 p-1">
@@ -55,23 +60,53 @@ export const IssueList: React.FC<IssueListProps> = ({
         <span className="text-xs font-black uppercase tracking-widest text-[#242242]">
           Nearby Reports ({reports.length})
         </span>
-        <span className="text-[10px] font-mono text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-full font-extrabold border border-indigo-200">
-          LIVE FEED
-        </span>
+
+        {userCoords ? (
+          <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full font-extrabold border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shadow-2xs">
+            <Navigation className="w-3 h-3 text-emerald-600 dark:text-emerald-400 fill-current" />
+            <span>GPS ACTIVE</span>
+          </span>
+        ) : isLocating ? (
+          <span className="text-[10px] font-mono text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-full font-extrabold border border-indigo-200 animate-pulse">
+            LOCATING GPS...
+          </span>
+        ) : (
+          <button
+            onClick={requestLocation}
+            className="text-[10px] font-mono text-indigo-700 bg-indigo-100/90 hover:bg-indigo-200 px-2.5 py-0.5 rounded-full font-extrabold border border-indigo-200 flex items-center gap-1 transition-all cursor-pointer"
+          >
+            <Locate className="w-3 h-3 text-indigo-600" />
+            <span>ENABLE DISTANCE</span>
+          </button>
+        )}
       </div>
 
-      {reports.map((report) => {
+      {reports.map((report, idx) => {
         const isSelected = report.id === selectedReportId;
         const statusConf = STATUS_CONFIG[report.status] || STATUS_CONFIG.OPEN;
         const catConf = CATEGORY_CONFIG[report.category] || CATEGORY_CONFIG.OTHER;
         const sevConf = SEVERITY_CONFIG[report.severity] || SEVERITY_CONFIG.MEDIUM;
         const isEmergency = report.category === 'EMERGENCY';
 
+        let distanceTag: string | null = null;
+        if (userCoords && report.latitude && report.longitude) {
+          const distKm = calculateDistanceKm(
+            userCoords.latitude,
+            userCoords.longitude,
+            report.latitude,
+            report.longitude
+          );
+          distanceTag = formatDistanceTag(distKm);
+        }
+
         return (
-          <div
+          <motion.div
             key={report.id}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, delay: Math.min(idx * 0.04, 0.3), ease: [0.16, 1, 0.3, 1] }}
             onClick={() => onSelectReport(report)}
-            className={`group relative soft-card soft-card-hover p-4 transition-all duration-200 cursor-pointer active:scale-[0.985] ${
+            className={`group relative soft-card soft-card-hover p-4 transition-all duration-200 cursor-pointer ${
               isEmergency
                 ? 'border-2 border-red-500 bg-red-50/50 dark:bg-red-950/30 shadow-red-100/60 shadow-md'
                 : isSelected
@@ -105,13 +140,23 @@ export const IssueList: React.FC<IssueListProps> = ({
               </div>
             )}
 
-            <div className="flex justify-between items-start mb-2">
-              <span
-                className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white shadow-xs"
-                style={{ backgroundColor: statusConf.pinHex }}
-              >
-                {statusConf.label}
-              </span>
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span
+                  className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white shadow-xs"
+                  style={{ backgroundColor: statusConf.pinHex }}
+                >
+                  {statusConf.label}
+                </span>
+
+                {distanceTag && (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1 shadow-2xs">
+                    <Navigation className="w-2.5 h-2.5 text-indigo-600 dark:text-indigo-400" />
+                    <span>{distanceTag}</span>
+                  </span>
+                )}
+              </div>
+
               <span className="text-xs text-indigo-400 font-mono font-bold">#{report.id}</span>
             </div>
 
@@ -119,7 +164,7 @@ export const IssueList: React.FC<IssueListProps> = ({
               <img
                 src={report.imageUrls[0]}
                 alt={report.title}
-                className="w-18 h-18 rounded-2xl object-cover shrink-0 bg-indigo-50 border border-white/80 shadow-xs"
+                className="w-18 h-18 rounded-2xl object-cover shrink-0 bg-indigo-50 border border-white/80 shadow-xs group-hover:scale-102 transition-transform duration-300"
               />
               <div className="min-w-0 flex-1">
                 <h3 className="font-heading font-black text-[#1c1a3b] dark:text-white text-sm sm:text-base line-clamp-1 group-hover:text-indigo-600 transition-colors">
@@ -142,7 +187,9 @@ export const IssueList: React.FC<IssueListProps> = ({
                   {sevConf.label}
                 </span>
 
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
                   onClick={(e) => onUpvoteReport(report.id, e)}
                   className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
                     report.userHasUpvoted
@@ -150,12 +197,12 @@ export const IssueList: React.FC<IssueListProps> = ({
                       : 'soft-pill text-indigo-800 hover:bg-white'
                   }`}
                 >
-                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current' : ''}`} />
+                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current text-amber-300' : ''}`} />
                   <span>{report.upvotesCount}</span>
-                </button>
+                </motion.button>
               </div>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>

@@ -168,13 +168,14 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
   const sponsoredEvents = events.filter((e) => e.isSponsored);
 
   const handleToggleRsvp = (eventId: string) => {
+    const targetEvent = events.find((e) => e.id === eventId);
+    if (!targetEvent) return;
+
+    const newRsvp = !targetEvent.userHasRsvped;
+
     setEvents((prev) =>
       prev.map((evt) => {
         if (evt.id === eventId) {
-          const newRsvp = !evt.userHasRsvped;
-          if (newRsvp && onAwardKarma) {
-            onAwardKarma(15, 'RSVPing to Community Event');
-          }
           return {
             ...evt,
             userHasRsvped: newRsvp,
@@ -184,6 +185,10 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
         return evt;
       })
     );
+
+    if (newRsvp && onAwardKarma) {
+      onAwardKarma(15, 'RSVPing to Community Event');
+    }
   };
 
   const handleHireAdSubmit = (e: React.FormEvent) => {

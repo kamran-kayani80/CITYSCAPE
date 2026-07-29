@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Report, ReportStatus } from '../types';
 import { AdminDashboard } from './AdminDashboard';
+import { downloadInvoicePDF } from '../lib/pdfExporter';
 
 interface MunicipalDeskPortalProps {
   reports: Report[];
@@ -723,8 +724,8 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
                   <span>Invoice #INV-2026-0725 ($25.00 USD)</span>
                 </div>
                 <button
-                  onClick={() => alert('Downloading official $25.00 USD Tax Invoice PDF...')}
-                  className="px-2.5 py-1 bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-[11px] font-bold border border-slate-200 dark:border-slate-600 flex items-center space-x-1 cursor-pointer"
+                  onClick={() => downloadInvoicePDF('INV-2026-0725', '25.00', officerEmail || 'procurement@sfpublicworks.org')}
+                  className="px-2.5 py-1 bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-[11px] font-bold border border-slate-200 dark:border-slate-600 flex items-center space-x-1 cursor-pointer active:scale-95 transition-all"
                 >
                   <Download className="w-3 h-3" />
                   <span>PDF Invoice</span>

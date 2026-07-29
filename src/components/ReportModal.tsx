@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
   Upload,
@@ -14,14 +15,19 @@ import {
   Mail,
   ArrowRight,
   ArrowLeft,
+  Mic,
+  Users,
+  Building,
+  Clock,
+  ShieldAlert,
+  Scan,
 } from 'lucide-react';
 import { ReportCategory, SeverityLevel, AIAnalysisResult, AiForensicResult } from '../types';
-import { CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
+import { CATEGORY_CONFIG, SEVERITY_CONFIG, CATEGORY_SLA_HOURS, MUNICIPAL_WARDS } from '../lib/constants';
 import { CategoryIcon } from './CategoryIcon';
 import { CommunityMap } from './CommunityMap';
 import { readFileAsBase64, reverseGeocode } from '../lib/utils';
 import { GoogleAuthButton } from './GoogleAuthButton';
-import { ShieldAlert, Scan } from 'lucide-react';
 
 interface ReportModalProps {
   isOpen: boolean;
@@ -42,7 +48,16 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
   const [description, setDescription] = useState<string>('');
   const [category, setCategory] = useState<ReportCategory>('POTHOLE');
   const [severity, setSeverity] = useState<SeverityLevel>('MEDIUM');
+  const [wardZone, setWardZone] = useState<string>('Ward 1 - Downtown & Civic Center');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Proxy Reporting for Seniors / Neighbors
+  const [isProxyReport, setIsProxyReport] = useState<boolean>(false);
+  const [proxyResidentName, setProxyResidentName] = useState<string>('');
+  const [proxyResidentContact, setProxyResidentContact] = useState<string>('');
+
+  // Voice Dictation State
+  const [isListeningVoice, setIsListeningVoice] = useState<boolean>(false);
 
   const [userName, setUserName] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
@@ -136,6 +151,45 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
     }
   };
 
+  // Voice Dictation Handler
+  const handleStartVoiceDictation = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Voice dictation speech recognition is not supported in this browser. You can type directly in the box.');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setIsListeningVoice(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setDescription((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        setIsListeningVoice(false);
+      };
+
+      recognition.onerror = () => {
+        setIsListeningVoice(false);
+      };
+
+      recognition.onend = () => {
+        setIsListeningVoice(false);
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.error('Failed to start speech recognition', err);
+      setIsListeningVoice(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
@@ -145,11 +199,16 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
 
     setIsSubmitting(true);
     try {
+      const slaInfo = CATEGORY_SLA_HOURS[category] || CATEGORY_SLA_HOURS.OTHER;
+      const targetHours = slaInfo.hours;
+      const dueDate = new Date(Date.now() + targetHours * 3600 * 1000).toISOString();
+
       await onSubmitReport({
         title: title.trim(),
         description: description.trim(),
         category,
         severity,
+        wardZone,
         latitude,
         longitude,
         addressText,
@@ -157,6 +216,12 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
         userName: userName.trim() || (isGuest ? 'Anonymous Resident' : 'Community Member'),
         userEmail: userEmail.trim(),
         isGuest,
+        isProxyReport,
+        proxyResidentName: isProxyReport ? proxyResidentName.trim() : undefined,
+        proxyResidentContact: isProxyReport ? proxyResidentContact.trim() : undefined,
+        slaHoursTarget: targetHours,
+        slaDueDate: dueDate,
+        slaStatus: 'ON_TRACK',
         aiForensics: forensicResult || undefined,
         isFlaggedAsAiFake: forensicResult?.isAiGenerated || false,
       });
@@ -167,6 +232,9 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
       setDescription('');
       setImagePreview(null);
       setAiAnalysisResult(null);
+      setIsProxyReport(false);
+      setProxyResidentName('');
+      setProxyResidentContact('');
       onClose();
     } catch (err) {
       console.error('Submit report failed', err);
@@ -176,50 +244,156 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col animate-settled-in">
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 12 }}
+          transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+          className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        >
         {/* Modal Header & Step Indicator */}
-        <div className="p-4 sm:p-5 border-b border-white/60 flex items-center justify-between soft-card rounded-t-3xl rounded-b-none">
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between soft-card rounded-t-3xl rounded-b-none">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">
-              Step {step} of 3
+            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+              Step {step} of 3 • Guided Civic Wizard
             </span>
             <h2 className="text-xl font-heading font-black text-[#1c1a3b] dark:text-white">
-              {step === 1 && 'Pin Issue Location'}
-              {step === 2 && 'Media & Details'}
-              {step === 3 && 'Submit & Verify'}
+              {step === 1 && '1. Choose Category & Ward'}
+              {step === 2 && '2. Pin Location & Proxy Report'}
+              {step === 3 && '3. Details, Photo & Voice Dictation'}
             </h2>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-500 hover:text-slate-800 rounded-full soft-pill cursor-pointer transition-colors"
+            className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-full soft-pill cursor-pointer transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            title="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Step Progress Bar */}
-        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5">
+        <div className="w-full bg-slate-100 dark:bg-slate-800 h-2">
           <div
-            className="bg-blue-600 h-1.5 transition-all duration-300"
+            className="bg-indigo-600 h-2 transition-all duration-300"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
 
         {/* Modal Body Scrollable Content */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5">
-          {/* STEP 1: LOCATION PINPOINT */}
+          {/* STEP 1: CATEGORY & WARD SELECTION */}
           {step === 1 && (
+            <div className="space-y-5">
+              {/* Category Grid */}
+              <div>
+                <label className="text-sm font-extrabold text-slate-900 dark:text-white block mb-2">
+                  Select Issue Category <span className="text-rose-500">*</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {(Object.keys(CATEGORY_CONFIG) as ReportCategory[]).map((catKey) => {
+                    const meta = CATEGORY_CONFIG[catKey];
+                    const sla = CATEGORY_SLA_HOURS[catKey];
+                    const isSelected = category === catKey;
+                    return (
+                      <button
+                        key={catKey}
+                        type="button"
+                        onClick={() => setCategory(catKey)}
+                        className={`p-3.5 rounded-2xl border text-left transition-all flex items-start space-x-3 cursor-pointer min-h-[58px] ${
+                          isSelected
+                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/80 text-indigo-950 dark:text-white ring-2 ring-indigo-500 shadow-sm font-bold'
+                            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 shrink-0 mt-0.5">
+                          <CategoryIcon category={catKey} className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-extrabold text-sm flex items-center justify-between">
+                            <span className="truncate">{meta.label}</span>
+                            {isSelected && <CheckCircle className="w-4 h-4 text-indigo-600 shrink-0 ml-1" />}
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                            {meta.description}
+                          </p>
+                          <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-bold mt-1">
+                            ⏱️ SLA Target: {sla?.label || '3 Days'}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Ward & Zone Selection */}
+              <div>
+                <label className="text-sm font-extrabold text-slate-900 dark:text-white block mb-2 flex items-center gap-1.5">
+                  <Building className="w-4 h-4 text-indigo-600" />
+                  <span>Administrative Ward / Zone</span>
+                </label>
+                <select
+                  value={wardZone}
+                  onChange={(e) => setWardZone(e.target.value)}
+                  className="w-full px-3.5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer min-h-[48px]"
+                >
+                  {MUNICIPAL_WARDS.map((w) => (
+                    <option key={w.id} value={w.name}>
+                      {w.name} (Officer: {w.officer})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Severity Selection */}
+              <div>
+                <label className="text-sm font-extrabold text-slate-900 dark:text-white block mb-2">
+                  Hazard Severity Level
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {(Object.keys(SEVERITY_CONFIG) as SeverityLevel[]).map((sev) => {
+                    const conf = SEVERITY_CONFIG[sev];
+                    const isSelected = severity === sev;
+                    return (
+                      <button
+                        key={sev}
+                        type="button"
+                        onClick={() => setSeverity(sev)}
+                        className={`py-3 px-2 text-center rounded-2xl border text-xs font-black transition-all cursor-pointer min-h-[48px] ${
+                          isSelected
+                            ? `${conf.colorClass} ring-2 ring-indigo-600 shadow-xs`
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        {conf.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: LOCATION PINPOINT & PROXY NEIGHBOR REPORTING */}
+          {step === 2 && (
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/80 dark:border-indigo-900 rounded-2xl text-xs text-indigo-950 dark:text-indigo-200 gap-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-900 rounded-2xl text-xs text-indigo-950 dark:text-indigo-200 gap-3">
                 <div className="flex items-start space-x-2.5">
                   <div className="p-2 bg-indigo-600 text-white rounded-xl shrink-0 shadow-xs">
-                    <MapPin className="w-4 h-4 animate-bounce text-yellow-300" />
+                    <MapPin className="w-4 h-4 text-yellow-300 animate-bounce" />
                   </div>
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                      Exact Pin Drop Location
+                      Issue Location
                     </span>
                     <p className="font-extrabold text-sm line-clamp-1">{addressText}</p>
                     <p className="text-[10px] opacity-75 font-mono">
@@ -239,15 +413,15 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
                       alert('Geolocation is not supported by your browser.');
                     }
                   }}
-                  className="px-3 py-1.5 bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-bold border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 transition-all cursor-pointer shrink-0 flex items-center space-x-1"
+                  className="px-3.5 py-2 bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-extrabold border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 transition-all cursor-pointer shrink-0 flex items-center space-x-1.5 min-h-[40px]"
                 >
                   <Navigation className="w-3.5 h-3.5 text-indigo-600" />
                   <span>GPS My Location</span>
                 </button>
               </div>
 
-              {/* Interactive map location picker */}
-              <div className="relative h-72 w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-inner">
+              {/* Interactive Map Picker */}
+              <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-inner">
                 <CommunityMap
                   reports={[]}
                   isPinningLocation={true}
@@ -259,73 +433,80 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
 
                 <div className="absolute top-3 left-3 z-20 px-3 py-1.5 bg-slate-900/85 text-white backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-wider border border-white/20 shadow-md flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>Interactive Location Pin Active</span>
+                  <span>Map Pin Active</span>
                 </div>
               </div>
 
-              {/* Precise Lat/Lng Input Controls */}
-              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
-                    Latitude Coordinates
-                  </label>
+              {/* Proxy Reporting Toggle ("Report for a Neighbor / Senior") */}
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl space-y-3">
+                <label className="flex items-center space-x-2.5 cursor-pointer">
                   <input
-                    type="number"
-                    step="0.0001"
-                    value={latitude}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      if (!isNaN(val)) handleLocationChange(val, longitude);
-                    }}
-                    className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-800 dark:text-slate-200"
+                    type="checkbox"
+                    checked={isProxyReport}
+                    onChange={(e) => setIsProxyReport(e.target.checked)}
+                    className="w-5 h-5 text-indigo-600 rounded border-amber-300 focus:ring-indigo-500 cursor-pointer"
                   />
-                </div>
+                  <div className="flex items-center space-x-1.5 font-extrabold text-amber-900 dark:text-amber-200 text-sm">
+                    <Users className="w-4 h-4 text-amber-600" />
+                    <span>Report for a Senior / Neighbor (Proxy Mode)</span>
+                  </div>
+                </label>
 
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
-                    Longitude Coordinates
-                  </label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={longitude}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      if (!isNaN(val)) handleLocationChange(latitude, val);
-                    }}
-                    className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-800 dark:text-slate-200"
-                  />
-                </div>
+                {isProxyReport && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-amber-200 dark:border-amber-800/60 animate-settled-in">
+                    <div>
+                      <label className="block text-[11px] font-bold text-amber-900 dark:text-amber-300 mb-1">
+                        Neighbor / Resident Full Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Mrs. Eleanor Vance (Apt 4B)"
+                        value={proxyResidentName}
+                        onChange={(e) => setProxyResidentName(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 rounded-xl font-bold text-slate-800 dark:text-slate-100"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-amber-900 dark:text-amber-300 mb-1">
+                        Phone Number or Contact
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. (415) 555-0192"
+                        value={proxyResidentContact}
+                        onChange={(e) => setProxyResidentContact(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 rounded-xl font-bold text-slate-800 dark:text-slate-100"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
-
-              <p className="text-xs text-slate-500 text-center">
-                Click or drag the animated pin on the map to drop the exact location of the infrastructure issue.
-              </p>
             </div>
           )}
 
-          {/* STEP 2: MEDIA & DETAILS */}
-          {step === 2 && (
+          {/* STEP 3: DETAILS, PHOTO & VOICE DICTATION */}
+          {step === 3 && (
             <div className="space-y-5">
-              {/* Image Upload Box */}
+              {/* Photo Upload & AI Forensic Scan */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Upload Photo (Optional but Recommended)
+                  <label className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    Issue Photo (Optional)
                   </label>
 
                   {imagePreview && (
                     <button
                       onClick={handleAnalyzeWithAI}
                       disabled={isAnalyzingAI}
-                      className="flex items-center space-x-1 px-2.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer"
+                      className="flex items-center space-x-1 px-2.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer min-h-[36px]"
                     >
                       {isAnalyzingAI ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
                         <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
                       )}
-                      <span>AI Auto-Classify</span>
+                      <span>AI Auto-Fill</span>
                     </button>
                   )}
                 </div>
@@ -340,27 +521,24 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
                           setImagePreview(null);
                           setForensicResult(null);
                         }}
-                        className="absolute top-2 right-2 p-1.5 bg-slate-900/80 text-white rounded-full hover:bg-red-600 transition-colors"
+                        className="absolute top-2 right-2 p-1.5 bg-slate-900/80 text-white rounded-full hover:bg-red-600 transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                       >
                         <X className="w-4 h-4" />
                       </button>
 
-                      {/* Floating Scan Badge */}
                       <div className="absolute bottom-2 left-2 px-3 py-1 bg-slate-950/80 backdrop-blur-md rounded-lg text-[10px] font-mono font-bold text-white border border-slate-700 flex items-center space-x-1.5">
                         <Scan className="w-3.5 h-3.5 text-indigo-400" />
-                        <span>AI Fraud Shield Active</span>
+                        <span>AI Forensic Guard Active</span>
                       </div>
                     </div>
 
-                    {/* Live Forensic Scanning Banner */}
                     {isScanningForensics && (
                       <div className="p-3 bg-indigo-950/50 border border-indigo-800 rounded-xl flex items-center space-x-3 text-xs text-indigo-300 animate-pulse">
                         <Loader2 className="w-4 h-4 animate-spin text-indigo-400 shrink-0" />
-                        <span>Performing Multi-modal AI Forensic Scan for synthetic picture markers...</span>
+                        <span>Scanning photo for AI deepfake/synthetic markers...</span>
                       </div>
                     )}
 
-                    {/* Scan Result Alert */}
                     {!isScanningForensics && forensicResult && (
                       <div className={`p-3 rounded-xl border text-xs flex items-start space-x-3 ${
                         forensicResult.isAiGenerated
@@ -376,227 +554,141 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
                           <div className="flex items-center justify-between font-bold">
                             <span>
                               {forensicResult.isAiGenerated
-                                ? '⚠️ AI-Generated Picture Flagged'
+                                ? '⚠️ AI Synthetic Image Flagged'
                                 : '🛡️ Authentic Camera Capture Verified'}
                             </span>
                             <span className="font-mono text-[10px] uppercase font-black px-2 py-0.5 rounded bg-slate-900/80">
-                              {forensicResult.aiProbability}% AI Probability
+                              {forensicResult.aiProbability}% AI Score
                             </span>
                           </div>
-                          <p className="text-[11px] opacity-90 mt-1">
-                            {forensicResult.forensicAnalysis}
-                          </p>
                         </div>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-2xl cursor-pointer bg-slate-50/50 dark:bg-slate-800/50 transition-colors">
-                    <Camera className="w-8 h-8 text-slate-400 mb-2" />
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Click or drag photo here
+                  <label className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-500 rounded-2xl cursor-pointer bg-slate-50/50 dark:bg-slate-800/50 transition-colors min-h-[100px]">
+                    <Camera className="w-7 h-7 text-indigo-500 mb-1" />
+                    <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                      Tap or Drag Photo
                     </span>
-                    <span className="text-[10px] text-slate-400 mt-0.5">PNG, JPG up to 10MB</span>
+                    <span className="text-[10px] text-slate-400">PNG or JPG up to 10MB</span>
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   </label>
                 )}
               </div>
 
-              {/* AI Analysis Confirmation Banner */}
-              {aiAnalysisResult && (
-                <div className="p-3 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 rounded-2xl text-xs space-y-1">
-                  <div className="flex items-center space-x-1.5 font-bold text-purple-900 dark:text-purple-200">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
-                    <span>Gemini AI Auto-Detected Issue</span>
-                  </div>
-                  <p className="text-purple-700 dark:text-purple-300 text-[11px]">
-                    Recommended Category: <strong>{aiAnalysisResult.category}</strong> | Severity:{' '}
-                    <strong>{aiAnalysisResult.severity}</strong>
-                  </p>
-                </div>
-              )}
-
-              {/* Category Selection Grid */}
+              {/* Title Input */}
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
-                  Category
+                <label className="text-sm font-extrabold text-slate-900 dark:text-white block mb-1">
+                  Issue Title <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {(Object.keys(CATEGORY_CONFIG) as ReportCategory[]).map((catKey) => {
-                    const meta = CATEGORY_CONFIG[catKey];
-                    const isSelected = category === catKey;
-                    return (
-                      <button
-                        key={catKey}
-                        type="button"
-                        onClick={() => setCategory(catKey)}
-                        className={`flex items-center space-x-2 p-2.5 rounded-xl border text-left text-xs transition-all ${
-                          isSelected
-                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/80 text-blue-900 dark:text-blue-200 font-bold shadow-xs ring-1 ring-blue-500'
-                            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
-                        }`}
-                      >
-                        <CategoryIcon category={catKey} className="w-4 h-4 text-blue-600 shrink-0" />
-                        <span className="truncate">{meta.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Deep pothole right near crosswalk"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-3.5 py-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 dark:text-slate-100 font-bold min-h-[48px]"
+                />
               </div>
 
-              {/* Severity Level */}
+              {/* Description + Hands-Free Voice Dictation Button */}
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
-                  Hazard Severity
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {(Object.keys(SEVERITY_CONFIG) as SeverityLevel[]).map((sev) => {
-                    const conf = SEVERITY_CONFIG[sev];
-                    const isSelected = severity === sev;
-                    return (
-                      <button
-                        key={sev}
-                        type="button"
-                        onClick={() => setSeverity(sev)}
-                        className={`py-2 px-2 text-center rounded-xl border text-xs font-semibold transition-all ${
-                          isSelected
-                            ? `${conf.colorClass} ring-2 ring-blue-500`
-                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600'
-                        }`}
-                      >
-                        {conf.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Title & Description */}
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Issue Title *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Deep pothole right near bike lane"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-slate-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-sm font-extrabold text-slate-900 dark:text-white">
                     Description
                   </label>
-                  <textarea
-                    rows={3}
-                    placeholder="Provide details such as size, hazard impact, or best times to observe..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-slate-100"
-                  />
+
+                  {/* Web Speech API Dictation Button */}
+                  <button
+                    type="button"
+                    onClick={handleStartVoiceDictation}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center space-x-1.5 transition-all cursor-pointer min-h-[38px] ${
+                      isListeningVoice
+                        ? 'bg-rose-600 text-white animate-pulse ring-2 ring-rose-400'
+                        : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-200'
+                    }`}
+                  >
+                    <Mic className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>{isListeningVoice ? 'Listening Voice...' : 'Dictate Voice (Hands-Free)'}</span>
+                  </button>
+                </div>
+
+                <textarea
+                  rows={3}
+                  placeholder="Provide details or tap Dictate Voice to speak your description hands-free..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 dark:text-slate-100"
+                />
+              </div>
+
+              {/* SLA Target Banner */}
+              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 rounded-2xl flex items-center space-x-3 text-xs text-indigo-950 dark:text-indigo-200">
+                <Clock className="w-5 h-5 text-indigo-600 shrink-0" />
+                <div>
+                  <span className="font-extrabold uppercase text-[10px] text-indigo-600 dark:text-indigo-400 block">
+                    Automated SLA Response Target
+                  </span>
+                  <span className="font-bold">
+                    {CATEGORY_SLA_HOURS[category]?.label || '3 Business Days'} for dispatch & repair.
+                  </span>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* STEP 3: SUBMIT & VERIFY */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm">Report Summary</h4>
-                <p>
-                  <strong>Title:</strong> {title || 'Untitled Issue'}
-                </p>
-                <p>
-                  <strong>Category:</strong> {CATEGORY_CONFIG[category].label}
-                </p>
-                <p>
-                  <strong>Location:</strong> {addressText}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                  Reporting As
+              {/* Reporter Identity */}
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                <label className="text-xs font-extrabold text-slate-900 dark:text-white block">
+                  Your Reporter Contact
                 </label>
 
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setIsGuest(true)}
-                    className={`p-3 rounded-2xl border text-left text-xs font-semibold transition-all ${
+                    className={`p-3 rounded-2xl border text-left text-xs font-extrabold transition-all min-h-[48px] ${
                       isGuest
-                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/80 text-blue-900 dark:text-blue-200 ring-1 ring-blue-500'
+                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/80 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500'
                         : 'border-slate-200 dark:border-slate-800 text-slate-600'
                     }`}
                   >
-                    <User className="w-4 h-4 mb-1 text-blue-600" />
-                    <div>Guest Resident</div>
-                    <p className="text-[10px] font-normal opacity-70">Submit anonymously</p>
+                    <User className="w-4 h-4 mb-0.5 text-indigo-600" />
+                    <div>Anonymous Resident</div>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setIsGuest(false)}
-                    className={`p-3 rounded-2xl border text-left text-xs font-semibold transition-all ${
+                    className={`p-3 rounded-2xl border text-left text-xs font-extrabold transition-all min-h-[48px] ${
                       !isGuest
-                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/80 text-blue-900 dark:text-blue-200 ring-1 ring-blue-500'
+                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/80 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500'
                         : 'border-slate-200 dark:border-slate-800 text-slate-600'
                     }`}
                   >
-                    <ShieldCheck className="w-4 h-4 mb-1 text-blue-600" />
+                    <ShieldCheck className="w-4 h-4 mb-0.5 text-indigo-600" />
                     <div>Verified Citizen</div>
-                    <p className="text-[10px] font-normal opacity-70">Receive municipal status updates</p>
                   </button>
                 </div>
 
-                {/* Google Sign In option */}
-                <div className="pt-1">
-                  <GoogleAuthButton
-                    variant="modal"
-                    onAuthChange={(profile) => {
-                      if (profile.fullName) setUserName(profile.fullName);
-                      if (profile.email) setUserEmail(profile.email);
-                      setIsGuest(false);
-                    }}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    placeholder="Your Name (Optional)"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                  />
-
-                  {!isGuest && (
-                    <input
-                      type="email"
-                      placeholder="Email for resolution notifications"
-                      value={userEmail}
-                      onChange={(e) => setUserEmail(e.target.value)}
-                      className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    />
-                  )}
-                </div>
+                <input
+                  type="text"
+                  placeholder="Your Name (Optional)"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none min-h-[44px]"
+                />
               </div>
             </div>
           )}
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="p-4 border-t border-white/60 soft-card rounded-b-3xl rounded-t-none flex items-center justify-between">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 soft-card rounded-b-3xl rounded-t-none flex items-center justify-between">
           {step > 1 ? (
             <button
               type="button"
               onClick={() => setStep((s) => (s - 1) as any)}
-              className="btn-soft-tactile flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs cursor-pointer"
+              className="btn-soft-tactile flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer min-h-[48px]"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
@@ -608,14 +700,8 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
           {step < 3 ? (
             <button
               type="button"
-              onClick={() => {
-                if (step === 2 && !title.trim()) {
-                  alert('Please enter a title for the report before continuing.');
-                  return;
-                }
-                setStep((s) => (s + 1) as any);
-              }}
-              className="btn-primary-designer flex items-center space-x-2 px-5 py-2.5 rounded-2xl text-xs cursor-pointer"
+              onClick={() => setStep((s) => (s + 1) as any)}
+              className="btn-primary-designer flex items-center space-x-2 px-6 py-3 rounded-2xl text-xs font-black cursor-pointer min-h-[48px]"
             >
               <span>Next Step</span>
               <ArrowRight className="w-4 h-4" />
@@ -625,18 +711,19 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="btn-primary-designer flex items-center space-x-2 px-6 py-2.5 rounded-2xl text-xs cursor-pointer disabled:opacity-50"
+              className="btn-primary-designer flex items-center space-x-2 px-7 py-3 rounded-2xl text-xs font-black cursor-pointer disabled:opacity-50 min-h-[48px]"
             >
               {isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <CheckCircle className="w-4 h-4" />
               )}
-              <span>Submit Issue Report</span>
+              <span>Submit Issue Ticket</span>
             </button>
           )}
         </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };

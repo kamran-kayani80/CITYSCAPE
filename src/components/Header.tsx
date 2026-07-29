@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import {
   MapPin,
   Plus,
@@ -21,14 +22,16 @@ import {
   BookOpen,
   Calendar,
   Megaphone,
+  Clock,
+  Bell,
 } from 'lucide-react';
 import { GoogleAuthButton } from './GoogleAuthButton';
 import { ReportFilter, ReportCategory, ReportStatus, SeverityLevel, UserProfile } from '../types';
 import { CATEGORY_CONFIG, STATUS_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 
 interface HeaderProps {
-  activeView: 'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events';
-  setActiveView: (view: 'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events') => void;
+  activeView: 'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events' | 'bulletin' | 'sla';
+  setActiveView: (view: 'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events' | 'bulletin' | 'sla') => void;
   filter: ReportFilter;
   setFilter: React.Dispatch<React.SetStateAction<ReportFilter>>;
   onOpenReportModal: () => void;
@@ -164,13 +167,15 @@ export const Header: React.FC<HeaderProps> = ({
             )}
 
             {/* Primary CTA Button: Brief Heading "+ Report" */}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onOpenReportModal}
-              className="btn-primary-designer pro-button flex items-center space-x-1.5 py-2 px-3.5 rounded-xl text-xs cursor-pointer"
+              className="btn-primary-designer pro-button flex items-center space-x-1.5 py-2 px-3.5 rounded-xl text-xs cursor-pointer shadow-md"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span>Report</span>
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
@@ -181,7 +186,9 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Main View Tabs (Short & Brief Labels) */}
           <nav className="flex items-center gap-1.5 text-xs font-heading font-extrabold overflow-x-auto no-scrollbar py-0.5">
             {/* Persistent Urgent / Emergency Tab */}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               id="urgent-tab-btn"
               onClick={() => {
                 setActiveView('map');
@@ -202,9 +209,11 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="bg-red-700 text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
                 ALERT
               </span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               id="discovery-tab-btn"
               onClick={() => setActiveView('map')}
               className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 ${
@@ -220,9 +229,39 @@ export const Header: React.FC<HeaderProps> = ({
               }`}>
                 {totalReportsCount}
               </span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setActiveView('bulletin')}
+              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
+                activeView === 'bulletin'
+                  ? 'bg-indigo-700 text-white shadow-xs border-indigo-800 font-extrabold'
+                  : 'bg-white/60 text-indigo-950 hover:bg-white border-white/80'
+              }`}
+            >
+              <Bell className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Bulletin</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setActiveView('sla')}
+              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
+                activeView === 'sla'
+                  ? 'bg-indigo-700 text-white shadow-xs border-indigo-800 font-extrabold'
+                  : 'bg-white/60 text-indigo-950 hover:bg-white border-white/80'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5 text-emerald-600" />
+              <span>SLA Tracker</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setActiveView('blog')}
               className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'blog'
@@ -232,7 +271,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
               <span>Civic Journal</span>
-            </button>
+            </motion.button>
 
             <button
               onClick={() => setActiveView('events')}

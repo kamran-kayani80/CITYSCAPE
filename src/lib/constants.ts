@@ -104,3 +104,73 @@ export const SEVERITY_CONFIG: Record<SeverityLevel, { label: string; colorClass:
   HIGH: { label: 'High Priority', colorClass: 'bg-orange-50 text-orange-700 border-orange-300 font-semibold' },
   CRITICAL: { label: 'Critical Safety Risk', colorClass: 'bg-red-100 text-red-800 border-red-300 font-bold' }
 };
+
+export const CATEGORY_SLA_HOURS: Record<ReportCategory, { hours: number; label: string }> = {
+  EMERGENCY: { hours: 2, label: '2 Hours (Emergency Dispatch)' },
+  POTHOLE: { hours: 120, label: '5 Business Days (Road Works)' },
+  LIGHTING: { hours: 72, label: '3 Business Days (Electrical Dept)' },
+  SANITATION: { hours: 24, label: '24 Hours (Sanitation Dept)' },
+  VANDALISM: { hours: 96, label: '4 Business Days (Public Works)' },
+  WATER_LEAK: { hours: 24, label: '24 Hours (Water & Sewage)' },
+  ROADS_TRAFFIC: { hours: 72, label: '3 Business Days (Transit Auth)' },
+  OTHER: { hours: 168, label: '7 Business Days (General Services)' },
+};
+
+export const MUNICIPAL_WARDS = [
+  { id: 'ward_1', name: 'Ward 1 - Downtown & Civic Center', officer: 'Capt. Sarah Jenkins' },
+  { id: 'ward_2', name: 'Ward 2 - Mission & Valencia Corridor', officer: 'Insp. Carlos Rivera' },
+  { id: 'ward_3', name: 'Ward 3 - Sunset & Richmond District', officer: 'Officer Elena Rostova' },
+  { id: 'ward_4', name: 'Ward 4 - SoMa, South Beach & Wharf', officer: 'Chief Marcus Vance' },
+  { id: 'ward_5', name: 'Ward 5 - Castro, Noe & Twin Peaks', officer: 'Officer Maya Lin' },
+];
+
+export const MOCK_ANNOUNCEMENTS = [
+  {
+    id: 'ann_1',
+    title: 'Emergency Water Main Servicing & Pressure Reduction',
+    department: 'Water & Utility Board',
+    category: 'UTILITY',
+    priority: 'CRITICAL',
+    description:
+      'Crews are conducting urgent repairs on the primary feeder main along 14th Street. Temporary low water pressure expected between 8:00 AM and 3:00 PM for Ward 1 and Ward 2 residents.',
+    effectiveDates: 'July 29 - July 30, 2026',
+    publishedAt: '2026-07-29T08:00:00Z',
+    wardZone: 'Ward 1 - Downtown',
+  },
+  {
+    id: 'ann_2',
+    title: 'Senior Wellness & Digital Literacy Workshop Series',
+    department: 'Department of Aging & Adult Services',
+    category: 'SENIOR_SERVICES',
+    priority: 'INFO',
+    description:
+      'Free weekly workshops for senior citizens covering tablet usage, telehealth navigation, and Medicare assistance. Lunch provided. Free shuttle pickup available from Ward 3 Community Center.',
+    effectiveDates: 'Every Tuesday & Thursday in August',
+    publishedAt: '2026-07-28T10:30:00Z',
+    wardZone: 'Ward 3 - Sunset',
+  },
+  {
+    id: 'ann_3',
+    title: 'Market Street Resurfacing & Nighttime Lane Closures',
+    department: 'Department of Transportation',
+    category: 'ROADWORK',
+    priority: 'URGENT',
+    description:
+      'Night resurfacing work from 10:00 PM to 5:00 AM daily. Single lane traffic active with flaggers present. Bus routes 14 and 49 detoured via Mission Street.',
+    effectiveDates: 'August 1 - August 15, 2026',
+    publishedAt: '2026-07-27T14:15:00Z',
+    wardZone: 'Ward 4 - SoMa',
+  },
+  {
+    id: 'ann_4',
+    title: 'Public Town Hall: 2027 Municipal Infrastructure Budget',
+    department: 'Office of the Mayor & City Council',
+    category: 'PUBLIC_HEARING',
+    priority: 'INFO',
+    description:
+      'Join Mayor & District Supervisors at City Hall Chambers or via livestream to submit public testimony regarding neighborhood road, park, and accessibility improvements.',
+    effectiveDates: 'August 5, 2026 at 6:00 PM',
+    publishedAt: '2026-07-25T09:00:00Z',
+  },
+];
+

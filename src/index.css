@@ -240,8 +240,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 /* Smooth Default Transitions */
 button, a, .card-interactive, .btn-interactive {
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               background-color 0.2s ease,
               border-color 0.2s ease,
               opacity 0.2s ease;
@@ -249,19 +249,37 @@ button, a, .card-interactive, .btn-interactive {
 
 /* Pro Card Lift & Subtle Depth */
 .pro-card {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.2s ease;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s ease;
 }
 
 .pro-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px -4px rgba(27, 25, 56, 0.12), 0 4px 12px -2px rgba(27, 25, 56, 0.08);
+  transform: translateY(-3px) scale(1.006);
+  box-shadow: 0 16px 36px -4px rgba(27, 25, 56, 0.12), 0 4px 12px -2px rgba(27, 25, 56, 0.08);
 }
 
 .pro-card:active {
-  transform: translateY(0) scale(0.995);
+  transform: translateY(0) scale(0.992);
   box-shadow: 0 4px 14px -2px rgba(27, 25, 56, 0.08);
+}
+
+/* Reimagined Tactile Card Hover - Elevated & Grounded */
+.soft-card-hover {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s ease;
+  will-change: transform, box-shadow;
+}
+
+.soft-card-hover:hover {
+  transform: translateY(-3px) scale(1.008);
+  box-shadow: 10px 14px 28px rgba(145, 135, 196, 0.45), -6px -6px 20px rgba(255, 255, 255, 0.95);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.soft-card-hover:active {
+  transform: translateY(0) scale(0.988);
 }
 
 /* Pro Button Settled Click & Tactile Spring */
@@ -336,12 +354,8 @@ button, a, .card-interactive, .btn-interactive {
 }
 
 .card-heartbeat-hover:hover {
-  animation: cardHeartbeat 1.6s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-}
-
-.soft-card-hover:hover {
-  animation: cardHeartbeat 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-  box-shadow: 12px 12px 26px rgba(145, 135, 196, 0.52), -12px -12px 26px rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.18);
 }
 
 /* Gentle Entrance Keyframe */
@@ -370,6 +384,65 @@ button, a, .card-interactive, .btn-interactive {
   background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
   background-size: 200% 100%;
   animation: subtleShimmer 3s infinite linear;
+}
+
+/* WCAG AAA High Contrast Accessibility Overrides */
+html.wcag-high-contrast {
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+}
+
+html.wcag-high-contrast body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.wcag-high-contrast *,
+html.wcag-high-contrast .soft-card,
+html.wcag-high-contrast .pro-card,
+html.wcag-high-contrast .dark-indigo-card,
+html.wcag-high-contrast .pro-glass-card {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #ffff00 !important;
+  box-shadow: none !important;
+}
+
+html.wcag-high-contrast button,
+html.wcag-high-contrast a,
+html.wcag-high-contrast input,
+html.wcag-high-contrast select,
+html.wcag-high-contrast textarea {
+  min-height: 48px !important;
+  min-width: 48px !important;
+  border: 2px solid #ffff00 !important;
+  color: #ffff00 !important;
+  background-color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+html.wcag-high-contrast button:hover,
+html.wcag-high-contrast button:focus {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+  outline: 4px solid #ffffff !important;
+}
+
+html.wcag-high-contrast span,
+html.wcag-high-contrast p,
+html.wcag-high-contrast h1,
+html.wcag-high-contrast h2,
+html.wcag-high-contrast h3,
+html.wcag-high-contrast h4 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+html.wcag-high-contrast .text-indigo-600,
+html.wcag-high-contrast .text-slate-500,
+html.wcag-high-contrast .text-slate-600,
+html.wcag-high-contrast .text-slate-700 {
+  color: #ffff00 !important;
 }
 
 
