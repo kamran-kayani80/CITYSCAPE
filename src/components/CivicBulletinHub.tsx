@@ -41,30 +41,30 @@ export const CivicBulletinHub: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-['Montserrat']">
       {/* Header Banner */}
-      <div className="dark-indigo-card p-6 sm:p-8 relative overflow-hidden">
-        <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-[#003333] text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border border-[#008080]/60">
+        <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-[#008080]/20 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
-              <span className="px-3 py-1 bg-yellow-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-lg">
+              <span className="px-3 py-1 bg-[#CCFF00] text-slate-950 font-black text-xs uppercase tracking-wider rounded-lg">
                 Municipal Official Feed
               </span>
-              <span className="text-xs font-bold text-indigo-300">Live Updates & Advisories</span>
+              <span className="text-xs font-bold text-[#CCFF00]">Live Updates & Advisories</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-heading font-black text-white">
+            <h1 className="text-2xl sm:text-3xl font-['Montserrat'] font-black text-white">
               Civic Bulletin & Municipal Announcements
             </h1>
-            <p className="text-xs sm:text-sm text-indigo-200/90 max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-200/90 max-w-2xl">
               Stay informed with verified alerts, road closures, public utility notices, senior community programs, and municipal town halls directly from city departments.
             </p>
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
-            <div className="p-4 bg-indigo-900/60 border border-indigo-700/80 rounded-2xl text-center">
-              <span className="block text-2xl font-black text-yellow-400">{announcements.length}</span>
-              <span className="text-[10px] font-bold text-indigo-200 uppercase tracking-wider">Active Bulletins</span>
+            <div className="p-4 bg-[#004d4d] border border-[#008080]/80 rounded-2xl text-center">
+              <span className="block text-2xl font-black text-[#CCFF00]">{announcements.length}</span>
+              <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">Active Bulletins</span>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@ export const CivicBulletinHub: React.FC = () => {
             placeholder="Search advisories, roadworks, wards, or departments..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-extrabold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none min-h-[44px]"
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-extrabold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-[#008080] outline-none min-h-[44px]"
           />
         </div>
 
@@ -99,7 +99,7 @@ export const CivicBulletinHub: React.FC = () => {
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-3 py-2 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer min-h-[40px] ${
                 selectedCategory === cat.id
-                  ? 'bg-indigo-600 text-white shadow-xs'
+                  ? 'bg-[#008080] text-white shadow-xs font-black'
                   : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100'
               }`}
             >
@@ -145,7 +145,7 @@ export const CivicBulletinHub: React.FC = () => {
                           ? 'bg-rose-600 text-white shadow-xs'
                           : isUrgent
                           ? 'bg-amber-500 text-white shadow-xs'
-                          : 'bg-indigo-600 text-white'
+                          : 'bg-[#008080] text-white'
                       }`}
                     >
                       {isCritical ? (
@@ -163,7 +163,7 @@ export const CivicBulletinHub: React.FC = () => {
                           {item.department}
                         </span>
                         {item.wardZone && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#008080]/10 text-[#008080] dark:bg-[#008080]/20 dark:text-[#CCFF00]">
                             📍 {item.wardZone}
                           </span>
                         )}
@@ -172,7 +172,7 @@ export const CivicBulletinHub: React.FC = () => {
                         </span>
                       </div>
 
-                      <h3 className="text-base sm:text-lg font-heading font-black text-slate-900 dark:text-white mt-1">
+                      <h3 className="text-base sm:text-lg font-['Montserrat'] font-black text-slate-900 dark:text-white mt-1">
                         {item.title}
                       </h3>
                     </div>
@@ -180,10 +180,10 @@ export const CivicBulletinHub: React.FC = () => {
 
                   <button
                     onClick={() => speakText(`${item.title}. Published by ${item.department}. ${item.description}`)}
-                    className="p-2 bg-indigo-100 dark:bg-indigo-900/60 hover:bg-indigo-200 text-indigo-800 dark:text-indigo-200 rounded-xl transition-all cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
+                    className="p-2 bg-[#008080]/10 dark:bg-[#008080]/20 hover:bg-[#008080]/20 text-[#008080] dark:text-[#CCFF00] rounded-xl transition-all cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
                     title="Read bulletin aloud"
                   >
-                    <Volume2 className="w-4 h-4 text-indigo-600 dark:text-indigo-300" />
+                    <Volume2 className="w-4 h-4 text-[#008080] dark:text-[#CCFF00]" />
                   </button>
                 </div>
 
@@ -195,8 +195,8 @@ export const CivicBulletinHub: React.FC = () => {
                 {/* Impact details / dates bar */}
                 <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-200/60 dark:border-slate-800 flex-wrap gap-2">
                   {item.effectiveDates && (
-                    <span className="font-extrabold text-indigo-900 dark:text-indigo-300 flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+                    <span className="font-extrabold text-[#008080] dark:text-[#CCFF00] flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-[#008080]" />
                       <span>{item.effectiveDates}</span>
                     </span>
                   )}
@@ -212,7 +212,7 @@ export const CivicBulletinHub: React.FC = () => {
                     }}
                     className="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 cursor-pointer min-h-[38px] flex items-center space-x-1"
                   >
-                    <Share2 className="w-3.5 h-3.5 text-indigo-600" />
+                    <Share2 className="w-3.5 h-3.5 text-[#008080]" />
                     <span>Share Advisory</span>
                   </button>
                 </div>

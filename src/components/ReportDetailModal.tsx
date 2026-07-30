@@ -135,7 +135,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
             <button
               onClick={() => downloadReportPDF(report)}
               title="Download official PDF report"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:hover:bg-indigo-900 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer active:scale-95 shadow-2xs"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-extrabold bg-[#008080]/10 hover:bg-[#008080]/20 text-[#008080] dark:bg-[#008080]/20 dark:hover:bg-[#008080]/30 dark:text-[#CCFF00] border border-[#008080]/30 transition-all cursor-pointer active:scale-95 shadow-2xs"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export PDF</span>
@@ -148,7 +148,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold transition-all cursor-pointer border ${
                 copiedLink
                   ? 'bg-emerald-600 text-white border-emerald-500 shadow-2xs'
-                  : 'bg-white/90 text-indigo-950 border-white hover:bg-white shadow-2xs'
+                  : 'bg-white/90 text-[#1A1A1A] border-white hover:bg-white shadow-2xs'
               }`}
             >
               {copiedLink ? (
@@ -158,7 +158,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 </>
               ) : (
                 <>
-                  <Copy className="w-3.5 h-3.5 text-indigo-600" />
+                  <Copy className="w-3.5 h-3.5 text-[#008080]" />
                   <span>Copy Link</span>
                 </>
               )}
@@ -168,7 +168,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               href={twitterUrl}
               target="_blank"
               rel="noreferrer"
-              className="p-2 text-slate-500 hover:text-blue-500 dark:text-slate-400 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800 transition-colors"
+              className="p-2 text-slate-500 hover:text-[#008080] dark:text-slate-400 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800 transition-colors"
               title="Share on X"
             >
               <Share2 className="w-4 h-4" />
@@ -205,7 +205,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
           {/* Main Title & Category */}
           <div>
-            <div className="flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-400 font-bold mb-1">
+            <div className="flex items-center space-x-2 text-xs text-[#008080] dark:text-[#CCFF00] font-bold mb-1">
               <CategoryIcon category={report.category} className="w-4 h-4" />
               <span>{catConf.label}</span>
               <span>•</span>
@@ -222,8 +222,8 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               {distanceTag && (
                 <>
                   <span>•</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1 shadow-2xs">
-                    <Navigation className="w-2.5 h-2.5 text-indigo-600 dark:text-indigo-400" />
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#008080]/10 dark:bg-[#008080]/20 text-[#008080] dark:text-[#CCFF00] border border-[#008080]/30 flex items-center gap-1 shadow-2xs">
+                    <Navigation className="w-2.5 h-2.5 text-[#008080] dark:text-[#CCFF00]" />
                     <span>{distanceTag}</span>
                   </span>
                 </>
@@ -316,9 +316,9 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
             <button
               onClick={() => setIsForensicsOpen(true)}
-              className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer shrink-0"
+              className="px-3.5 py-2 bg-[#008080] hover:bg-[#006666] text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer shrink-0"
             >
-              <Scan className="w-3.5 h-3.5" />
+              <Scan className="w-3.5 h-3.5 text-[#CCFF00]" />
               <span>Inspect Forensics</span>
             </button>
           </div>
@@ -361,7 +361,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4 text-indigo-600" />
+                      <Copy className="w-4 h-4 text-[#008080]" />
                       <span>Copy Link</span>
                     </>
                   )}
@@ -376,7 +376,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                       : 'btn-soft-tactile'
                   }`}
                 >
-                  <ThumbsUp className={`w-4 h-4 ${report.userHasUpvoted ? 'fill-current' : ''}`} />
+                  <ThumbsUp className={`w-4 h-4 ${report.userHasUpvoted ? 'fill-current text-[#CCFF00]' : ''}`} />
                   <span>{report.upvotesCount} Endorsements</span>
                 </button>
               </div>
@@ -402,7 +402,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           {/* Community Discussion Feed */}
           <div className="space-y-4 pt-2">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-              <MessageSquare className="w-4 h-4 text-blue-600" />
+              <MessageSquare className="w-4 h-4 text-[#008080]" />
               <span>Community Discussion & Updates ({comments.length})</span>
             </h3>
 
@@ -412,20 +412,20 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                   key={comment.id}
                   className={`p-3.5 rounded-2xl border text-xs space-y-1.5 ${
                     comment.isOfficialUpdate
-                      ? 'bg-blue-50/80 dark:bg-blue-950/50 border-blue-200 dark:border-blue-900'
+                      ? 'bg-[#008080]/10 dark:bg-[#008080]/20 border-[#008080]/30'
                       : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-1.5 font-bold text-slate-900 dark:text-slate-100">
                       {comment.isOfficialUpdate ? (
-                        <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                        <Building2 className="w-3.5 h-3.5 text-[#008080]" />
                       ) : (
                         <User className="w-3.5 h-3.5 text-slate-500" />
                       )}
                       <span>{comment.userName}</span>
                       {comment.isOfficialUpdate && (
-                        <span className="px-1.5 py-0.2 text-[9px] bg-blue-600 text-white rounded-md uppercase font-bold">
+                        <span className="px-1.5 py-0.2 text-[9px] bg-[#008080] text-[#CCFF00] rounded-md uppercase font-bold">
                           Official
                         </span>
                       )}
@@ -445,7 +445,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 placeholder="Add your observation or comment..."
                 value={newCommentText}
                 onChange={(e) => setNewCommentText(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100"
+                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#008080] text-slate-900 dark:text-slate-100"
               />
 
               <div className="flex items-center justify-between">
@@ -466,9 +466,9 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 <button
                   type="submit"
                   disabled={isPosting || !newCommentText.trim()}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] rounded-xl text-xs font-bold shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-3.5 h-3.5 text-[#CCFF00]" />
                   <span>Post Comment</span>
                 </button>
               </div>

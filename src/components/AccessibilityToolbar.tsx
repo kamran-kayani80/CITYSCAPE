@@ -31,12 +31,12 @@ export const AccessibilityToolbar: React.FC = () => {
   return (
     <>
       {/* Top Fixed Accessibility & Senior Citizen Quick Bar */}
-      <div className="w-full bg-[#1b1938] text-white py-1.5 px-3 sm:px-6 border-b border-indigo-900/60 flex items-center justify-between text-xs flex-wrap gap-2 z-40 sticky top-0 shadow-md">
+      <div className="w-full bg-[#003333] text-white py-1.5 px-3 sm:px-6 border-b border-[#008080]/60 flex items-center justify-between text-xs flex-wrap gap-2 z-40 sticky top-0 shadow-md font-['Montserrat']">
         <div className="flex items-center space-x-2">
-          <span className="px-2 py-0.5 rounded-md bg-yellow-400 text-slate-950 font-black text-[10px] tracking-wider uppercase">
+          <span className="px-2 py-0.5 rounded-md bg-[#CCFF00] text-slate-950 font-black text-[10px] tracking-wider uppercase">
             WCAG AAA
           </span>
-          <span className="font-bold text-[11px] hidden sm:inline text-indigo-200">
+          <span className="font-bold text-[11px] hidden sm:inline text-teal-100">
             Senior & Universal Accessibility Bar
           </span>
         </div>
@@ -54,8 +54,8 @@ export const AccessibilityToolbar: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg font-extrabold flex items-center space-x-1.5 transition-all cursor-pointer min-h-[36px] ${
               highContrast
-                ? 'bg-yellow-400 text-slate-950 ring-2 ring-yellow-300 font-black'
-                : 'bg-indigo-900/80 hover:bg-indigo-800 text-indigo-100 border border-indigo-700/60'
+                ? 'bg-[#CCFF00] text-slate-950 ring-2 ring-[#CCFF00] font-black'
+                : 'bg-[#004d4d] hover:bg-[#006666] text-white border border-[#008080]/60'
             }`}
             title="Toggle High-Contrast Visual Mode for Low Vision"
           >
@@ -64,8 +64,8 @@ export const AccessibilityToolbar: React.FC = () => {
           </button>
 
           {/* Font Scaling Buttons */}
-          <div className="flex items-center bg-indigo-950/80 p-0.5 rounded-lg border border-indigo-800/80">
-            <span className="px-1.5 text-indigo-300 font-bold text-[10px] hidden md:inline">
+          <div className="flex items-center bg-[#002626] p-0.5 rounded-lg border border-[#008080]/60">
+            <span className="px-1.5 text-teal-200 font-bold text-[10px] hidden md:inline">
               <Type className="w-3 h-3 inline mr-0.5" /> Text:
             </span>
             {([100, 125, 150] as FontScale[]).map((scale) => (
@@ -77,8 +77,8 @@ export const AccessibilityToolbar: React.FC = () => {
                 }}
                 className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold transition-all min-h-[32px] cursor-pointer ${
                   fontScale === scale
-                    ? 'bg-indigo-500 text-white shadow-xs font-black'
-                    : 'text-indigo-200 hover:text-white hover:bg-indigo-900'
+                    ? 'bg-[#008080] text-white shadow-xs font-black'
+                    : 'text-teal-200 hover:text-white hover:bg-[#004d4d]'
                 }`}
               >
                 {scale}%
@@ -92,7 +92,7 @@ export const AccessibilityToolbar: React.FC = () => {
             className={`px-2.5 py-1 rounded-lg font-bold flex items-center space-x-1 transition-all cursor-pointer min-h-[36px] ${
               speechEnabled
                 ? 'bg-emerald-500 text-white ring-2 ring-emerald-300 font-black animate-pulse'
-                : 'bg-indigo-900/80 hover:bg-indigo-800 text-indigo-100 border border-indigo-700/60'
+                : 'bg-[#004d4d] hover:bg-[#006666] text-white border border-[#008080]/60'
             }`}
             title="Toggle Voice Guidance Read Aloud"
           >
@@ -103,9 +103,9 @@ export const AccessibilityToolbar: React.FC = () => {
           {/* Senior Guide Modal Trigger */}
           <button
             onClick={() => setIsOpenGuide(true)}
-            className="px-2 py-1 bg-indigo-800/60 hover:bg-indigo-700 text-indigo-200 rounded-lg font-bold flex items-center space-x-1 transition-all min-h-[36px] cursor-pointer"
+            className="px-2 py-1 bg-[#004d4d] hover:bg-[#006666] text-teal-100 rounded-lg font-bold flex items-center space-x-1 transition-all min-h-[36px] cursor-pointer"
           >
-            <HelpCircle className="w-3.5 h-3.5 text-yellow-300" />
+            <HelpCircle className="w-3.5 h-3.5 text-[#CCFF00]" />
             <span className="hidden md:inline">Senior Guide</span>
           </button>
         </div>
@@ -114,10 +114,10 @@ export const AccessibilityToolbar: React.FC = () => {
       {/* Senior Citizen & Accessibility Quick Guide Modal */}
       {isOpenGuide && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md">
-          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-indigo-500 shadow-2xl space-y-4 animate-settled-in">
+          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-[#008080] shadow-2xl space-y-4 animate-settled-in font-['Montserrat']">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center space-x-2">
-                <div className="p-2 bg-yellow-400 text-slate-950 rounded-xl font-black">
+                <div className="p-2 bg-[#CCFF00] text-slate-950 rounded-xl font-black">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
@@ -138,8 +138,8 @@ export const AccessibilityToolbar: React.FC = () => {
             </div>
 
             <div className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl border border-indigo-200 dark:border-indigo-800">
-                <p className="font-extrabold text-indigo-900 dark:text-indigo-200">
+              <div className="p-3 bg-[#008080]/10 dark:bg-[#008080]/20 rounded-2xl border border-[#008080]/30">
+                <p className="font-extrabold text-[#008080] dark:text-[#CCFF00]">
                   📍 Step 1: Guided 3-Step Reporting
                 </p>
                 <p className="text-xs mt-1 text-slate-600 dark:text-slate-300">
@@ -147,8 +147,8 @@ export const AccessibilityToolbar: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl border border-indigo-200 dark:border-indigo-800">
-                <p className="font-extrabold text-indigo-900 dark:text-indigo-200">
+              <div className="p-3 bg-[#008080]/10 dark:bg-[#008080]/20 rounded-2xl border border-[#008080]/30">
+                <p className="font-extrabold text-[#008080] dark:text-[#CCFF00]">
                   🎤 Step 2: Voice Dictation Hands-Free
                 </p>
                 <p className="text-xs mt-1 text-slate-600 dark:text-slate-300">
@@ -156,8 +156,8 @@ export const AccessibilityToolbar: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl border border-indigo-200 dark:border-indigo-800">
-                <p className="font-extrabold text-indigo-900 dark:text-indigo-200">
+              <div className="p-3 bg-[#008080]/10 dark:bg-[#008080]/20 rounded-2xl border border-[#008080]/30">
+                <p className="font-extrabold text-[#008080] dark:text-[#CCFF00]">
                   🤝 Step 3: Report for a Neighbor
                 </p>
                 <p className="text-xs mt-1 text-slate-600 dark:text-slate-300">
@@ -177,7 +177,7 @@ export const AccessibilityToolbar: React.FC = () => {
 
             <button
               onClick={() => setIsOpenGuide(false)}
-              className="w-full py-3 bg-indigo-600 text-white font-extrabold rounded-2xl text-center cursor-pointer min-h-[48px] hover:bg-indigo-700 transition-all"
+              className="w-full py-3 bg-[#008080] text-white font-extrabold rounded-2xl text-center cursor-pointer min-h-[48px] hover:bg-[#006666] transition-all"
             >
               Got It, Let's Get Started!
             </button>

@@ -110,7 +110,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   return (
     <div className="space-y-6">
       {/* Municipal Operations Header Banner */}
-      <div className="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-slate-700">
+      <div className="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-[#004d4d] text-white rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-slate-700 font-['Montserrat']">
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
             <Building2 className="w-5 h-5 text-amber-400" />
@@ -206,7 +206,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         )}
 
                         <div className="flex items-center justify-between text-[10px]">
-                          <span className="font-mono text-indigo-400 font-bold">#{report.id}</span>
+                          <span className="font-mono text-[#008080] dark:text-[#CCFF00] font-bold">#{report.id}</span>
                           <span className={`px-2 py-0.5 rounded-md border font-black ${sevConf.colorClass}`}>
                             {sevConf.label}
                           </span>
@@ -216,12 +216,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <img
                             src={report.imageUrls[0]}
                             alt={report.title}
-                            className="w-12 h-12 rounded-xl object-cover shrink-0 bg-indigo-50 border border-white"
+                            className="w-12 h-12 rounded-xl object-cover shrink-0 bg-slate-100 border border-white"
                           />
                           <div className="min-w-0">
                             <h4
                               onClick={() => onSelectReport(report)}
-                              className="font-heading font-black text-xs text-[#1c1a3b] dark:text-white line-clamp-2 hover:text-indigo-600 cursor-pointer"
+                              className="font-['Montserrat'] font-black text-xs text-[#1A1A1A] dark:text-white line-clamp-2 hover:text-[#008080] cursor-pointer"
                             >
                               {report.title}
                             </h4>

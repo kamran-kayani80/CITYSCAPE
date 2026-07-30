@@ -67,8 +67,16 @@ export async function testConnection() {
     await getDocFromServer(doc(db, 'test', 'connection'));
     console.log('Firebase connection verified.');
   } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error('Please check your Firebase configuration.');
+    if (error instanceof Error) {
+      if (
+        error.message.includes('the client is offline') ||
+        error.message.includes('Could not reach Cloud Firestore backend') ||
+        error.message.includes('permission-denied')
+      ) {
+        console.warn('Firebase network state notice:', error.message);
+      } else {
+        console.warn('Firebase test connection message:', error.message);
+      }
     }
   }
 }

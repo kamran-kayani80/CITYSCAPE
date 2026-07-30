@@ -47,15 +47,15 @@ export const CATEGORY_CONFIG: Record<ReportCategory, CategoryMeta> = {
   WATER_LEAK: {
     label: 'Water & Drainage',
     iconName: 'Droplets',
-    badgeBg: 'bg-blue-100 dark:bg-blue-950/60',
-    badgeText: 'text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+    badgeBg: 'bg-[#008080]/10 dark:bg-[#008080]/20',
+    badgeText: 'text-[#008080] dark:text-[#CCFF00] border-[#008080]/30',
     description: 'Burst water mains, clogged storm drains, sewage backup'
   },
   ROADS_TRAFFIC: {
     label: 'Roads & Traffic Signs',
     iconName: 'TrafficCone',
-    badgeBg: 'bg-indigo-100 dark:bg-indigo-950/60',
-    badgeText: 'text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800',
+    badgeBg: 'bg-[#008080]/10 dark:bg-[#008080]/20',
+    badgeText: 'text-[#008080] dark:text-[#CCFF00] border-[#008080]/30',
     description: 'Damaged stop signs, missing lane markers, obscured crosswalks'
   },
   OTHER: {
@@ -100,7 +100,7 @@ export const STATUS_CONFIG: Record<ReportStatus, { label: string; dotColor: stri
 
 export const SEVERITY_CONFIG: Record<SeverityLevel, { label: string; colorClass: string }> = {
   LOW: { label: 'Low Severity', colorClass: 'bg-slate-100 text-slate-700 border-slate-300' },
-  MEDIUM: { label: 'Moderate Hazard', colorClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+  MEDIUM: { label: 'Moderate Hazard', colorClass: 'bg-[#008080]/10 text-[#008080] dark:text-[#CCFF00] border-[#008080]/30' },
   HIGH: { label: 'High Priority', colorClass: 'bg-orange-50 text-orange-700 border-orange-300 font-semibold' },
   CRITICAL: { label: 'Critical Safety Risk', colorClass: 'bg-red-100 text-red-800 border-red-300 font-bold' }
 };
@@ -117,11 +117,11 @@ export const CATEGORY_SLA_HOURS: Record<ReportCategory, { hours: number; label: 
 };
 
 export const MUNICIPAL_WARDS = [
-  { id: 'ward_1', name: 'Ward 1 - Downtown & Civic Center', officer: 'Capt. Sarah Jenkins' },
-  { id: 'ward_2', name: 'Ward 2 - Mission & Valencia Corridor', officer: 'Insp. Carlos Rivera' },
-  { id: 'ward_3', name: 'Ward 3 - Sunset & Richmond District', officer: 'Officer Elena Rostova' },
-  { id: 'ward_4', name: 'Ward 4 - SoMa, South Beach & Wharf', officer: 'Chief Marcus Vance' },
-  { id: 'ward_5', name: 'Ward 5 - Castro, Noe & Twin Peaks', officer: 'Officer Maya Lin' },
+  { id: 'ward_1', name: 'San Francisco Ward 1 - Downtown & Civic Center', officer: 'Capt. Sarah Jenkins' },
+  { id: 'ward_2', name: 'San Francisco Ward 2 - Mission & Valencia Corridor', officer: 'Insp. Carlos Rivera' },
+  { id: 'ward_3', name: 'San Francisco Ward 3 - Sunset & Richmond District', officer: 'Officer Elena Rostova' },
+  { id: 'ward_4', name: 'San Francisco Ward 4 - SoMa, South Beach & Wharf', officer: 'Chief Marcus Vance' },
+  { id: 'ward_5', name: 'San Francisco Ward 5 - Castro, Noe & Twin Peaks', officer: 'Officer Maya Lin' },
 ];
 
 export const MOCK_ANNOUNCEMENTS = [

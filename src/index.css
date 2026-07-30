@@ -1,121 +1,125 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* Soft Periwinkle & Dark Midnight Indigo Custom Theme Styles */
+/* Official Cityscape Brand Theme Variables & Styling (Evergreen Teal #008080, Electric Lime #CCFF00, Slate Black #1A1A1A, Cloud Grey #F2F2F2) */
 :root {
-  --bg-periwinkle: #e5e3f7;
-  --bg-periwinkle-light: #f2f0fd;
-  --bg-periwinkle-dark: #1b1938;
-  --bg-periwinkle-card: #f5f4fd;
-  --font-display: 'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif;
-  --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --bg-periwinkle: #f2f2f2;
+  --bg-periwinkle-light: #ffffff;
+  --bg-periwinkle-dark: #1a1a1a;
+  --bg-periwinkle-card: #ffffff;
+  --font-display: 'Montserrat', -apple-system, sans-serif;
+  --font-body: 'Montserrat', -apple-system, sans-serif;
 }
 
 body {
-  background-color: var(--bg-periwinkle);
-  color: #242242;
-  font-family: var(--font-body);
+  background-color: #f2f2f2;
+  color: #1a1a1a;
+  font-family: 'Montserrat', -apple-system, sans-serif;
   overflow-x: hidden;
   letter-spacing: -0.01em;
 }
 
 /* Headings Typography Refinement */
 h1, h2, h3, h4, h5, h6, .font-heading {
-  font-family: var(--font-display);
-  letter-spacing: -0.03em;
+  font-family: 'Montserrat', -apple-system, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .heading-gradient {
-  background: linear-gradient(135deg, #1c1a3b 0%, #4338ca 50%, #6d28d9 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #008080 60%, #006666 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .heading-gradient-light {
-  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 60%, #a5b4fc 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ccff00 70%, #ffd700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 /* Designer Button Styles */
 .btn-primary-designer {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6d28d9 100%);
-  color: #ffffff;
-  font-family: var(--font-display);
+  background: #008080;
+  color: #ccff00;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 800;
   letter-spacing: -0.01em;
-  box-shadow: 0 6px 20px -2px rgba(79, 70, 229, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 20px -2px rgba(0, 128, 128, 0.4), inset 0 1px 0 rgba(204, 255, 0, 0.35);
+  border: 1px solid rgba(204, 255, 0, 0.3);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-primary-designer:hover {
+  background: #006666;
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px -2px rgba(79, 70, 229, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 28px -2px rgba(0, 128, 128, 0.6), inset 0 1px 0 rgba(204, 255, 0, 0.5);
   filter: brightness(1.06);
 }
 
 .btn-primary-designer:active {
   transform: translateY(0) scale(0.97);
-  box-shadow: 0 3px 12px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 3px 12px rgba(0, 128, 128, 0.4);
 }
 
 .btn-glow-cyan {
-  background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+  background: #008080;
   color: #ffffff;
-  font-family: var(--font-display);
+  font-family: 'Montserrat', sans-serif;
   font-weight: 800;
-  box-shadow: 0 6px 20px -2px rgba(6, 182, 212, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px -2px rgba(0, 128, 128, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.25);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-glow-cyan:hover {
+  background: #006666;
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px -2px rgba(6, 182, 212, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 28px -2px rgba(0, 128, 128, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .btn-soft-tactile {
-  background: #f5f4fd;
-  color: #1c1a3b;
-  font-family: var(--font-display);
+  background: #ffffff;
+  color: #1a1a1a;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 700;
-  box-shadow: 4px 4px 12px rgba(155, 146, 202, 0.38), -4px -4px 12px rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #f2f2f2;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-soft-tactile:hover {
   transform: translateY(-1.5px);
-  box-shadow: 6px 6px 16px rgba(145, 135, 196, 0.48), -6px -6px 16px rgba(255, 255, 255, 1);
-  color: #4338ca;
+  box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.12), -6px -6px 16px rgba(255, 255, 255, 1);
+  color: #008080;
 }
 
 .btn-soft-tactile:active {
   transform: translateY(0) scale(0.97);
-  box-shadow: inset 2px 2px 5px rgba(155, 146, 202, 0.4), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .btn-amber-accent {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: #ffffff;
-  font-family: var(--font-display);
+  background: #008080;
+  color: #ccff00;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 800;
-  box-shadow: 0 6px 18px -2px rgba(245, 158, 11, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 18px -2px rgba(0, 128, 128, 0.35);
+  border: 1px solid rgba(204, 255, 0, 0.4);
   transition: all 0.2s ease;
 }
 
 .btn-amber-accent:hover {
+  background: #006666;
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px -2px rgba(245, 158, 11, 0.6);
+  box-shadow: 0 10px 24px -2px rgba(0, 128, 128, 0.5);
 }
 
-/* Custom Soft Tactile / Neumorphic Glass Classes */
+/* Custom Cards */
 .soft-card {
-  background: #f5f4fe;
-  box-shadow: 8px 8px 20px rgba(155, 146, 202, 0.45), -8px -8px 20px rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(26, 26, 26, 0.06);
+  border: 2px solid #f2f2f2;
+  border-radius: 16px;
 }
 
 .soft-card-hover {
@@ -124,39 +128,40 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .soft-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 12px 12px 26px rgba(145, 135, 196, 0.52), -12px -12px 26px rgba(255, 255, 255, 1);
+  box-shadow: 0 12px 28px rgba(0, 128, 128, 0.15);
+  border-color: #008080;
 }
 
 .soft-inset {
-  background: #e2dff4;
-  box-shadow: inset 3px 3px 8px rgba(155, 146, 202, 0.45), inset -3px -3px 8px rgba(255, 255, 255, 0.85);
-  border-radius: 20px;
+  background: #f2f2f2;
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
 }
 
 .soft-pill {
-  background: #f5f4fd;
-  box-shadow: 4px 4px 10px rgba(155, 146, 202, 0.38), -4px -4px 10px rgba(255, 255, 255, 0.92);
+  background: #ffffff;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.06);
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1.5px solid #f2f2f2;
 }
 
 .dark-indigo-card {
-  background: linear-gradient(155deg, #1b1938 0%, #232049 100%);
+  background: #1a1a1a;
   color: #ffffff;
-  border-radius: 28px;
-  box-shadow: 8px 12px 28px rgba(22, 19, 52, 0.38);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border: 2px solid #008080;
 }
 
 .glowing-bar {
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
-  box-shadow: 0 0 14px rgba(99, 102, 241, 0.65);
+  background: linear-gradient(90deg, #008080 0%, #ccff00 100%);
+  box-shadow: 0 0 14px rgba(0, 128, 128, 0.65);
 }
 
 .icon-tile-indigo {
-  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
-  box-shadow: 3px 3px 8px rgba(99, 102, 241, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.9);
-  color: #4338ca;
+  background: linear-gradient(135deg, #e6f2f2, #ccecec);
+  box-shadow: 3px 3px 8px rgba(0, 128, 128, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.9);
+  color: #008080;
 }
 
 .icon-tile-amber {
@@ -438,7 +443,7 @@ html.wcag-high-contrast h4 {
   -webkit-text-fill-color: initial !important;
 }
 
-html.wcag-high-contrast .text-indigo-600,
+html.wcag-high-contrast .text-[#008080],
 html.wcag-high-contrast .text-slate-500,
 html.wcag-high-contrast .text-slate-600,
 html.wcag-high-contrast .text-slate-700 {

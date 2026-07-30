@@ -249,7 +249,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12">
       {/* Top Banner Header */}
-      <div className="p-6 sm:p-8 bg-gradient-to-br from-[#1c1a3b] via-indigo-950 to-slate-900 text-white rounded-3xl shadow-xl border border-indigo-900/60 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="p-6 sm:p-8 bg-gradient-to-br from-slate-900 via-[#004d4d] to-slate-900 text-white rounded-3xl shadow-xl border border-[#008080]/60 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 font-['Montserrat']">
         <div className="space-y-2 max-w-2xl relative z-10">
           <div className="flex items-center space-x-2">
             <span className="px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
@@ -294,7 +294,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
             {sponsoredEvents.map((evt) => (
               <div
                 key={evt.id}
-                className="relative rounded-3xl p-5 bg-gradient-to-br from-indigo-950 via-[#1c1a3b] to-slate-900 text-white shadow-xl border-2 border-amber-400/80 space-y-4 overflow-hidden"
+                className="relative rounded-3xl p-5 bg-gradient-to-br from-[#003333] via-[#004d4d] to-slate-900 text-white shadow-xl border-2 border-amber-400/80 space-y-4 overflow-hidden"
               >
                 {/* Sponsor Ribbon */}
                 <div className="flex items-center justify-between">
@@ -383,7 +383,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
               onClick={() => setSelectedCategory(cat)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 selectedCategory === cat
-                  ? 'bg-indigo-700 text-white shadow-xs'
+                  ? 'bg-[#008080] text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
               }`}
             >
@@ -399,7 +399,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search events & venues..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#008080]"
           />
         </div>
       </div>
@@ -426,19 +426,19 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                   </span>
                 </div>
 
-                <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-white/90 dark:bg-slate-900/90 text-indigo-900 dark:text-indigo-200 backdrop-blur-md rounded-xl text-[10px] font-extrabold shadow-md">
+                <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-white/90 dark:bg-slate-900/90 text-[#008080] dark:text-[#CCFF00] backdrop-blur-md rounded-xl text-[10px] font-extrabold shadow-md">
                   {evt.price}
                 </div>
               </div>
 
               {/* Event Meta */}
               <div>
-                <div className="flex items-center space-x-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mb-1">
+                <div className="flex items-center space-x-2 text-[10px] font-bold text-[#008080] dark:text-[#CCFF00] mb-1">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{evt.date} • {evt.time}</span>
                 </div>
 
-                <h3 className="font-heading font-extrabold text-base text-[#1c1a3b] dark:text-white line-clamp-2">
+                <h3 className="font-['Montserrat'] font-extrabold text-base text-[#1A1A1A] dark:text-white line-clamp-2">
                   {evt.title}
                 </h3>
 
@@ -456,7 +456,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
             {/* Organizer & RSVP */}
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div className="space-y-0.5">
-                <p className="text-[11px] font-bold text-[#1c1a3b] dark:text-white line-clamp-1">
+                <p className="text-[11px] font-bold text-[#1A1A1A] dark:text-white line-clamp-1">
                   {evt.organizerName}
                 </p>
                 <p className="text-[9px] font-semibold text-slate-400">{evt.organizerType}</p>
@@ -467,7 +467,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                   evt.userHasRsvped
                     ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-indigo-700 hover:bg-indigo-800 text-white shadow-xs'
+                    : 'bg-[#008080] hover:bg-[#006666] text-[#CCFF00] shadow-xs'
                 }`}
               >
                 {evt.userHasRsvped ? '✓ Going' : 'RSVP'}
@@ -479,15 +479,15 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
 
       {/* POST EVENT / HIRE AD SPACE MODAL */}
       {isHireAdModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-indigo-100 dark:border-slate-800 overflow-hidden my-auto p-6 sm:p-7 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto font-['Montserrat']">
+          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-[#008080]/30 dark:border-slate-800 overflow-hidden my-auto p-6 sm:p-7 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
-                  <Megaphone className="w-5 h-5 text-amber-300" />
+                <div className="w-9 h-9 rounded-xl bg-[#008080] text-white flex items-center justify-center font-bold">
+                  <Megaphone className="w-5 h-5 text-[#CCFF00]" />
                 </div>
                 <div>
-                  <h3 className="font-heading font-black text-base text-[#1c1a3b] dark:text-white">
+                  <h3 className="font-['Montserrat'] font-black text-base text-[#1A1A1A] dark:text-white">
                     Post Community Event & Hire Ad Space
                   </h3>
                   <p className="text-[11px] text-slate-500">Promote local business specials or community cleanups</p>
@@ -513,12 +513,12 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                   onClick={() => setSelectedAdTier('Free')}
                   className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                     selectedAdTier === 'Free'
-                      ? 'bg-indigo-50 dark:bg-indigo-950 border-indigo-600 ring-2 ring-indigo-500/30'
+                      ? 'bg-[#008080]/10 dark:bg-[#008080]/20 border-[#008080] ring-2 ring-[#008080]/30'
                       : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
                   }`}
                 >
                   <span className="block text-[10px] font-black uppercase text-slate-500">Basic</span>
-                  <span className="block font-heading font-extrabold text-sm text-[#1c1a3b] dark:text-white">Free</span>
+                  <span className="block font-['Montserrat'] font-extrabold text-sm text-[#1A1A1A] dark:text-white">Free</span>
                   <span className="block text-[10px] text-slate-500">Standard feed</span>
                 </button>
 
@@ -532,7 +532,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                   }`}
                 >
                   <span className="block text-[10px] font-black uppercase text-amber-600">Popular</span>
-                  <span className="block font-heading font-extrabold text-sm text-[#1c1a3b] dark:text-white">$15.00</span>
+                  <span className="block font-['Montserrat'] font-extrabold text-sm text-[#1A1A1A] dark:text-white">$15.00</span>
                   <span className="block text-[10px] text-slate-500">3-Day Highlight</span>
                 </button>
 
@@ -541,12 +541,12 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                   onClick={() => setSelectedAdTier('Platinum Banner')}
                   className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                     selectedAdTier === 'Platinum Banner'
-                      ? 'bg-indigo-950 text-white border-indigo-500 ring-2 ring-amber-400'
+                      ? 'bg-[#003333] text-white border-[#008080] ring-2 ring-[#CCFF00]'
                       : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
                   }`}
                 >
-                  <span className="block text-[10px] font-black uppercase text-amber-300">Platinum</span>
-                  <span className="block font-heading font-extrabold text-sm">$49.00</span>
+                  <span className="block text-[10px] font-black uppercase text-[#CCFF00]">Platinum</span>
+                  <span className="block font-['Montserrat'] font-extrabold text-sm">$49.00</span>
                   <span className="block text-[10px] opacity-80">Top Banner Ad</span>
                 </button>
               </div>
@@ -685,9 +685,9 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
               <button
                 type="submit"
                 disabled={isProcessingPayment}
-                className="w-full py-3.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full py-3.5 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-2"
               >
-                <Sparkles className="w-4 h-4 text-amber-300" />
+                <Sparkles className="w-4 h-4 text-[#CCFF00]" />
                 <span>
                   {selectedAdTier === 'Free'
                     ? 'Publish Free Event'

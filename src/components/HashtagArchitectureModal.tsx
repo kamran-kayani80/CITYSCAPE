@@ -114,18 +114,18 @@ POST /api/hashtags/follow
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-slate-950 text-slate-100 rounded-3xl shadow-2xl border border-indigo-900/80 overflow-hidden my-auto p-6 sm:p-8 space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto font-['Montserrat']">
+      <div className="relative w-full max-w-3xl bg-slate-950 text-slate-100 rounded-3xl shadow-2xl border border-[#008080]/60 overflow-hidden my-auto p-6 sm:p-8 space-y-5">
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-800 text-amber-300 flex items-center justify-center font-bold shadow-md">
+            <div className="w-10 h-10 rounded-2xl bg-[#008080] text-[#CCFF00] flex items-center justify-center font-bold shadow-md">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-heading font-black text-lg text-white flex items-center gap-2">
+              <h3 className="font-['Montserrat'] font-black text-lg text-white flex items-center gap-2">
                 <span>Hashtag Engine Architecture & SQL Schema</span>
-                <Sparkles className="w-4 h-4 text-amber-400" />
+                <Sparkles className="w-4 h-4 text-[#CCFF00]" />
               </h3>
               <p className="text-xs text-slate-400 font-mono">
                 PostgreSQL • pg_trgm • Time-Decay Gravity Scoring • Express API
@@ -147,7 +147,7 @@ POST /api/hashtags/follow
             onClick={() => setActiveTab('schema')}
             className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
               activeTab === 'schema'
-                ? 'bg-indigo-600 text-white shadow-md'
+                ? 'bg-[#008080] text-white shadow-md font-black'
                 : 'bg-slate-900 text-slate-400 hover:text-white'
             }`}
           >
@@ -159,7 +159,7 @@ POST /api/hashtags/follow
             onClick={() => setActiveTab('function')}
             className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
               activeTab === 'function'
-                ? 'bg-indigo-600 text-white shadow-md'
+                ? 'bg-[#008080] text-white shadow-md font-black'
                 : 'bg-slate-900 text-slate-400 hover:text-white'
             }`}
           >
@@ -171,11 +171,11 @@ POST /api/hashtags/follow
             onClick={() => setActiveTab('algorithm')}
             className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
               activeTab === 'algorithm'
-                ? 'bg-indigo-600 text-white shadow-md'
+                ? 'bg-[#008080] text-white shadow-md font-black'
                 : 'bg-slate-900 text-slate-400 hover:text-white'
             }`}
           >
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
+            <Flame className="w-3.5 h-3.5 text-[#CCFF00]" />
             <span>3. Time-Decay Formula</span>
           </button>
 
@@ -183,7 +183,7 @@ POST /api/hashtags/follow
             onClick={() => setActiveTab('api')}
             className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
               activeTab === 'api'
-                ? 'bg-indigo-600 text-white shadow-md'
+                ? 'bg-[#008080] text-white shadow-md font-black'
                 : 'bg-slate-900 text-slate-400 hover:text-white'
             }`}
           >
@@ -202,7 +202,7 @@ POST /api/hashtags/follow
             <span>{copied ? 'Copied Snippet' : 'Copy SQL/Code'}</span>
           </button>
 
-          <pre className="p-4 bg-slate-900 rounded-2xl border border-slate-800 font-mono text-xs text-indigo-200 overflow-x-auto leading-relaxed max-h-96">
+          <pre className="p-4 bg-slate-900 rounded-2xl border border-slate-800 font-mono text-xs text-teal-200 overflow-x-auto leading-relaxed max-h-96">
             <code>{getActiveCode()}</code>
           </pre>
         </div>
@@ -214,7 +214,7 @@ POST /api/hashtags/follow
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl cursor-pointer"
+            className="px-5 py-2 bg-[#008080] hover:bg-[#006666] text-white font-bold rounded-xl cursor-pointer"
           >
             Close Inspector
           </button>

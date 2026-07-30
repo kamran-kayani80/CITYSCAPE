@@ -17,8 +17,9 @@ import { AccessibilityToolbar } from './components/AccessibilityToolbar';
 import { CivicBulletinHub } from './components/CivicBulletinHub';
 import { SlaDashboard } from './components/SlaDashboard';
 import { CitizenPrideBanner } from './components/CitizenPrideBanner';
+import { BrandIdentitySystem } from './components/BrandIdentitySystem';
 import { AccessibilityProvider } from './context/AccessibilityContext';
-import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile } from './types';
+import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
 import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map, List } from 'lucide-react';
 
 export default function App() {
@@ -28,9 +29,7 @@ export default function App() {
   const [cityStats, setCityStats] = useState<CityStats | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-  const [activeView, setActiveView] = useState<
-    'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events' | 'bulletin' | 'sla'
-  >('map');
+  const [activeView, setActiveView] = useState<AppViewMode>('map');
   const [mobileTab, setMobileTab] = useState<'map' | 'list'>('map');
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -291,7 +290,7 @@ export default function App() {
 
   return (
     <AccessibilityProvider>
-      <div className="min-h-screen bg-[#e5e3f7] dark:bg-[#121026] text-[#242242] dark:text-[#e5e3f7] flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+      <div className="min-h-screen bg-[#f2f2f2] dark:bg-[#1A1A1A] text-[#1A1A1A] dark:text-[#f2f2f2] flex flex-col font-['Montserrat'] antialiased selection:bg-[#008080] selection:text-[#CCFF00]">
         {/* Sticky WCAG AAA Accessibility Toolbar */}
         <AccessibilityToolbar />
 
@@ -334,7 +333,7 @@ export default function App() {
                     <button
                       onClick={() => setMobileTab('map')}
                       className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
-                        mobileTab === 'map' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-xs' : 'text-slate-600'
+                        mobileTab === 'map' ? 'bg-[#008080] text-[#CCFF00] shadow-xs font-extrabold' : 'text-slate-600'
                       }`}
                     >
                       <Map className="w-3.5 h-3.5" />
@@ -343,7 +342,7 @@ export default function App() {
                     <button
                       onClick={() => setMobileTab('list')}
                       className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
-                        mobileTab === 'list' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-xs' : 'text-slate-600'
+                        mobileTab === 'list' ? 'bg-[#008080] text-[#CCFF00] shadow-xs font-extrabold' : 'text-slate-600'
                       }`}
                     >
                       <List className="w-3.5 h-3.5" />
@@ -447,6 +446,9 @@ export default function App() {
 
               {/* VIEW 9: CITY INSIGHTS & ANALYTICS */}
               {activeView === 'analytics' && <AnalyticsView stats={cityStats} reports={reports} />}
+
+              {/* VIEW 10: OFFICIAL BRAND IDENTITY SYSTEM & GUIDELINES */}
+              {activeView === 'brand' && <BrandIdentitySystem />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -492,7 +494,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-            className="fixed bottom-6 right-6 z-50 bg-[#0A2540] text-white px-4 py-3 rounded-2xl shadow-2xl border border-indigo-500/40 flex items-center space-x-3 text-xs font-bold"
+            className="fixed bottom-6 right-6 z-50 bg-[#1A1A1A] text-white px-4 py-3 rounded-2xl shadow-2xl border-2 border-[#008080] flex items-center space-x-3 text-xs font-bold font-['Montserrat']"
           >
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
             <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />

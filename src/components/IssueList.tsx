@@ -106,19 +106,19 @@ export const IssueList: React.FC<IssueListProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.22, delay: Math.min(idx * 0.04, 0.3), ease: [0.16, 1, 0.3, 1] }}
             onClick={() => onSelectReport(report)}
-            className={`group relative soft-card soft-card-hover p-4 transition-all duration-200 cursor-pointer ${
+            className={`group relative soft-card soft-card-hover p-4 transition-all duration-200 cursor-pointer font-['Montserrat'] ${
               isEmergency
                 ? 'border-2 border-red-500 bg-red-50/50 dark:bg-red-950/30 shadow-red-100/60 shadow-md'
                 : isSelected
-                ? 'ring-2 ring-indigo-500 bg-[#f8f7fe] shadow-lg'
-                : 'hover:border-indigo-200'
+                ? 'ring-2 ring-[#008080] bg-white dark:bg-slate-900 shadow-lg border-[#008080]'
+                : 'hover:border-[#008080]'
             }`}
           >
             {/* High-Contrast Visual Alert Badge for Emergency Reports */}
             {isEmergency && (
               <div className="mb-3 px-3 py-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between shadow-md border border-red-400">
                 <div className="flex items-center space-x-1.5">
-                  <Siren className="w-4 h-4 animate-bounce text-yellow-300" />
+                  <Siren className="w-4 h-4 animate-bounce text-[#CCFF00]" />
                   <span>EMERGENCY HAZARD ALERT</span>
                 </div>
                 <span className="bg-red-950/80 text-red-100 px-2 py-0.5 rounded font-mono text-[9px] font-extrabold border border-red-400/50">
@@ -150,24 +150,24 @@ export const IssueList: React.FC<IssueListProps> = ({
                 </span>
 
                 {distanceTag && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1 shadow-2xs">
-                    <Navigation className="w-2.5 h-2.5 text-indigo-600 dark:text-indigo-400" />
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#008080]/10 text-[#008080] dark:text-[#CCFF00] border border-[#008080]/30 flex items-center gap-1 shadow-2xs">
+                    <Navigation className="w-2.5 h-2.5 text-[#008080] dark:text-[#CCFF00]" />
                     <span>{distanceTag}</span>
                   </span>
                 )}
               </div>
 
-              <span className="text-xs text-indigo-400 font-mono font-bold">#{report.id}</span>
+              <span className="text-xs text-[#008080] dark:text-[#CCFF00] font-mono font-bold">#{report.id}</span>
             </div>
 
             <div className="flex gap-3 my-2.5">
               <img
                 src={report.imageUrls[0]}
                 alt={report.title}
-                className="w-18 h-18 rounded-2xl object-cover shrink-0 bg-indigo-50 border border-white/80 shadow-xs group-hover:scale-102 transition-transform duration-300"
+                className="w-18 h-18 rounded-2xl object-cover shrink-0 bg-slate-100 border border-slate-200 shadow-xs group-hover:scale-102 transition-transform duration-300"
               />
               <div className="min-w-0 flex-1">
-                <h3 className="font-heading font-black text-[#1c1a3b] dark:text-white text-sm sm:text-base line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                <h3 className="font-['Montserrat'] font-black text-[#1A1A1A] dark:text-white text-sm sm:text-base line-clamp-1 group-hover:text-[#008080] transition-colors">
                   {report.title}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mt-0.5 leading-snug font-medium">
@@ -176,9 +176,9 @@ export const IssueList: React.FC<IssueListProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-white/60">
-              <div className="flex items-center gap-1.5 text-xs text-indigo-900/80 font-medium truncate max-w-[180px]">
-                <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+            <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 font-medium truncate max-w-[180px]">
+                <MapPin className="w-3.5 h-3.5 text-[#008080] shrink-0" />
                 <span className="truncate">{report.addressText}</span>
               </div>
 
@@ -193,11 +193,11 @@ export const IssueList: React.FC<IssueListProps> = ({
                   onClick={(e) => onUpvoteReport(report.id, e)}
                   className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
                     report.userHasUpvoted
-                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
-                      : 'soft-pill text-indigo-800 hover:bg-white'
+                      ? 'bg-[#008080] text-[#CCFF00] shadow-sm border border-[#CCFF00]/40'
+                      : 'soft-pill text-[#1A1A1A] dark:text-white hover:bg-[#008080] hover:text-white'
                   }`}
                 >
-                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current text-amber-300' : ''}`} />
+                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current text-[#CCFF00]' : ''}`} />
                   <span>{report.upvotesCount}</span>
                 </motion.button>
               </div>

@@ -24,14 +24,15 @@ import {
   Megaphone,
   Clock,
   Bell,
+  Palette,
 } from 'lucide-react';
 import { GoogleAuthButton } from './GoogleAuthButton';
-import { ReportFilter, ReportCategory, ReportStatus, SeverityLevel, UserProfile } from '../types';
+import { ReportFilter, ReportCategory, ReportStatus, SeverityLevel, UserProfile, AppViewMode } from '../types';
 import { CATEGORY_CONFIG, STATUS_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 
 interface HeaderProps {
-  activeView: 'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events' | 'bulletin' | 'sla';
-  setActiveView: (view: 'map' | 'admin' | 'analytics' | 'gratitude' | 'profile' | 'blog' | 'events' | 'bulletin' | 'sla') => void;
+  activeView: AppViewMode;
+  setActiveView: (view: AppViewMode) => void;
   filter: ReportFilter;
   setFilter: React.Dispatch<React.SetStateAction<ReportFilter>>;
   onOpenReportModal: () => void;
@@ -64,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
     (filter.severity && filter.severity !== 'ALL' ? 1 : 0);
 
   return (
-    <header className="sticky top-0 z-30 bg-[#e8e6f8]/95 backdrop-blur-md border-b border-white/80 shadow-sm transition-all">
+    <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-md border-b-2 border-[#008080] shadow-sm transition-all font-['Montserrat']">
       {/* Top Bar: Brand, Search, User Actions & Primary CTA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 py-2">
@@ -73,24 +74,28 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveView('map')}
             className="flex items-center space-x-3 shrink-0 cursor-pointer group"
           >
-            {/* Custom Cityscape Skyline & Location Pin Logo */}
-            <div className="relative w-10 h-10 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all border border-white/40 ring-2 ring-indigo-500/20 overflow-hidden">
-              <Building2 className="w-5 h-5 text-indigo-100 absolute" />
-              <MapPin className="w-3.5 h-3.5 text-amber-300 absolute -top-0.5 right-1 drop-shadow-sm" />
-              <Sparkles className="w-2.5 h-2.5 text-amber-200 absolute top-1 left-1 animate-pulse" />
+            {/* Official Cityscape Continuous Skyline & Citizen Node Network Logo */}
+            <div className="relative w-11 h-11 bg-[#008080] rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all border border-[#CCFF00]/40 ring-2 ring-[#008080]/30 overflow-hidden p-1">
+              <svg className="w-full h-full" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 5 65 L 15 65 L 15 40 L 25 40 L 25 25 L 35 25 L 35 45 L 45 45 L 45 15 L 60 15 L 60 50 L 70 50 L 70 20 L 80 20 L 80 65" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                <path d="M 80 65 Q 85 65 90 45 L 95 30" stroke="#CCFF00" strokeWidth="4" strokeLinecap="round" fill="none" />
+                <circle cx="90" cy="45" r="4.5" fill="#CCFF00" />
+                <circle cx="95" cy="30" r="4.5" fill="#CCFF00" />
+                <circle cx="60" cy="15" r="3.5" fill="#CCFF00" />
+              </svg>
             </div>
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <span className="font-heading font-black text-xl sm:text-2xl tracking-tight uppercase bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-700 bg-clip-text text-transparent">
+                <span className="font-['Montserrat'] font-black text-xl sm:text-2xl tracking-tight uppercase text-[#1A1A1A] dark:text-white">
                   CITYSCAPE
                 </span>
-                <span className="hidden lg:inline-block px-1.5 py-0.2 text-[8px] font-black uppercase tracking-widest rounded-md bg-indigo-900 text-amber-300 border border-indigo-700">
-                  GeoGrid
+                <span className="hidden lg:inline-block px-1.5 py-0.2 text-[8px] font-black uppercase tracking-widest rounded-md bg-[#008080] text-[#CCFF00] border border-[#CCFF00]/40">
+                  Official
                 </span>
               </div>
-              <span className="text-[10px] font-bold text-indigo-900/80 -mt-0.5 tracking-tight flex items-center space-x-1">
-                <span>Let's Fix Our City</span>
-                <span className="text-amber-500 font-extrabold">•</span>
+              <span className="text-[10px] font-bold text-[#008080] dark:text-[#CCFF00] -mt-0.5 tracking-tight flex items-center space-x-1">
+                <span>Civic Engagement Platform</span>
+                <span className="text-[#008080] font-extrabold">•</span>
               </span>
             </div>
           </div>
@@ -99,18 +104,18 @@ export const Header: React.FC<HeaderProps> = ({
           {activeView === 'map' && (
             <div className="flex-1 max-w-sm hidden md:block relative">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-500" />
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#008080]" />
                 <input
                   type="text"
                   placeholder="Search location or hazard..."
                   value={filter.searchQuery || ''}
                   onChange={(e) => setFilter((prev) => ({ ...prev, searchQuery: e.target.value }))}
-                  className="w-full pl-9 pr-8 py-1.5 bg-[#dcdaed] focus:bg-white border border-white/80 rounded-xl text-xs font-bold text-[#1c1a3b] outline-none transition-all placeholder-indigo-500/70 focus:ring-2 focus:ring-indigo-500/40"
+                  className="w-full pl-9 pr-8 py-1.5 bg-[#F2F2F2] dark:bg-slate-800 focus:bg-white border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-[#1A1A1A] dark:text-white outline-none transition-all placeholder-slate-500 focus:ring-2 focus:ring-[#008080]"
                 />
                 {filter.searchQuery && (
                   <button
                     onClick={() => setFilter((prev) => ({ ...prev, searchQuery: '' }))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500 hover:text-indigo-800"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#008080]"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -137,7 +142,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 isAdminMode
                   ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
-                  : 'bg-white/80 text-indigo-950 border-white hover:bg-white'
+                  : 'bg-white/80 text-slate-900 border-white hover:bg-white'
               }`}
             >
               {isAdminMode ? (
@@ -147,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </>
               ) : (
                 <>
-                  <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+                  <UserCheck className="w-3.5 h-3.5 text-[#008080]" />
                   <span>Resident</span>
                 </>
               )}
@@ -157,7 +162,7 @@ export const Header: React.FC<HeaderProps> = ({
             {activeView === 'map' && (
               <button
                 onClick={() => setShowFiltersMobile(!showFiltersMobile)}
-                className="lg:hidden relative p-2 text-indigo-900 bg-white/80 rounded-xl border border-white"
+                className="lg:hidden relative p-2 text-slate-900 bg-white/80 rounded-xl border border-white"
               >
                 <Filter className="w-4 h-4" />
                 {activeFiltersCount > 0 && (
@@ -181,10 +186,10 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Line 2: Dedicated Navigation Tabs Bar (Gestalt Law of Proximity) */}
-      <div className="bg-[#dcdaed] border-t border-white/80 py-1.5 px-4">
+      <div className="bg-[#F2F2F2] dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-1.5 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           {/* Main View Tabs (Short & Brief Labels) */}
-          <nav className="flex items-center gap-1.5 text-xs font-heading font-extrabold overflow-x-auto no-scrollbar py-0.5">
+          <nav className="flex items-center gap-1.5 text-xs font-['Montserrat'] font-extrabold overflow-x-auto no-scrollbar py-0.5">
             {/* Persistent Urgent / Emergency Tab */}
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -216,16 +221,16 @@ export const Header: React.FC<HeaderProps> = ({
               whileTap={{ scale: 0.97 }}
               id="discovery-tab-btn"
               onClick={() => setActiveView('map')}
-              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 ${
+              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'map'
-                  ? 'bg-indigo-700 text-white shadow-xs'
-                  : 'bg-white/60 text-indigo-950 hover:bg-white'
+                  ? 'bg-[#008080] text-[#CCFF00] shadow-xs border-[#CCFF00]/40 font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#1A1A1A] dark:text-white hover:bg-slate-100 border-slate-200 dark:border-slate-700'
               }`}
             >
               <MapIcon className="w-3.5 h-3.5" />
               <span>Map</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                activeView === 'map' ? 'bg-indigo-900 text-indigo-100' : 'bg-indigo-100 text-indigo-900'
+                activeView === 'map' ? 'bg-[#1A1A1A] text-[#CCFF00]' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
               }`}>
                 {totalReportsCount}
               </span>
@@ -237,11 +242,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('bulletin')}
               className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'bulletin'
-                  ? 'bg-indigo-700 text-white shadow-xs border-indigo-800 font-extrabold'
-                  : 'bg-white/60 text-indigo-950 hover:bg-white border-white/80'
+                  ? 'bg-[#008080] text-[#CCFF00] shadow-xs border-[#CCFF00]/40 font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#1A1A1A] dark:text-white hover:bg-slate-100 border-slate-200 dark:border-slate-700'
               }`}
             >
-              <Bell className="w-3.5 h-3.5 text-indigo-600" />
+              <Bell className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00]" />
               <span>Bulletin</span>
             </motion.button>
 
@@ -251,11 +256,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('sla')}
               className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'sla'
-                  ? 'bg-indigo-700 text-white shadow-xs border-indigo-800 font-extrabold'
-                  : 'bg-white/60 text-indigo-950 hover:bg-white border-white/80'
+                  ? 'bg-[#008080] text-[#CCFF00] shadow-xs border-[#CCFF00]/40 font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#1A1A1A] dark:text-white hover:bg-slate-100 border-slate-200 dark:border-slate-700'
               }`}
             >
-              <Clock className="w-3.5 h-3.5 text-emerald-600" />
+              <Clock className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00]" />
               <span>SLA Tracker</span>
             </motion.button>
 
@@ -265,11 +270,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('blog')}
               className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'blog'
-                  ? 'bg-indigo-700 text-white shadow-xs border-indigo-800 font-extrabold'
-                  : 'bg-white/60 text-indigo-950 hover:bg-white border-white/80'
+                  ? 'bg-[#008080] text-[#CCFF00] shadow-xs border-[#CCFF00]/40 font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#1A1A1A] dark:text-white hover:bg-slate-100 border-slate-200 dark:border-slate-700'
               }`}
             >
-              <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+              <BookOpen className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00]" />
               <span>Civic Journal</span>
             </motion.button>
 
@@ -277,26 +282,26 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('events')}
               className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'events'
-                  ? 'bg-indigo-700 text-white shadow-xs border-indigo-800 font-extrabold'
-                  : 'bg-white/60 text-indigo-950 hover:bg-white border-white/80'
+                  ? 'bg-[#008080] text-[#CCFF00] shadow-xs border-[#CCFF00]/40 font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#1A1A1A] dark:text-white hover:bg-slate-100 border-slate-200 dark:border-slate-700'
               }`}
             >
-              <Megaphone className="w-3.5 h-3.5 text-amber-500" />
+              <Megaphone className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00]" />
               <span>Events & Ads</span>
-              <span className="bg-amber-400 text-slate-950 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
+              <span className="bg-[#CCFF00] text-[#1A1A1A] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
                 HIRE
               </span>
             </button>
 
             <button
               onClick={() => setActiveView('gratitude')}
-              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 ${
+              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'gratitude'
-                  ? 'bg-indigo-700 text-white shadow-xs'
-                  : 'bg-white/60 text-indigo-950 hover:bg-white'
+                  ? 'bg-[#008080] text-[#CCFF00] shadow-xs border-[#CCFF00]/40 font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#1A1A1A] dark:text-white hover:bg-slate-100 border-slate-200 dark:border-slate-700'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <Sparkles className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00]" />
               <span>Fame</span>
             </button>
 
@@ -304,20 +309,20 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('admin')}
               className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'admin'
-                  ? 'bg-indigo-800 text-white shadow-xs border-indigo-900 font-extrabold'
-                  : 'bg-white/70 text-indigo-950 hover:bg-white border-white/80'
+                  ? 'bg-[#008080] text-[#CCFF00] shadow-xs border-[#CCFF00]/40 font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#1A1A1A] dark:text-white hover:bg-slate-100 border-slate-200 dark:border-slate-700'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5 text-amber-500" />
+              <Building2 className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00]" />
               <span>Gov Desk</span>
               {isAdminMode ? (
-                <span className="bg-emerald-600 text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5">
-                  <ShieldCheck className="w-2.5 h-2.5 text-emerald-200" />
+                <span className="bg-[#008080] text-[#CCFF00] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5 border border-[#CCFF00]/40">
+                  <ShieldCheck className="w-2.5 h-2.5 text-[#CCFF00]" />
                   <span>$25/mo</span>
                 </span>
               ) : (
-                <span className="bg-amber-100 text-amber-900 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5 text-amber-700" />
+                <span className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5">
+                  <Lock className="w-2.5 h-2.5" />
                   <span>PASS</span>
                 </span>
               )}
@@ -325,13 +330,13 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => setActiveView('analytics')}
-              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 ${
+              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
                 activeView === 'analytics'
-                  ? 'bg-indigo-700 text-white shadow-xs'
-                  : 'bg-white/60 text-indigo-950 hover:bg-white'
+                  ? 'bg-[#008080] text-[#CCFF00] shadow-xs border-[#CCFF00]/40 font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#1A1A1A] dark:text-white hover:bg-slate-100 border-slate-200 dark:border-slate-700'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" />
+              <BarChart3 className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00]" />
               <span>Stats</span>
             </button>
 
@@ -339,8 +344,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('profile')}
               className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 ${
                 activeView === 'profile'
-                  ? 'bg-indigo-700 text-white shadow-xs'
-                  : 'bg-white/60 text-indigo-950 hover:bg-white'
+                  ? 'bg-[#008080] text-white shadow-xs font-black'
+                  : 'bg-white/60 text-slate-900 hover:bg-white'
               }`}
             >
               <User className="w-3.5 h-3.5" />
@@ -348,6 +353,21 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="flex items-center gap-0.5 text-[10px] font-mono font-black text-amber-800 bg-amber-100 px-1 rounded">
                 <Flame className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
                 <span>{userKarma}</span>
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveView('brand')}
+              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
+                activeView === 'brand'
+                  ? 'bg-[#008080] text-white shadow-xs border-[#008080] font-extrabold ring-2 ring-[#CCFF00]'
+                  : 'bg-amber-100/90 text-[#008080] hover:bg-amber-200 border-amber-300 font-extrabold'
+              }`}
+            >
+              <Palette className="w-3.5 h-3.5 text-[#008080]" />
+              <span className="font-extrabold">Brand Identity</span>
+              <span className="bg-[#CCFF00] text-slate-950 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
+                SYSTEM
               </span>
             </button>
           </nav>
@@ -361,20 +381,20 @@ export const Header: React.FC<HeaderProps> = ({
         <div
           className={`${
             showFiltersMobile ? 'block' : 'hidden lg:block'
-          } bg-[#dcdaed] border-t border-white/80 py-2.5 px-4 transition-all`}
+          } bg-[#008080]/15 border-t border-white/80 py-2.5 px-4 transition-all`}
         >
           <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
             {/* Filter Pills */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-indigo-950 font-black uppercase tracking-wider text-[10px]">
+              <span className="text-slate-900 font-black uppercase tracking-wider text-[10px]">
                 Filter Status:
               </span>
               <button
                 onClick={() => setFilter((prev) => ({ ...prev, status: 'ALL' }))}
                 className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
                   !filter.status || filter.status === 'ALL'
-                    ? 'bg-indigo-700 text-white shadow-xs'
-                    : 'bg-white/80 text-indigo-950 border border-white hover:bg-white'
+                    ? 'bg-[#008080] text-white shadow-xs font-black'
+                    : 'bg-white/80 text-slate-900 border border-white hover:bg-white'
                 }`}
               >
                 All Statuses
@@ -388,8 +408,8 @@ export const Header: React.FC<HeaderProps> = ({
                     onClick={() => setFilter((prev) => ({ ...prev, status: isActive ? 'ALL' : st }))}
                     className={`flex items-center space-x-1.5 px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
                       isActive
-                        ? `${conf.bgClass} ${conf.textClass} shadow-xs ring-2 ring-indigo-500`
-                        : 'bg-white/80 text-indigo-900 border border-white hover:bg-white'
+                        ? `${conf.bgClass} ${conf.textClass} shadow-xs ring-2 ring-[#008080]`
+                        : 'bg-white/80 text-slate-900 border border-white hover:bg-white'
                     }`}
                   >
                     <span className={`w-2 h-2 rounded-full ${conf.dotColor}`} />
@@ -406,7 +426,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onChange={(e) =>
                   setFilter((prev) => ({ ...prev, category: e.target.value as ReportCategory | 'ALL' }))
                 }
-                className="bg-white/90 border border-white/80 text-indigo-950 font-bold px-3 py-1 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
+                className="bg-white/90 border border-white/80 text-slate-900 font-bold px-3 py-1 rounded-xl focus:ring-2 focus:ring-[#008080] outline-none cursor-pointer"
               >
                 <option value="ALL">All Categories</option>
                 {(Object.keys(CATEGORY_CONFIG) as ReportCategory[]).map((cat) => (
@@ -424,7 +444,7 @@ export const Header: React.FC<HeaderProps> = ({
                     sortBy: e.target.value as 'newest' | 'oldest' | 'upvotes' | 'severity',
                   }))
                 }
-                className="bg-white/90 border border-white/80 text-indigo-950 font-bold px-3 py-1 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
+                className="bg-white/90 border border-white/80 text-slate-900 font-bold px-3 py-1 rounded-xl focus:ring-2 focus:ring-[#008080] outline-none cursor-pointer"
               >
                 <option value="newest">Sort: Newest First</option>
                 <option value="upvotes">Sort: Most Endorsed</option>
@@ -443,7 +463,7 @@ export const Header: React.FC<HeaderProps> = ({
                       sortBy: 'newest',
                     })
                   }
-                  className="text-xs text-indigo-800 font-extrabold underline hover:text-indigo-950 ml-1 cursor-pointer"
+                  className="text-xs text-[#008080] font-extrabold underline hover:text-teal-950 ml-1 cursor-pointer"
                 >
                   Clear
                 </button>

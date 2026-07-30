@@ -1,3 +1,15 @@
+export type AppViewMode =
+  | 'map'
+  | 'admin'
+  | 'analytics'
+  | 'gratitude'
+  | 'profile'
+  | 'blog'
+  | 'events'
+  | 'bulletin'
+  | 'sla'
+  | 'brand';
+
 export type ReportCategory =
   | 'EMERGENCY'
   | 'POTHOLE'

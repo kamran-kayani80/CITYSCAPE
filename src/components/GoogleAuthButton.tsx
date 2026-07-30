@@ -246,7 +246,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
             <div className="space-y-2.5">
               <button
                 onClick={() => connectAccountDirectly('kaamikayani@gmail.com', 'Kaamika Yani')}
-                className="w-full flex items-center space-x-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
+                className="w-full flex items-center space-x-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-[#008080] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
               >
                 <img
                   src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
@@ -262,9 +262,9 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
 
               <button
                 onClick={() => connectAccountDirectly('alex.m@sfgov.org', 'Alex Morgan (Civic Lead)')}
-                className="w-full flex items-center space-x-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
+                className="w-full flex items-center space-x-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-[#008080] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
+                <div className="w-9 h-9 rounded-full bg-[#008080] text-[#CCFF00] font-bold flex items-center justify-center text-xs shrink-0">
                   AM
                 </div>
                 <div className="flex-1 min-w-0">
@@ -288,7 +288,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
                 <button
                   onClick={() => connectAccountDirectly(customEmail.trim(), customName.trim() || 'Civic Member')}
                   disabled={!customEmail.trim()}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] text-xs font-bold rounded-xl disabled:opacity-50 cursor-pointer"
                 >
                   Connect
                 </button>

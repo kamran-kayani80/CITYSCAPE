@@ -149,15 +149,15 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
         rows={rows}
         required={required}
         placeholder={placeholder}
-        className={`w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 font-sans leading-relaxed resize-none transition-all ${className}`}
+        className={`w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#008080]/30 focus:border-[#008080] font-sans leading-relaxed resize-none transition-all ${className}`}
       />
 
       {/* Floating Autocomplete Dropdown */}
       {isOpen && (
-        <div className="absolute left-0 right-0 z-50 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/60 rounded-2xl shadow-xl p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-900 dark:text-indigo-400 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+        <div className="absolute left-0 right-0 z-50 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-[#008080]/30 dark:border-[#008080]/60 rounded-2xl shadow-xl p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150 font-['Montserrat']">
+          <div className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[#008080] dark:text-[#CCFF00] flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
             <span className="flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-500 animate-spin" />
+              <Sparkles className="w-3 h-3 text-[#CCFF00] animate-spin" />
               <span>Matching Hashtags {matchQuery ? `("#${matchQuery}")` : ''}</span>
             </span>
             <span className="text-[9px] font-mono text-slate-400">Press Enter or Tab</span>
@@ -166,13 +166,13 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
           {suggestions.length === 0 ? (
             <div
               onClick={() => selectTag(matchQuery || 'CityFix')}
-              className="p-2.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-xl cursor-pointer flex items-center justify-between font-mono"
+              className="p-2.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-[#008080]/10 dark:hover:bg-[#008080]/20 rounded-xl cursor-pointer flex items-center justify-between font-mono"
             >
-              <div className="flex items-center gap-1.5 font-bold text-indigo-600 dark:text-indigo-400">
+              <div className="flex items-center gap-1.5 font-bold text-[#008080] dark:text-[#CCFF00]">
                 <Hash className="w-3.5 h-3.5" />
                 <span>Create new tag #{matchQuery}</span>
               </div>
-              <span className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md">New Tag</span>
+              <span className="text-[10px] bg-[#008080]/20 text-[#008080] dark:text-[#CCFF00] px-2 py-0.5 rounded-md">New Tag</span>
             </div>
           ) : (
             suggestions.map((tag, idx) => {
@@ -184,16 +184,16 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
                   onMouseEnter={() => setHighlightIdx(idx)}
                   className={`p-2.5 rounded-xl cursor-pointer flex items-center justify-between transition-all ${
                     isHighlighted
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'hover:bg-indigo-50 dark:hover:bg-slate-800/80 text-slate-800 dark:text-slate-200'
+                      ? 'bg-[#008080] text-white shadow-sm font-bold'
+                      : 'hover:bg-[#008080]/10 dark:hover:bg-slate-800/80 text-slate-800 dark:text-slate-200'
                   }`}
                 >
                   <div className="flex items-center space-x-2">
                     <div
                       className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${
                         isHighlighted
-                          ? 'bg-indigo-500 text-amber-300'
-                          : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
+                          ? 'bg-[#006666] text-[#CCFF00]'
+                          : 'bg-[#008080]/20 dark:bg-[#008080]/30 text-[#008080] dark:text-[#CCFF00]'
                       }`}
                     >
                       #
@@ -202,7 +202,7 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
                       <div className="font-mono font-bold text-xs">
                         #{tag.displayName}
                       </div>
-                      <div className={`text-[10px] ${isHighlighted ? 'text-indigo-100' : 'text-slate-400'}`}>
+                      <div className={`text-[10px] ${isHighlighted ? 'text-teal-100' : 'text-slate-400'}`}>
                         {tag.usageCount} community reports
                       </div>
                     </div>
@@ -212,7 +212,7 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
                     <span
                       className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold flex items-center gap-1 ${
                         isHighlighted
-                          ? 'bg-indigo-800 text-amber-300'
+                          ? 'bg-[#004d4d] text-[#CCFF00]'
                           : 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300/40'
                       }`}
                     >

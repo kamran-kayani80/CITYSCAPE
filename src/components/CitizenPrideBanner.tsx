@@ -1,41 +1,153 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Sparkles, Building2, ChevronDown, Check, Compass, Locate, Loader2, Navigation } from 'lucide-react';
+import { MapPin, Sparkles, Building2, ChevronDown, Check, Compass, Landmark, History, Locate, Loader2 } from 'lucide-react';
 
 interface CityData {
   id: string;
   cityName: string;
   demonym: string;
   phrasePrefix: string; // e.g. "I AM A" or "I AM"
+  inspirationalSlogan: string;
+  culturalHeritage: string; // Rich traditional identity & cultural values
+  culturalLandmarks: string; // Iconic heritage sites & historical monuments
   landmarksName: string;
   wardName: string;
   themeBg: 'navy' | 'white' | 'teal';
   svgSilhouettes: React.ReactNode;
 }
 
-// Known demonym dictionary for instant accurate mapping
-const DEMONYM_MAP: Record<string, { demonym: string; prefix: string }> = {
-  rawalpindi: { demonym: 'RAWALPINDIAN', prefix: 'I AM A' },
-  islamabad: { demonym: 'ISLAMABADIAN', prefix: 'I AM AN' },
-  lahore: { demonym: 'LAHORI', prefix: 'I AM A' },
-  karachi: { demonym: 'KARACHITE', prefix: 'I AM A' },
-  peshawar: { demonym: 'PESHAWARI', prefix: 'I AM A' },
-  quetta: { demonym: 'QUETTAITE', prefix: 'I AM A' },
-  multan: { demonym: 'MULTANI', prefix: 'I AM A' },
-  faisalabad: { demonym: 'FAISALABADI', prefix: 'I AM A' },
-  sialkot: { demonym: 'SIALKOTI', prefix: 'I AM A' },
-  gujranwala: { demonym: 'GUJRANWALI', prefix: 'I AM A' },
-  'new york': { demonym: 'NEW YORKER', prefix: 'I AM A' },
-  'new york city': { demonym: 'NEW YORKER', prefix: 'I AM A' },
-  london: { demonym: 'LONDONER', prefix: 'I AM A' },
-  paris: { demonym: 'PARISIAN', prefix: 'I AM A' },
-  sydney: { demonym: 'SYDNEY-SIDER', prefix: 'I AM A' },
-  berlin: { demonym: 'BERLINER', prefix: 'I AM A' },
-  tokyo: { demonym: 'TOKYOITE', prefix: 'I AM A' }
+// Known demonym dictionary with motivational civic slogans & rich cultural heritage for instant accurate mapping
+const DEMONYM_MAP: Record<string, { demonym: string; prefix: string; inspirationalSlogan: string; culturalHeritage: string; culturalLandmarks: string }> = {
+  rawalpindi: {
+    demonym: 'RAWALPINDIAN',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Preserving Ancient Potohari Heritage • Building a Stronger, Greener City',
+    culturalHeritage: 'Ancient Potohari Crossroads • Garrison Heritage & Vibrant Crafts',
+    culturalLandmarks: 'Raja Bazaar Clock Tower, Ayub Park & Taxila Gateway'
+  },
+  islamabad: {
+    demonym: 'ISLAMABADIAN',
+    prefix: 'I AM AN',
+    inspirationalSlogan: 'Eco-Sanctuary of Margalla • Uniting Tradition & Modern Civic Care',
+    culturalHeritage: 'Saidpur Heritage Village & Margalla Eco-Traditions',
+    culturalLandmarks: 'Faisal Mosque, Pakistan Monument & Lok Virsa Museum'
+  },
+  lahore: {
+    demonym: 'LAHORI',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Zinda Dilan-e-Lahore • Heart of Mughal Splendor, Sufi Mysticism & Hospitality',
+    culturalHeritage: 'Mughal Architecture & Sufi Mysticism',
+    culturalLandmarks: 'Badshahi Mosque, Lahore Fort & Shalamar Gardens'
+  },
+  karachi: {
+    demonym: 'KARACHITE',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'City of Lights — Standing Strong With Cosmopolitan Heritage & Resilience',
+    culturalHeritage: 'Colonial Maritime Heritage & Port Trade History',
+    culturalLandmarks: 'Mazar-e-Quaid, Mohatta Palace & Empress Market'
+  },
+  peshawar: {
+    demonym: 'PESHAWARI',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'City of Flowers & Storytellers — Honoring Ancient Silk Road Traditions',
+    culturalHeritage: 'Ancient Silk Route Gateway & Pashtun Hospitality',
+    culturalLandmarks: 'Qissa Khwani Bazaar, Bala Hisar Fort & Mahabat Khan Mosque'
+  },
+  quetta: {
+    demonym: 'QUETTAITE',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Fruit Garden of the Nation — Nurturing Balochi Craftsmanship & Mountain Traditions',
+    culturalHeritage: 'Fruit Gardens & Traditional Balochi Rug Weaving',
+    culturalLandmarks: 'Hanna Lake, Urak Valley & Bolan Pass Gateway'
+  },
+  multan: {
+    demonym: 'MULTANI',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'City of Saints — Honoring Centuries of Kashikari Blue Tile Craft & Sufi Wisdom',
+    culturalHeritage: 'Kashikari Blue Tile Pottery & Sufi Heritage',
+    culturalLandmarks: 'Shrine of Shah Rukn-e-Alam, Tomb of Bahauddin Zakariya & Fort Kohna'
+  },
+  faisalabad: {
+    demonym: 'FAISALABADI',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Engine of Growth — Preserving Lyallpur Craftsmanship & Community Unity',
+    culturalHeritage: 'Textile Artisan Legacy & Historic Eight-Bazaar Clock Tower Grid',
+    culturalLandmarks: 'Ghanta Ghar (Clock Tower), Gumti Fountain & Lyallpur Heritage'
+  },
+  sialkot: {
+    demonym: 'SIALKOTI',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'City of Iqbal & Master Artisans — Crafting World-Class Heritage & Pride',
+    culturalHeritage: 'Poetic Legacy of Allama Iqbal & Artisan Craftsmanship',
+    culturalLandmarks: 'Iqbal Manzil, Sialkot Fort & Marala Headworks'
+  },
+  gujranwala: {
+    demonym: 'GUJRANWALI',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'City of Champions (Pahlwans) — Honoring Athletic Heritage & Local Unity',
+    culturalHeritage: 'Traditional Wrestling (Pahlwani) & Culinary Craftsmanship',
+    culturalLandmarks: 'Estcourt Clock Tower, Nishan-e-Manzil & Sheranwala Gate'
+  },
+  'new york': {
+    demonym: 'NEW YORKER',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Melting Pot of Nations • Harlem Renaissance & Beacon of Freedom',
+    culturalHeritage: 'Harlem Jazz, Broadway & Immigrant Cultural Legacy',
+    culturalLandmarks: 'Statue of Liberty, Brooklyn Bridge & Central Park'
+  },
+  'new york city': {
+    demonym: 'NEW YORKER',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Melting Pot of Nations • Harlem Renaissance & Beacon of Freedom',
+    culturalHeritage: 'Harlem Jazz, Broadway & Immigrant Cultural Legacy',
+    culturalLandmarks: 'Statue of Liberty, Brooklyn Bridge & Central Park'
+  },
+  london: {
+    demonym: 'LONDONER',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Protecting Millennia of Crown, Globe Theatre & Maritime History',
+    culturalHeritage: 'Thames Maritime Tradition & Shakespearean Heritage',
+    culturalLandmarks: 'Big Ben, Tower of London & Globe Theatre'
+  },
+  paris: {
+    demonym: 'PARISIAN',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Illuminating Neighborhoods With Enlightenment, Salon Culture & Passion',
+    culturalHeritage: 'Bohemian Salon Culture & Architectural Elegance',
+    culturalLandmarks: 'Eiffel Tower, Louvre Museum & Notre-Dame Cathedral'
+  },
+  sydney: {
+    demonym: 'SYDNEY-SIDER',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Harbor of Opportunity — Honoring Eora First Nations & Coastal Heritage',
+    culturalHeritage: 'Eora Nation Heritage & Pacific Maritime Traditions',
+    culturalLandmarks: 'Sydney Opera House, Harbor Bridge & Bondi Beach'
+  },
+  berlin: {
+    demonym: 'BERLINER',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Uniting Creative Expression, Freedom & Historic Reunification',
+    culturalHeritage: 'Creative Avant-Garde & Historic Reunification Spirit',
+    culturalLandmarks: 'Brandenburg Gate, Museum Island & East Side Gallery'
+  },
+  tokyo: {
+    demonym: 'TOKYOITE',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Edo Shrine Traditions Meeting High-Tech Innovation in Harmony',
+    culturalHeritage: 'Edo Shinto Traditions & Omotenashi Hospitality',
+    culturalLandmarks: 'Sensō-ji Temple, Meiji Shrine & Tokyo Tower'
+  },
+  'san francisco': {
+    demonym: 'SAN FRANCISCAN',
+    prefix: 'I AM A',
+    inspirationalSlogan: 'Bridging Gold Rush Legacy, Bay Culture & Pioneer Innovation',
+    culturalHeritage: 'Gold Rush History, Maritime Bay Culture & Cable Car Heritage',
+    culturalLandmarks: 'Golden Gate Bridge, Alcatraz & Dragon Gate'
+  }
 };
 
 // Smart fallback algorithm for any newly geotagged city
-function getSmartDemonym(name: string): { demonym: string; prefix: string } {
+function getSmartDemonym(name: string): { demonym: string; prefix: string; inspirationalSlogan: string; culturalHeritage: string; culturalLandmarks: string } {
   const clean = name.trim();
   const lower = clean.toLowerCase();
   if (DEMONYM_MAP[lower]) return DEMONYM_MAP[lower];
@@ -56,7 +168,10 @@ function getSmartDemonym(name: string): { demonym: string; prefix: string } {
   const startsWithVowel = /^[aeiou]/i.test(demonym);
   return {
     demonym,
-    prefix: startsWithVowel ? 'I AM AN' : 'I AM A'
+    prefix: startsWithVowel ? 'I AM AN' : 'I AM A',
+    inspirationalSlogan: `Standing Strong Together to Preserve Heritage & Build a Safer ${clean}`,
+    culturalHeritage: `Vibrant ${clean} Cultural Heritage • Local Artisan & Civic Traditions`,
+    culturalLandmarks: `${clean} Central Square, Historic Clock Tower & Civic Gardens`
   };
 }
 
@@ -66,11 +181,14 @@ const CITIES: CityData[] = [
     cityName: 'Rawalpindi',
     demonym: 'RAWALPINDIAN',
     phrasePrefix: 'I AM A',
+    inspirationalSlogan: 'Preserving Ancient Potohari Heritage • Building a Stronger, Greener City',
+    culturalHeritage: 'Ancient Potohari Crossroads • Garrison Heritage & Vibrant Crafts',
+    culturalLandmarks: 'Raja Bazaar Clock Tower, Ayub Park & Taxila Gateway',
     landmarksName: 'Raja Bazaar & Ayub National Park',
     wardName: 'Rawalpindi Cantonment Ward 3',
     themeBg: 'navy',
     svgSilhouettes: (
-      <svg className="w-full h-full text-indigo-900/60" viewBox="0 0 600 200" fill="currentColor" aria-hidden="true">
+      <svg className="w-full h-full text-[#008080]/40" viewBox="0 0 600 200" fill="currentColor" aria-hidden="true">
         {/* Historic Rawalpindi Clock Tower / Arch Silhouette */}
         <path d="M110,190 L110,80 L105,80 L105,50 L120,20 L120,5 L122,5 L122,20 L137,50 L132,80 L127,80 L127,190 Z" />
         <circle cx="121" cy="62" r="8" className="text-amber-400/40" />
@@ -86,6 +204,9 @@ const CITIES: CityData[] = [
     cityName: 'Islamabad',
     demonym: 'ISLAMABADIAN',
     phrasePrefix: 'I AM AN',
+    inspirationalSlogan: 'Eco-Sanctuary of Margalla • Uniting Tradition & Modern Civic Care',
+    culturalHeritage: 'Saidpur Heritage Village & Margalla Eco-Traditions',
+    culturalLandmarks: 'Faisal Mosque, Pakistan Monument & Lok Virsa Museum',
     landmarksName: 'Faisal Mosque & Margalla Hills',
     wardName: 'Sector F-7 Ward 1',
     themeBg: 'teal',
@@ -104,6 +225,9 @@ const CITIES: CityData[] = [
     cityName: 'New York City',
     demonym: 'NEW YORKER',
     phrasePrefix: 'I AM A',
+    inspirationalSlogan: 'Melting Pot of Nations • Harlem Renaissance & Beacon of Freedom',
+    culturalHeritage: 'Harlem Jazz, Broadway & Immigrant Cultural Legacy',
+    culturalLandmarks: 'Statue of Liberty, Brooklyn Bridge & Central Park',
     landmarksName: 'Statue of Liberty & Empire State Building',
     wardName: 'Manhattan Ward 4',
     themeBg: 'white',
@@ -126,11 +250,14 @@ const CITIES: CityData[] = [
     cityName: 'London',
     demonym: 'LONDONER',
     phrasePrefix: 'I AM A',
+    inspirationalSlogan: 'Protecting Millennia of Crown, Globe Theatre & Maritime History',
+    culturalHeritage: 'Thames Maritime Tradition & Shakespearean Heritage',
+    culturalLandmarks: 'Big Ben, Tower of London & Globe Theatre',
     landmarksName: 'Big Ben & London Eye',
     wardName: 'Westminster Borough Ward 2',
     themeBg: 'navy',
     svgSilhouettes: (
-      <svg className="w-full h-full text-indigo-900/60" viewBox="0 0 600 200" fill="currentColor" aria-hidden="true">
+      <svg className="w-full h-full text-[#008080]/40" viewBox="0 0 600 200" fill="currentColor" aria-hidden="true">
         <path d="M120,190 L120,70 L115,70 L115,45 L125,20 L125,5 L127,5 L127,20 L137,45 L133,70 L128,70 L128,190 Z" />
         <circle cx="124" cy="55" r="7" className="text-amber-500/30" />
         <circle cx="450" cy="110" r="65" stroke="currentColor" strokeWidth="6" fill="none" />
@@ -147,6 +274,9 @@ const CITIES: CityData[] = [
     cityName: 'Paris',
     demonym: 'PARISIAN',
     phrasePrefix: 'I AM A',
+    inspirationalSlogan: 'Illuminating Our Neighborhoods Through Shared Civic Care & Passion',
+    culturalHeritage: 'Bohemian Salon Culture & Architectural Elegance',
+    culturalLandmarks: 'Eiffel Tower, Louvre Museum & Notre-Dame Cathedral',
     landmarksName: 'Eiffel Tower & Notre Dame',
     wardName: '7th Arrondissement',
     themeBg: 'teal',
@@ -165,6 +295,9 @@ const CITIES: CityData[] = [
     cityName: 'Tokyo',
     demonym: 'TOKYOITE',
     phrasePrefix: 'I AM A',
+    inspirationalSlogan: 'Innovating Community Harmony & Safe Streets Every Single Day',
+    culturalHeritage: 'Edo Shinto Traditions & Omotenashi Hospitality',
+    culturalLandmarks: 'Sensō-ji Temple, Meiji Shrine & Tokyo Tower',
     landmarksName: 'Mt. Fuji & Tokyo Tower',
     wardName: 'Shinjuku Ward',
     themeBg: 'white',
@@ -197,6 +330,10 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
     setCustomCityData(null);
     setSelectedCityId(city.id);
     setIsDropdownOpen(false);
+
+    localStorage.setItem('cityscape_user_city', city.cityName);
+    window.dispatchEvent(new CustomEvent('cityscape:city-changed', { detail: { cityName: city.cityName } }));
+
     if (onLocationChange) {
       onLocationChange(city.cityName);
     }
@@ -248,6 +385,13 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
   };
 
   const applyDetectedCity = (cityName: string, _lat: number, _lon: number) => {
+    localStorage.setItem('cityscape_user_city', cityName);
+    if (_lat && _lon) {
+      localStorage.setItem('cityscape_user_lat', _lat.toString());
+      localStorage.setItem('cityscape_user_lng', _lon.toString());
+    }
+    window.dispatchEvent(new CustomEvent('cityscape:city-changed', { detail: { cityName, lat: _lat, lng: _lon } }));
+
     const matchedKnown = CITIES.find((c) => c.cityName.toLowerCase() === cityName.toLowerCase());
 
     if (matchedKnown) {
@@ -256,17 +400,20 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
       setGeotagSuccessMsg(`Geotagged: ${matchedKnown.cityName} • Welcome, ${matchedKnown.demonym}!`);
       if (onLocationChange) onLocationChange(matchedKnown.cityName);
     } else {
-      const { demonym, prefix } = getSmartDemonym(cityName);
+      const { demonym, prefix, inspirationalSlogan, culturalHeritage, culturalLandmarks } = getSmartDemonym(cityName);
       const newCityObj: CityData = {
         id: `geotagged-${cityName.toLowerCase().replace(/\s+/g, '-')}`,
         cityName: cityName,
         demonym: demonym,
         phrasePrefix: prefix,
+        inspirationalSlogan: inspirationalSlogan,
+        culturalHeritage: culturalHeritage,
+        culturalLandmarks: culturalLandmarks,
         landmarksName: 'Local Heritage & Public Infrastructure',
         wardName: `${cityName} Municipal Ward 1`,
         themeBg: 'navy',
         svgSilhouettes: (
-          <svg className="w-full h-full text-indigo-900/60" viewBox="0 0 600 200" fill="currentColor" aria-hidden="true">
+          <svg className="w-full h-full text-[#008080]/40" viewBox="0 0 600 200" fill="currentColor" aria-hidden="true">
             <path d="M100,190 L120,80 L180,80 L200,190 M250,190 Q300,100 350,190 M400,190 L420,60 L450,60 L470,190 Z" />
             <circle cx="200" cy="70" r="10" className="text-amber-400/40" />
           </svg>
@@ -306,31 +453,31 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
     }
   }, []);
 
-  // Color theme classes mapping for WCAG AAA high contrast compliance
+  // Color theme classes mapping for WCAG AAA high contrast compliance using official brand palette
   const themeStyles = {
     white: {
-      card: 'bg-white text-[#111827] border-[1.5px] border-[#CBD5E1] shadow-[0_4px_12px_rgba(10,37,64,0.08)]',
-      sloganPrefix: 'text-[#0A2540]',
-      demonymText: 'text-[#B45309]', // Action Amber for maximum pop
-      badge: 'bg-[#006D5B] text-white',
+      card: 'bg-white text-[#1A1A1A] border-2 border-[#F2F2F2] dark:border-slate-800 shadow-xl',
+      sloganPrefix: 'text-[#1A1A1A] dark:text-white',
+      demonymText: 'text-[#008080] dark:text-[#CCFF00]', // Evergreen Teal / Electric Lime
+      badge: 'bg-[#008080] text-white font-black',
       wardText: 'text-slate-600 dark:text-slate-400',
-      button: 'bg-[#0A2540] text-white hover:bg-[#071a2e] active:scale-[0.98]'
+      button: 'bg-[#008080] text-[#CCFF00] hover:bg-[#006666] font-black active:scale-[0.98] border border-[#CCFF00]/40'
     },
     navy: {
-      card: 'bg-[#0A2540] text-white border-[1.5px] border-[#0A2540] shadow-[0_4px_20px_rgba(10,37,64,0.25)]',
+      card: 'bg-[#1A1A1A] text-white border-2 border-[#008080] shadow-2xl',
       sloganPrefix: 'text-slate-100',
-      demonymText: 'text-amber-400', // High contrast vibrant amber
-      badge: 'bg-[#006D5B] text-white border border-teal-400/30',
-      wardText: 'text-indigo-200',
-      button: 'bg-[#B45309] text-white hover:bg-[#964205] active:scale-[0.98]'
+      demonymText: 'text-[#CCFF00]', // High-energy Electric Lime
+      badge: 'bg-[#008080] text-[#CCFF00] border border-[#CCFF00]/30 font-black',
+      wardText: 'text-slate-300',
+      button: 'bg-[#008080] text-[#CCFF00] hover:bg-[#006666] font-black active:scale-[0.98] border border-[#CCFF00]/40'
     },
     teal: {
-      card: 'bg-[#006D5B] text-white border-[1.5px] border-[#006D5B] shadow-[0_4px_16px_rgba(0,109,91,0.2)]',
-      sloganPrefix: 'text-emerald-50',
-      demonymText: 'text-amber-300',
-      badge: 'bg-[#0A2540] text-white',
-      wardText: 'text-emerald-100',
-      button: 'bg-[#0A2540] text-white hover:bg-[#071a2e] active:scale-[0.98]'
+      card: 'bg-[#008080] text-white border-2 border-[#CCFF00]/40 shadow-xl',
+      sloganPrefix: 'text-white',
+      demonymText: 'text-[#CCFF00]', // Electric Lime accent
+      badge: 'bg-[#1A1A1A] text-[#CCFF00] font-black',
+      wardText: 'text-[#F2F2F2]',
+      button: 'bg-[#1A1A1A] text-[#CCFF00] hover:bg-black font-black active:scale-[0.98] border border-[#CCFF00]/40'
     }
   }[activeCity.themeBg];
 
@@ -363,19 +510,52 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
           </AnimatePresence>
         </div>
 
-        {/* Top Meta Bar: Location Selector */}
-        <div className="relative z-10 flex flex-wrap items-center justify-end gap-3">
+        {/* Top Meta Bar: Location Selector & Civic Ward Context */}
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
+          {/* Left Civic Meta Badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-[#008080] text-[#CCFF00] shadow-xs border border-[#CCFF00]/30 font-['Montserrat']">
+              <Building2 className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+              <span>{activeCity.wardName}</span>
+            </div>
 
+            <div className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-[#CCFF00]/20 text-[#008080] dark:text-[#CCFF00] border border-[#CCFF00]/40 font-['Montserrat']">
+              <span className="w-2 h-2 rounded-full bg-[#008080] dark:bg-[#CCFF00] animate-pulse" />
+              <span>{activeCity.demonym} JURISDICTION</span>
+            </div>
+
+            <div className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white/30 dark:bg-slate-900/40 backdrop-blur-xs text-slate-800 dark:text-slate-200 border border-slate-300/40 dark:border-slate-700/40 font-['Montserrat']">
+              <Compass className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00] shrink-0" />
+              <span>{activeCity.landmarksName}</span>
+            </div>
+          </div>
+
+          {/* Right Controls: Geotag & City Selector */}
           <div className="flex items-center space-x-2">
+            {/* Auto-Geotag Button */}
+            <button
+              onClick={handleDetectGeotagLocation}
+              disabled={isGeotagging}
+              title="Auto-detect current city via GPS"
+              className="flex items-center space-x-1.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-2 rounded-xl text-xs font-extrabold text-[#1A1A1A] dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm hover:border-[#008080] transition-all cursor-pointer min-h-[44px] disabled:opacity-50 font-['Montserrat']"
+            >
+              {isGeotagging ? (
+                <Loader2 className="w-4 h-4 text-[#008080] animate-spin" />
+              ) : (
+                <Locate className="w-4 h-4 text-[#008080] dark:text-[#CCFF00]" />
+              )}
+              <span className="hidden sm:inline">{isGeotagging ? 'Geotagging...' : 'Auto-GPS'}</span>
+            </button>
+
             {/* Location Picker Toggle */}
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 aria-expanded={isDropdownOpen}
                 aria-label="Change current city location"
-                className="flex items-center space-x-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs font-extrabold text-[#0A2540] dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm hover:border-[#0A2540] transition-all cursor-pointer min-h-[44px]"
+                className="flex items-center space-x-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs font-extrabold text-[#1A1A1A] dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm hover:border-[#008080] transition-all cursor-pointer min-h-[44px] font-['Montserrat']"
               >
-                <MapPin className="w-4 h-4 text-[#B45309]" />
+                <MapPin className="w-4 h-4 text-[#008080] dark:text-[#CCFF00]" />
                 <span>{activeCity.cityName}</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -387,29 +567,30 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
                     initial={{ opacity: 0, y: 8, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 6, scale: 0.96 }}
-                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 z-50 text-slate-800 dark:text-slate-100"
+                    className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border-2 border-slate-200 dark:border-slate-800 p-2 z-50 text-slate-800 dark:text-slate-100 font-['Montserrat']"
                   >
-                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                      Select Your City
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                      <span>Select Your City</span>
+                      <span className="text-[10px] text-[#008080] dark:text-[#CCFF00] font-extrabold">WCAG AAA</span>
                     </div>
-                    <div className="space-y-1 mt-1">
+                    <div className="space-y-1 mt-1 max-h-60 overflow-y-auto">
                       {CITIES.map((city) => (
                         <button
                           key={city.id}
                           onClick={() => handleSelectCity(city)}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer min-h-[44px] ${
                             city.id === activeCity.id
-                              ? 'bg-[#0A2540] text-white'
+                              ? 'bg-[#008080] text-white'
                               : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'
                           }`}
                         >
                           <div className="flex flex-col">
                             <span>{city.cityName}</span>
-                            <span className={`text-[10px] ${city.id === activeCity.id ? 'text-indigo-200' : 'text-slate-600 dark:text-slate-400'}`}>
-                              {city.demonym}
+                            <span className={`text-[10px] ${city.id === activeCity.id ? 'text-[#CCFF00]' : 'text-slate-600 dark:text-slate-400'}`}>
+                              {city.demonym} • {city.wardName}
                             </span>
                           </div>
-                          {city.id === activeCity.id && <Check className="w-4 h-4 text-amber-400" />}
+                          {city.id === activeCity.id && <Check className="w-4 h-4 text-[#CCFF00]" />}
                         </button>
                       ))}
                     </div>
@@ -422,7 +603,7 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
 
 
 
-        {/* Centerpiece Slogan ("Pride Element") */}
+        {/* Centerpiece Slogan ("Pride Element") & Cultural Values */}
         <div className="relative z-10 my-3 sm:my-5">
           <AnimatePresence mode="wait">
             <motion.div
@@ -431,22 +612,41 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-1"
+              className="space-y-3"
             >
-              <h1 className="font-heading font-black tracking-tight text-2xl sm:text-4xl lg:text-5xl leading-tight">
-                <span className={themeStyles.sloganPrefix}>{activeCity.phrasePrefix} </span>
-                <span className={`inline-block underline decoration-[#B45309] decoration-4 underline-offset-4 ${themeStyles.demonymText}`}>
+              <h1 className="font-['Montserrat'] font-black tracking-tight text-2xl sm:text-4xl lg:text-5xl leading-tight">
+                <span className={themeStyles.sloganPrefix}>I AM A PROUD </span>
+                <span className={`inline-block underline decoration-[#008080] dark:decoration-[#CCFF00] decoration-4 underline-offset-4 ${themeStyles.demonymText}`}>
                   {activeCity.demonym}
                 </span>
               </h1>
+              
+              <div className="flex items-center space-x-2 text-xs sm:text-sm md:text-base font-extrabold tracking-wide opacity-95 font-['Montserrat']">
+                <Sparkles className="w-4 h-4 shrink-0 animate-pulse text-[#008080] dark:text-[#CCFF00]" />
+                <span className="italic">"{activeCity.inspirationalSlogan}"</span>
+              </div>
+
+              {/* Cultural Heritage & Traditional Values Section */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-1 font-['Montserrat']">
+                <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/20 dark:border-white/10 shadow-sm">
+                  <History className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00] shrink-0" />
+                  <span><strong>Cultural Heritage:</strong> {activeCity.culturalHeritage}</span>
+                </div>
+                <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/20 dark:border-white/10 shadow-sm">
+                  <Landmark className="w-3.5 h-3.5 text-[#008080] dark:text-[#CCFF00] shrink-0" />
+                  <span><strong>Heritage Monuments:</strong> {activeCity.culturalLandmarks}</span>
+                </div>
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
 
+
+
         {/* Bottom Interactive Call-to-Action Bar */}
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-black/10 dark:border-white/10">
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-black/10 dark:border-white/10 font-['Montserrat']">
           <div className="flex items-center space-x-2 text-xs font-bold opacity-90">
-            <Compass className="w-4 h-4 text-[#B45309]" />
+            <Compass className="w-4 h-4 text-[#008080] dark:text-[#CCFF00]" />
             <span>24/7 Municipal Service Response Active</span>
           </div>
 

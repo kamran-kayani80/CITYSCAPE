@@ -211,15 +211,15 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12">
       {/* Top Value Banner */}
-      <div className="p-6 sm:p-8 bg-gradient-to-br from-[#1c1a3b] via-indigo-950 to-slate-900 text-white rounded-3xl shadow-xl border border-indigo-900/60 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="p-6 sm:p-8 bg-[#003333] text-white rounded-3xl shadow-xl border border-[#008080]/60 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 font-['Montserrat']">
         <div className="space-y-2 max-w-2xl relative z-10">
           <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-amber-300" />
+            <span className="px-3 py-1 bg-[#CCFF00]/20 text-[#CCFF00] border border-[#CCFF00]/40 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-[#CCFF00]" />
               CIVIC JOURNAL & THOUGHT LEADERSHIP
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-white">
+          <h1 className="text-2xl sm:text-3xl font-['Montserrat'] font-black tracking-tight text-white">
             Community Voices & Guest Journal
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -229,21 +229,21 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
         <button
           onClick={() => setIsContactModalOpen(true)}
-          className="relative z-10 px-5 py-3.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-400/20 transition-all cursor-pointer shrink-0 flex items-center space-x-2"
+          className="relative z-10 px-5 py-3.5 bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-[#CCFF00]/20 transition-all cursor-pointer shrink-0 flex items-center space-x-2"
         >
           <Mail className="w-4 h-4 text-slate-950" />
           <span>Contact for Guest Posts</span>
         </button>
 
         {/* Decorative Background Accent */}
-        <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-[#008080]/20 rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* FEATURED EDITORIAL BANNER */}
       {featuredPost && (
         <div
           onClick={() => setSelectedPost(featuredPost)}
-          className="group relative rounded-3xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 cursor-pointer grid grid-cols-1 lg:grid-cols-12 gap-0 hover:shadow-2xl transition-all"
+          className="group relative rounded-3xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 cursor-pointer grid grid-cols-1 lg:grid-cols-12 gap-0 hover:shadow-2xl transition-all font-['Montserrat']"
         >
           <div className="lg:col-span-7 relative h-64 sm:h-80 lg:h-auto overflow-hidden">
             <img
@@ -252,8 +252,8 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute top-4 left-4">
-              <span className="px-3 py-1 bg-indigo-700 text-white font-black text-[10px] uppercase tracking-wider rounded-xl shadow-md flex items-center gap-1">
-                <Award className="w-3 h-3 text-amber-300" />
+              <span className="px-3 py-1 bg-[#008080] text-white font-black text-[10px] uppercase tracking-wider rounded-xl shadow-md flex items-center gap-1">
+                <Award className="w-3 h-3 text-[#CCFF00]" />
                 Featured Editorial
               </span>
             </div>
@@ -262,7 +262,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
           <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-xs">
-                <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 font-bold rounded-lg text-[10px] uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 bg-[#008080]/10 text-[#008080] dark:bg-[#008080]/20 dark:text-[#CCFF00] font-bold rounded-lg text-[10px] uppercase tracking-wider">
                   {featuredPost.category}
                 </span>
                 <span className="text-slate-400">•</span>
@@ -272,7 +272,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                 </span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-heading font-black text-[#1c1a3b] dark:text-white group-hover:text-indigo-600 transition-colors leading-tight">
+              <h2 className="text-xl sm:text-2xl font-['Montserrat'] font-black text-[#1A1A1A] dark:text-white group-hover:text-[#008080] transition-colors leading-tight">
                 {featuredPost.title}
               </h2>
 
@@ -286,20 +286,20 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                 <img
                   src={featuredPost.authorAvatar}
                   alt={featuredPost.authorName}
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/30"
+                  className="w-9 h-9 rounded-full object-cover ring-2 ring-[#008080]/30"
                 />
                 <div>
-                  <p className="text-xs font-bold text-[#1c1a3b] dark:text-white flex items-center gap-1">
+                  <p className="text-xs font-bold text-[#1A1A1A] dark:text-white flex items-center gap-1">
                     {featuredPost.authorName}
                     {featuredPost.isVerifiedAuthor && (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 fill-indigo-100" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#008080] fill-[#008080]/20" />
                     )}
                   </p>
                   <p className="text-[10px] text-slate-500">{featuredPost.authorTitle}</p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600">
+              <div className="flex items-center space-x-2 text-xs font-bold text-[#008080]">
                 <span>Read Story</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -309,7 +309,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
       )}
 
       {/* FILTER & SEARCH ROW */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-white dark:bg-slate-900 rounded-3xl shadow-md border border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-white dark:bg-slate-900 rounded-3xl shadow-md border border-slate-200 dark:border-slate-800 font-['Montserrat']">
         {/* Category Pills */}
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
           {categories.map((cat) => (
@@ -318,7 +318,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
               onClick={() => setSelectedCategory(cat)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 selectedCategory === cat
-                  ? 'bg-indigo-700 text-white shadow-xs'
+                  ? 'bg-[#008080] text-white shadow-xs font-black'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
               }`}
             >
@@ -335,13 +335,13 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search articles & authors..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#008080]"
           />
         </div>
       </div>
 
       {/* ARTICLES GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-['Montserrat']">
         {filteredPosts.map((post) => {
           const isBookmarked = bookmarkedIds.includes(post.id);
 
@@ -371,7 +371,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                   >
                     <Bookmark
                       className={`w-3.5 h-3.5 ${
-                        isBookmarked ? 'fill-indigo-600 text-indigo-600' : ''
+                        isBookmarked ? 'fill-[#008080] text-[#008080]' : ''
                       }`}
                     />
                   </button>
@@ -388,7 +388,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                     </span>
                   </div>
 
-                  <h3 className="font-heading font-extrabold text-base text-[#1c1a3b] dark:text-white group-hover:text-indigo-600 transition-colors line-clamp-2">
+                  <h3 className="font-['Montserrat'] font-extrabold text-base text-[#1A1A1A] dark:text-white group-hover:text-[#008080] transition-colors line-clamp-2">
                     {post.title}
                   </h3>
 
@@ -407,7 +407,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                     className="w-7 h-7 rounded-full object-cover"
                   />
                   <div>
-                    <p className="text-[11px] font-bold text-[#1c1a3b] dark:text-white line-clamp-1">
+                    <p className="text-[11px] font-bold text-[#1A1A1A] dark:text-white line-clamp-1">
                       {post.authorName}
                     </p>
                     <p className="text-[9px] text-slate-400 line-clamp-1">{post.authorTitle}</p>
@@ -418,11 +418,11 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                   onClick={(e) => handleLikePost(post.id, e)}
                   className={`flex items-center space-x-1 px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
                     post.userHasLiked
-                      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                      ? 'bg-[#008080]/10 text-[#008080] dark:bg-[#008080]/20 dark:text-[#CCFF00]'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
                   }`}
                 >
-                  <ThumbsUp className={`w-3.5 h-3.5 ${post.userHasLiked ? 'fill-indigo-600' : ''}`} />
+                  <ThumbsUp className={`w-3.5 h-3.5 ${post.userHasLiked ? 'fill-[#008080] text-[#008080] dark:fill-[#CCFF00] dark:text-[#CCFF00]' : ''}`} />
                   <span>{post.likesCount}</span>
                 </button>
               </div>
@@ -433,11 +433,11 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
       {/* READ FULL ARTICLE MODAL */}
       {selectedPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto font-['Montserrat']">
           <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto p-6 sm:p-8 space-y-6">
             {/* Header / Close */}
             <div className="flex items-center justify-between">
-              <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-wider rounded-xl">
+              <span className="px-3 py-1 bg-[#008080]/10 dark:bg-[#008080]/20 text-[#008080] dark:text-[#CCFF00] text-[10px] font-black uppercase tracking-wider rounded-xl">
                 {selectedPost.category}
               </span>
 
@@ -451,7 +451,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
             {/* Title & Author Meta */}
             <div className="space-y-3">
-              <h2 className="text-2xl font-heading font-black text-[#1c1a3b] dark:text-white leading-tight">
+              <h2 className="text-2xl font-['Montserrat'] font-black text-[#1A1A1A] dark:text-white leading-tight">
                 {selectedPost.title}
               </h2>
 
@@ -459,13 +459,13 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                 <img
                   src={selectedPost.authorAvatar}
                   alt={selectedPost.authorName}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-500/20"
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-[#008080]/30"
                 />
                 <div>
-                  <p className="text-xs font-extrabold text-[#1c1a3b] dark:text-white flex items-center gap-1">
+                  <p className="text-xs font-extrabold text-[#1A1A1A] dark:text-white flex items-center gap-1">
                     {selectedPost.authorName}
                     {selectedPost.isVerifiedAuthor && (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 fill-indigo-100" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#008080] fill-[#008080]/20" />
                     )}
                   </p>
                   <p className="text-[11px] text-slate-500">{selectedPost.authorTitle}</p>
@@ -504,9 +504,9 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
             <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={(e) => handleLikePost(selectedPost.id, e)}
-                className="px-4 py-2 bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center space-x-2 cursor-pointer shadow-md"
+                className="px-4 py-2 bg-[#008080] text-[#CCFF00] rounded-xl text-xs font-bold flex items-center space-x-2 cursor-pointer shadow-md hover:bg-[#006666]"
               >
-                <ThumbsUp className="w-4 h-4 fill-amber-300 text-amber-300" />
+                <ThumbsUp className="w-4 h-4 fill-[#CCFF00] text-[#CCFF00]" />
                 <span>Endorse Article ({selectedPost.likesCount})</span>
               </button>
 
@@ -527,15 +527,15 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
       {/* GUEST POST CONTACT & EMAIL PITCH MODAL */}
       {isContactModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-indigo-100 dark:border-slate-800 overflow-hidden my-auto p-6 sm:p-7 space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto font-['Montserrat']">
+          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-[#008080]/30 dark:border-slate-800 overflow-hidden my-auto p-6 sm:p-7 space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center space-x-2.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-bold shadow-md">
-                  <Mail className="w-5 h-5 text-amber-300" />
+                <div className="w-10 h-10 rounded-xl bg-[#008080] text-white flex items-center justify-center font-bold shadow-md">
+                  <Mail className="w-5 h-5 text-[#CCFF00]" />
                 </div>
                 <div>
-                  <h3 className="font-heading font-black text-base text-[#1c1a3b] dark:text-white">
+                  <h3 className="font-['Montserrat'] font-black text-base text-[#1A1A1A] dark:text-white">
                     Guest Post Submissions
                   </h3>
                   <p className="text-[11px] text-slate-500">Contact Editorial Team at contact@cityscape.solutions</p>
@@ -551,10 +551,10 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
             </div>
 
             {/* Direct Contact Callout Box */}
-            <div className="p-4 sm:p-5 bg-gradient-to-br from-indigo-950 to-slate-900 text-white rounded-2xl border border-indigo-800/80 space-y-3.5 shadow-md">
+            <div className="p-4 sm:p-5 bg-[#003333] text-white rounded-2xl border border-[#008080]/80 space-y-3.5 shadow-md">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-xs font-extrabold uppercase text-amber-300 tracking-wider flex items-center gap-1.5 mb-1">
+                  <div className="text-xs font-extrabold uppercase text-[#CCFF00] tracking-wider flex items-center gap-1.5 mb-1">
                     <Mail className="w-3.5 h-3.5" />
                     Official Submissions Email
                   </div>
@@ -570,7 +570,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
               <div className="flex flex-wrap gap-2.5 pt-1">
                 <a
                   href="mailto:contact@cityscape.solutions?subject=CITYSCAPE%20Guest%20Post%20Pitch"
-                  className="px-3.5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1.5"
+                  className="px-3.5 py-2 bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black text-xs rounded-xl shadow-xs transition-all flex items-center space-x-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Send Email to contact@cityscape.solutions</span>
@@ -578,7 +578,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
                 <button
                   onClick={handleCopyEmail}
-                  className="px-3.5 py-2 bg-indigo-900 hover:bg-indigo-800 text-indigo-100 font-bold text-xs rounded-xl border border-indigo-700 transition-all flex items-center space-x-1.5 cursor-pointer"
+                  className="px-3.5 py-2 bg-[#004d4d] hover:bg-[#006666] text-teal-100 font-bold text-xs rounded-xl border border-[#008080] transition-all flex items-center space-x-1.5 cursor-pointer"
                 >
                   {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedEmail ? 'Copied Email!' : 'Copy Email Address'}</span>
@@ -655,9 +655,9 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full py-3.5 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-2"
               >
-                <Send className="w-4 h-4 text-amber-300" />
+                <Send className="w-4 h-4 text-[#CCFF00]" />
                 <span>Send Email Pitch to contact@cityscape.solutions</span>
               </button>
             </form>

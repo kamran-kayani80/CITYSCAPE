@@ -60,6 +60,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Connection test document
+    match /test/connection {
+      allow read: if true;
+    }
+
     // Reports collection
     match /reports/{reportId} {
       allow read: if true;
