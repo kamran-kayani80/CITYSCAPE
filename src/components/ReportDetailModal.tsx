@@ -28,6 +28,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { formatTimeAgo, formatFullDate } from '../lib/utils';
 import { downloadReportPDF } from '../lib/pdfExporter';
 import { AiForensicModal } from './AiForensicModal';
+import { ReportMapDirections } from './ReportMapDirections';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
 
@@ -322,6 +323,9 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               <span>Inspect Forensics</span>
             </button>
           </div>
+
+          {/* TURN-BY-TURN NAVIGATION & DISPATCH ROUTE ASSISTANT */}
+          <ReportMapDirections report={report} variant="full" />
 
           {/* Description & Endorse Button */}
           <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">

@@ -7,6 +7,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { formatTimeAgo } from '../lib/utils';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
+import { ReportMapDirections } from './ReportMapDirections';
 
 interface IssueListProps {
   reports: Report[];
@@ -183,6 +184,8 @@ export const IssueList: React.FC<IssueListProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
+                <ReportMapDirections report={report} variant="button-only" />
+
                 <span className={`px-2.5 py-0.5 text-[10px] rounded-full font-black uppercase ${sevConf.colorClass}`}>
                   {sevConf.label}
                 </span>

@@ -115,9 +115,12 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
           imageBase64: imgData,
         }),
       });
-      const data = await res.json();
-      if (data.result) {
-        setForensicResult(data.result);
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data && data.result) {
+          setForensicResult(data.result);
+        }
       }
     } catch (err) {
       console.error('Forensic scan error:', err);
@@ -168,14 +171,17 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
         }),
       });
 
-      const data = await res.json();
-      if (data.result) {
-        const result: AIAnalysisResult = data.result;
-        setAiAnalysisResult(result);
-        if (result.title) setTitle(result.title);
-        if (result.category) setCategory(result.category);
-        if (result.severity) setSeverity(result.severity);
-        if (result.description) setDescription(result.description);
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data && data.result) {
+          const result: AIAnalysisResult = data.result;
+          setAiAnalysisResult(result);
+          if (result.title) setTitle(result.title);
+          if (result.category) setCategory(result.category);
+          if (result.severity) setSeverity(result.severity);
+          if (result.description) setDescription(result.description);
+        }
       }
     } catch (err) {
       console.error('AI Scan Error:', err);

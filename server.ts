@@ -26,7 +26,8 @@ import {
 const app = express();
 const PORT = 3000;
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // In-memory data store with initial seed data
 let reports: Report[] = [...INITIAL_REPORTS];
@@ -1463,6 +1464,18 @@ app.get('/api/hashtags/:tag', (req, res) => {
     reports: matchingReports,
     totalVolume: matchingReports.length,
   });
+});
+
+// Global JSON error handler for Express middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err) {
+    console.error("API Body Parser / Server Error:", err.message);
+    if (err.type === 'entity.too.large' || err.status === 413) {
+      return res.status(413).json({ error: "Payload entity too large." });
+    }
+    return res.status(err.status || 500).json({ error: err.message || "Internal server error" });
+  }
+  next();
 });
 
 // ==========================================

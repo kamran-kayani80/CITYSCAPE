@@ -17,6 +17,7 @@ import {
 import { Report, ReportStatus } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 import { CategoryIcon } from './CategoryIcon';
+import { ReportMapDirections } from './ReportMapDirections';
 import { readFileAsBase64, formatTimeAgo } from '../lib/utils';
 
 interface AdminDashboardProps {
@@ -229,6 +230,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </div>
                         </div>
 
+                        {/* Quick Turn-by-Turn Directions Launcher for Field Crew */}
+                        <ReportMapDirections report={report} variant="compact" />
+
                         {report.officialNote && (
                           <p className="text-[10px] text-amber-900 bg-amber-100/80 p-2 rounded-xl line-clamp-2 border border-amber-200/80 font-bold">
                             Note: {report.officialNote}
@@ -274,6 +278,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             <form onSubmit={handleSaveStatus} className="p-5 space-y-4 text-xs">
+              {/* Field Crew Navigation & Dispatch Map */}
+              <ReportMapDirections report={selectedReportForEdit} variant="full" />
+
               <div>
                 <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Change Issue Status

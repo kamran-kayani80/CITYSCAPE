@@ -40,6 +40,7 @@ import {
   Camera,
   FileText
 } from 'lucide-react';
+import { CityscapeLogo } from './CityscapeLogo';
 
 // Primary & Secondary Brand Colors (Matching Pages 11 & 12 Guidelines)
 interface ColorToken {
@@ -1046,12 +1047,8 @@ export const BrandIdentitySystem: React.FC = () => {
                 <span className="bg-[#008080] text-[#CCFF00] font-black text-xs px-3 py-1 rounded-full">Official Spec 1.0</span>
               </div>
 
-              <div className="text-center space-y-4 py-8 bg-[#1A1A1A] text-white rounded-2xl p-8 border-2 border-[#CCFF00]/40">
-                <div className="w-24 h-24 mx-auto bg-[#008080] rounded-3xl p-4 flex items-center justify-center border-2 border-[#CCFF00]">
-                  <Leaf className="w-16 h-16 text-[#CCFF00]" strokeWidth={2.5} />
-                </div>
-                <h1 className="text-4xl font-black font-['Montserrat'] tracking-tight">CITYSCAPE</h1>
-                <p className="text-sm text-[#CCFF00] font-bold font-['Montserrat'] uppercase tracking-widest">A Community Civic Engagement Platform</p>
+              <div className="text-center space-y-6 py-12 bg-[#0A2540] text-white rounded-3xl p-8 border-2 border-[#008080] shadow-2xl flex flex-col items-center justify-center">
+                <CityscapeLogo variant="dark" size="xl" showTagline={true} />
               </div>
             </div>
           </div>
@@ -1062,15 +1059,54 @@ export const BrandIdentitySystem: React.FC = () => {
         {/* ========================================================= */}
         {activeTab === 'logo' && (
           <div className="space-y-8 animate-fadeIn">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border-2 border-slate-300 dark:border-slate-800 shadow-xl space-y-6">
-              <h2 className="text-2xl font-black font-['Montserrat']">Core Logo Mark & Structure</h2>
-              <div className="p-12 bg-[#1A1A1A] rounded-2xl flex items-center justify-center">
-                <svg className="w-full max-w-sm h-32" viewBox="0 0 340 100" fill="none">
-                  <path d="M 20 80 L 35 80 L 35 50 L 50 50 L 50 35 L 65 35 L 65 60 L 75 60 L 75 20 L 95 20 L 95 65 L 110 65 L 110 30 L 125 30 L 125 80" stroke="#008080" strokeWidth="4.5" fill="none" />
-                  <path d="M 125 80 Q 140 80 155 60 L 175 40 L 195 70 L 215 30 L 235 60" stroke="#CCFF00" strokeWidth="4.5" fill="none" />
-                  <circle cx="215" cy="30" r="8" fill="#CCFF00" />
-                  <text x="20" y="98" fill="#FFFFFF" fontSize="24" fontWeight="900" fontFamily="Montserrat">CITYSCAPE</text>
-                </svg>
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border-2 border-slate-300 dark:border-slate-800 shadow-xl space-y-8">
+              <div>
+                <span className="text-xs font-mono font-extrabold text-[#008080] uppercase tracking-wider">Page 10 • Core Logo Structure</span>
+                <h2 className="text-3xl font-black font-['Montserrat'] text-[#1A1A1A] dark:text-white mt-1">
+                  Core Logo Structure & Geometric Specifications
+                </h2>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 max-w-3xl leading-relaxed">
+                  The dynamic cityscape-network structure fuses an urban skyline icon with a community mesh network, symbolizing how technology and citizens unite for responsive public administration.
+                </p>
+              </div>
+
+              {/* Light & Dark Logo Variants Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Light Surface Variant */}
+                <div className="p-10 bg-[#F8FAFC] rounded-3xl border-2 border-slate-300 flex flex-col items-center justify-center space-y-4 shadow-md">
+                  <span className="text-xs font-mono font-black text-slate-500 uppercase tracking-wider">Light Surface Variant</span>
+                  <CityscapeLogo variant="full" size="lg" showTagline={true} />
+                </div>
+
+                {/* Dark Surface Variant */}
+                <div className="p-10 bg-[#0A2540] rounded-3xl border-2 border-slate-800 flex flex-col items-center justify-center space-y-4 shadow-md">
+                  <span className="text-xs font-mono font-black text-teal-300 uppercase tracking-wider">Dark Surface Variant (Civic Navy)</span>
+                  <CityscapeLogo variant="dark" size="lg" showTagline={true} />
+                </div>
+              </div>
+
+              {/* Logo Structure Color Spec Breakdown */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-200 dark:border-slate-800 text-xs font-['Montserrat']">
+                <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
+                  <div className="w-4 h-4 rounded-full bg-[#0052CC]" />
+                  <h4 className="font-bold text-slate-900 dark:text-white">Progressive Blue</h4>
+                  <p className="text-[11px] text-slate-500">Skyline Outline & Municipal Structure</p>
+                </div>
+                <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
+                  <div className="w-4 h-4 rounded-full bg-[#008080]" />
+                  <h4 className="font-bold text-slate-900 dark:text-white">Community Teal</h4>
+                  <p className="text-[11px] text-slate-500">Citizen Nodes & Mesh Connections</p>
+                </div>
+                <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
+                  <div className="w-4 h-4 rounded-full bg-[#FF5A36]" />
+                  <h4 className="font-bold text-slate-900 dark:text-white">Engaged Coral</h4>
+                  <p className="text-[11px] text-slate-500">Energy & Resident Participation</p>
+                </div>
+                <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
+                  <div className="w-4 h-4 rounded-full bg-[#64748B]" />
+                  <h4 className="font-bold text-slate-900 dark:text-white">Neutral Gray</h4>
+                  <p className="text-[11px] text-slate-500">Tagline & Secondary Copy</p>
+                </div>
               </div>
             </div>
           </div>

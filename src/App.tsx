@@ -190,19 +190,27 @@ export default function App() {
         body: JSON.stringify(newReportData),
       });
 
-      if (!res.ok) throw new Error('Failed to create report');
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      let data: any = null;
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      }
 
-      if (data.report) {
+      if (!res.ok) {
+        const errorMsg = data?.error || `Server error (${res.status})`;
+        throw new Error(errorMsg);
+      }
+
+      if (data && data.report) {
         showToast('🎉 Issue Report Submitted Successfully!');
         fetchReports();
         fetchStats();
         // Select newly created report to center map
         setSelectedReport(data.report);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Create report failed', err);
-      alert('Failed to submit report. Please try again.');
+      alert(`Failed to submit report: ${err.message || 'Please try again.'}`);
     }
   };
 

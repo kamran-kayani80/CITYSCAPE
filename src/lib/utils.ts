@@ -28,12 +28,68 @@ export function formatFullDate(isoString: string): string {
   });
 }
 
-// Convert image file to compressed base64 string
-export function readFileAsBase64(file: File): Promise<string> {
+// Convert image file to compressed base64 string using HTML5 Canvas scaling
+export function readFileAsBase64(file: File, maxDimension = 1200, quality = 0.82): Promise<string> {
   return new Promise((resolve, reject) => {
+    // If not an image, use standard FileReader
+    if (!file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const img = new Image();
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
+
+    reader.onload = (e) => {
+      img.src = e.target?.result as string;
+    };
     reader.onerror = error => reject(error);
+
+    img.onload = () => {
+      try {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(img.src);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedBase64);
+      } catch (err) {
+        // Fallback to original image data URL if canvas fails
+        resolve(img.src);
+      }
+    };
+
+    img.onerror = () => {
+      // Fallback
+      const fallbackReader = new FileReader();
+      fallbackReader.onload = () => resolve(fallbackReader.result as string);
+      fallbackReader.onerror = err => reject(err);
+      fallbackReader.readAsDataURL(file);
+    };
+
     reader.readAsDataURL(file);
   });
 }

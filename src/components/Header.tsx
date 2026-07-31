@@ -26,6 +26,7 @@ import {
   Bell,
   Palette,
 } from 'lucide-react';
+import { CityscapeLogo } from './CityscapeLogo';
 import { GoogleAuthButton } from './GoogleAuthButton';
 import { ReportFilter, ReportCategory, ReportStatus, SeverityLevel, UserProfile, AppViewMode } from '../types';
 import { CATEGORY_CONFIG, STATUS_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
@@ -72,32 +73,12 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Brand Logo & Name */}
           <div
             onClick={() => setActiveView('map')}
-            className="flex items-center space-x-3 shrink-0 cursor-pointer group"
+            className="flex items-center space-x-2 shrink-0 cursor-pointer group py-1"
           >
-            {/* Official Cityscape Continuous Skyline & Citizen Node Network Logo */}
-            <div className="relative w-11 h-11 bg-[#008080] rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all border border-[#CCFF00]/40 ring-2 ring-[#008080]/30 overflow-hidden p-1">
-              <svg className="w-full h-full" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M 5 65 L 15 65 L 15 40 L 25 40 L 25 25 L 35 25 L 35 45 L 45 45 L 45 15 L 60 15 L 60 50 L 70 50 L 70 20 L 80 20 L 80 65" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <path d="M 80 65 Q 85 65 90 45 L 95 30" stroke="#CCFF00" strokeWidth="4" strokeLinecap="round" fill="none" />
-                <circle cx="90" cy="45" r="4.5" fill="#CCFF00" />
-                <circle cx="95" cy="30" r="4.5" fill="#CCFF00" />
-                <circle cx="60" cy="15" r="3.5" fill="#CCFF00" />
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <span className="font-['Montserrat'] font-black text-xl sm:text-2xl tracking-tight uppercase text-[#1A1A1A] dark:text-white">
-                  CITYSCAPE
-                </span>
-                <span className="hidden lg:inline-block px-1.5 py-0.2 text-[8px] font-black uppercase tracking-widest rounded-md bg-[#008080] text-[#CCFF00] border border-[#CCFF00]/40">
-                  Official
-                </span>
-              </div>
-              <span className="text-[10px] font-bold text-[#008080] dark:text-[#CCFF00] -mt-0.5 tracking-tight flex items-center space-x-1">
-                <span>Civic Engagement Platform</span>
-                <span className="text-[#008080] font-extrabold">•</span>
-              </span>
-            </div>
+            <CityscapeLogo size="md" showTagline={true} />
+            <span className="hidden xl:inline-block px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md bg-[#008080] text-[#CCFF00] border border-[#CCFF00]/40 self-start mt-1">
+              Official
+            </span>
           </div>
 
           {/* Search bar for map/feed view */}
@@ -356,20 +337,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
 
-            <button
-              onClick={() => setActiveView('brand')}
-              className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg transition-all cursor-pointer shrink-0 border ${
-                activeView === 'brand'
-                  ? 'bg-[#008080] text-white shadow-xs border-[#008080] font-extrabold ring-2 ring-[#CCFF00]'
-                  : 'bg-amber-100/90 text-[#008080] hover:bg-amber-200 border-amber-300 font-extrabold'
-              }`}
-            >
-              <Palette className="w-3.5 h-3.5 text-[#008080]" />
-              <span className="font-extrabold">Brand Identity</span>
-              <span className="bg-[#CCFF00] text-slate-950 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
-                SYSTEM
-              </span>
-            </button>
+
           </nav>
 
 

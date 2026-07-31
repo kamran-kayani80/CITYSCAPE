@@ -1,6 +1,64 @@
 import jsPDF from 'jspdf';
 import { Report } from '../types';
 
+/**
+ * Draws the official Cityscape Skyline & Community Mesh Network vector logo onto a jsPDF instance.
+ */
+function drawCityscapeHeaderLogo(doc: jsPDF, startX: number, startY: number) {
+  // --- Skyline Buildings (Progressive Blue / Cyan) ---
+  doc.setDrawColor(56, 189, 248); // #38BDF8
+  doc.setLineWidth(0.8);
+
+  // Building 1 (Far left low-rise)
+  doc.line(startX + 2, startY + 16, startX + 2, startY + 9);
+  doc.line(startX + 2, startY + 9, startX + 6, startY + 9);
+  doc.line(startX + 6, startY + 9, startX + 6, startY + 16);
+
+  // Building 2 (Mid-rise with angled roof)
+  doc.line(startX + 6, startY + 16, startX + 6, startY + 6);
+  doc.line(startX + 6, startY + 6, startX + 9, startY + 3);
+  doc.line(startX + 9, startY + 3, startX + 12, startY + 6);
+  doc.line(startX + 12, startY + 6, startX + 12, startY + 16);
+
+  // Building 3 (Spire tower)
+  doc.line(startX + 12, startY + 16, startX + 12, startY + 3);
+  doc.line(startX + 12, startY + 3, startX + 15, startY + 0);
+  doc.line(startX + 15, startY + 0, startX + 18, startY + 3);
+  doc.line(startX + 18, startY + 3, startX + 18, startY + 16);
+
+  // Baseline
+  doc.line(startX + 0, startY + 16, startX + 36, startY + 16);
+
+  // --- Community Mesh Network (Coral & Teal) ---
+  doc.setDrawColor(255, 90, 54); // Engaged Coral
+  doc.setLineWidth(0.6);
+  doc.line(startX + 18, startY + 9, startX + 23, startY + 4);
+  doc.line(startX + 23, startY + 4, startX + 29, startY + 1);
+  doc.line(startX + 29, startY + 1, startX + 34, startY + 5);
+  doc.line(startX + 34, startY + 5, startX + 32, startY + 13);
+
+  doc.setDrawColor(45, 212, 191); // Community Teal
+  doc.line(startX + 23, startY + 4, startX + 32, startY + 13);
+  doc.line(startX + 29, startY + 1, startX + 25, startY + 12);
+
+  // Nodes
+  doc.setFillColor(56, 189, 248);
+  doc.circle(startX + 18, startY + 9, 1.1, 'F');
+  doc.setFillColor(255, 90, 54);
+  doc.circle(startX + 23, startY + 4, 1.2, 'F');
+  doc.setFillColor(45, 212, 191);
+  doc.circle(startX + 29, startY + 1, 1.3, 'F');
+  doc.setFillColor(255, 90, 54);
+  doc.circle(startX + 34, startY + 5, 1.2, 'F');
+  doc.setFillColor(45, 212, 191);
+  doc.circle(startX + 32, startY + 13, 1.1, 'F');
+  doc.setFillColor(56, 189, 248);
+  doc.circle(startX + 25, startY + 12, 1.1, 'F');
+}
+
+/**
+ * Downloads a Tax Invoice / Receipt styled in strict accordance with Cityscape Brand Guidelines.
+ */
 export function downloadInvoicePDF(
   invoiceNumber = 'INV-2026-0725',
   amount = '25.00',
@@ -14,103 +72,117 @@ export function downloadInvoicePDF(
       day: 'numeric',
     });
 
-    // Header Dark Banner
-    doc.setFillColor(30, 27, 75); // Dark Indigo
-    doc.rect(0, 0, 210, 42, 'F');
+    // --- HEADER BANNER: Civic Navy (#0A2540) ---
+    doc.setFillColor(10, 37, 64);
+    doc.rect(0, 0, 210, 48, 'F');
 
-    // Branding Title
+    // Vector Brand Mark
+    drawCityscapeHeaderLogo(doc, 14, 12);
+
+    // Brand Name: CITYSCAPE
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(22);
-    doc.text('CITYSCAPE SOLUTIONS', 15, 22);
+    doc.text('CITYSCAPE', 56, 22);
 
-    doc.setFontSize(10);
+    // Brand Slogan (Mandatory Brand Language)
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('Municipal Desk Enterprise SaaS Tax Invoice', 15, 32);
+    doc.setTextColor(204, 255, 0); // Lime Highlight (#CCFF00)
+    doc.text('Inclusive by design. Exclusive by experience.', 56, 29);
 
-    // Invoice Status Badge
-    doc.setFillColor(16, 185, 129); // Emerald
-    doc.roundedRect(145, 14, 50, 14, 3, 3, 'F');
-    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8.5);
+    doc.setTextColor(226, 232, 240);
+    doc.text('Municipal Desk Enterprise SaaS Tax Invoice', 56, 36);
+
+    // Paid / Active Badge (Community Teal)
+    doc.setFillColor(0, 128, 128); // #008080 Community Teal
+    doc.roundedRect(142, 15, 53, 16, 3, 3, 'F');
+    doc.setTextColor(204, 255, 0); // Lime Text
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('PAID / ACTIVE', 152, 23);
+    doc.text('PAID / MUNICIPAL VERIFIED', 145, 25);
 
-    // Meta Details Section
-    doc.setTextColor(30, 41, 59);
+    // --- DOCUMENT BODY SECTION ---
+    doc.setTextColor(17, 24, 39); // Charcoal Dark (#111827)
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text(`INVOICE NUMBER: ${invoiceNumber}`, 15, 56);
+    doc.text(`INVOICE REFERENCE: ${invoiceNumber}`, 15, 60);
 
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Date of Issue: ${today}`, 15, 65);
-    doc.text(`Billing Contact: ${email}`, 15, 73);
-    doc.text(`Payment Gateway: Stripe / Municipal P-Card Authorization`, 15, 81);
-    doc.text(`Tax EIN Reference: XX-XXX9042 (Municipal Tax Exempt Verified)`, 15, 89);
+    doc.setTextColor(51, 65, 85);
+    doc.text(`Date of Issue: ${today}`, 15, 68);
+    doc.text(`Billing Contact: ${email}`, 15, 75);
+    doc.text(`Municipal Department: Public Works & Civic Administration Desk`, 15, 82);
+    doc.text(`Tax EIN Reference: XX-XXX9042 (Municipal Exemption Verified)`, 15, 89);
 
-    // Divider Line
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.5);
+    // Divider Line (Outline Slate)
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.6);
     doc.line(15, 96, 195, 96);
 
-    // Table Header
-    doc.setFillColor(241, 245, 249);
-    doc.rect(15, 102, 180, 10, 'F');
+    // --- TABLE HEADER: Warm Canvas Surface (#F8FAFC) ---
+    doc.setFillColor(248, 250, 252);
+    doc.rect(15, 102, 180, 11, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(51, 65, 85);
-    doc.text('Subscription Description', 20, 108.5);
-    doc.text('Qty', 140, 108.5);
-    doc.text('Total', 170, 108.5);
+    doc.setTextColor(10, 37, 64); // Civic Navy
+    doc.text('Subscription / Service Description', 20, 109);
+    doc.text('Qty', 142, 109);
+    doc.text('Total', 172, 109);
 
     // Table Item Line
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(30, 41, 59);
-    doc.text('CITYSCAPE Municipal Desk SaaS Plan (Monthly)', 20, 122);
-    doc.text('1', 142, 122);
-    doc.text(`$${amount} USD`, 170, 122);
+    doc.setTextColor(17, 24, 39);
+    doc.text('CITYSCAPE Municipal Desk SaaS Plan (Monthly)', 20, 123);
+    doc.text('1', 144, 123);
+    doc.text(`$${amount} USD`, 172, 123);
 
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(100, 116, 139);
-    doc.text('• Unlimited Emergency Triage Desk & Kanban Work Orders', 20, 130);
-    doc.text('• AI Fraud Shield & Deepfake Photo Verification', 20, 136);
-    doc.text('• Real-time Resident Communications & Official Seal Proofs', 20, 142);
+    doc.text('• Unlimited Emergency Triage Desk & Kanban Neighborhood Work Orders', 20, 131);
+    doc.text('• AI Fraud Shield & Forensic Image Authenticity Verification', 20, 137);
+    doc.text('• Real-time Resident Communications & Official Civic Seal Proofs', 20, 143);
 
-    doc.line(15, 150, 195, 150);
+    doc.line(15, 152, 195, 152);
 
-    // Summary Totals
-    doc.setFontSize(11);
+    // --- SUMMARY TOTALS ---
+    doc.setFontSize(10.5);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(30, 41, 59);
-    doc.text(`Subtotal: $${amount} USD`, 135, 162);
-    doc.text(`Sales Tax / Municipal Fee: $0.00 USD`, 120, 170);
-    doc.setFontSize(13);
-    doc.setTextColor(79, 70, 229); // Indigo
-    doc.text(`Total Paid: $${amount} USD`, 135, 182);
+    doc.setTextColor(17, 24, 39);
+    doc.text(`Subtotal: $${amount} USD`, 135, 164);
+    doc.text(`Sales Tax / Municipal Fee: $0.00 USD`, 120, 172);
 
-    // Verification Seal Box
+    doc.setFontSize(13);
+    doc.setTextColor(10, 37, 64); // Civic Navy
+    doc.text(`Total Paid: $${amount} USD`, 135, 184);
+
+    // --- OFFICIAL BRAND SEAL BOX ---
     doc.setFillColor(248, 250, 252);
     doc.setDrawColor(203, 213, 225);
-    doc.roundedRect(15, 200, 180, 45, 4, 4, 'FD');
+    doc.roundedRect(15, 202, 180, 48, 4, 4, 'FD');
+
+    // Accent left stripe (Action Amber #B45309)
+    doc.setFillColor(180, 83, 9);
+    doc.rect(15, 202, 4, 48, 'F');
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(15, 23, 42);
-    doc.text('CITYSCAPE OFFICIAL MUNICIPAL VERIFICATION SEAL', 22, 212);
+    doc.setTextColor(10, 37, 64);
+    doc.text('CITYSCAPE OFFICIAL MUNICIPAL VERIFICATION SEAL', 24, 214);
 
     doc.setFontSize(8.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(71, 85, 105);
-    doc.text('This document serves as an official receipt for municipal software procurement.', 22, 220);
-    doc.text('Generated electronically under SAM.gov clearance protocol.', 22, 226);
-    doc.text('Contact Support: contact@cityscape.solutions | https://cityscape.solutions', 22, 232);
+    doc.text('This document serves as an official receipt for municipal software procurement.', 24, 222);
+    doc.text('Generated under SAM.gov clearance protocol • Inclusive by design. Exclusive by experience.', 24, 228);
+    doc.text('Contact Support: contact@cityscape.solutions | https://cityscape.solutions', 24, 234);
 
-    // Trigger download
     doc.save(`${invoiceNumber}.pdf`);
   } catch (error) {
     console.error('PDF Invoice Generation Error:', error);
-    // Robust Blob Fallback
-    const fallbackText = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 120 >>\nstream\nBT /F1 18 Tf 50 700 Td (CITYSCAPE Municipal Invoice #${invoiceNumber}) Tj 0 -30 Td (Amount Paid: $${amount} USD) Tj ET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000244 00000 n\n0000000414 00000 n\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n485\n%%EOF`;
+    // Blob Fallback
+    const fallbackText = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 150 >>\nstream\nBT /F1 18 Tf 50 700 Td (CITYSCAPE Municipal Invoice #${invoiceNumber}) Tj 0 -25 Td (Inclusive by design. Exclusive by experience.) Tj 0 -25 Td (Amount Paid: $${amount} USD) Tj ET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000244 00000 n\n0000000444 00000 n\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n515\n%%EOF`;
     const blob = new Blob([fallbackText], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -123,68 +195,160 @@ export function downloadInvoicePDF(
   }
 }
 
+/**
+ * Downloads a Neighborhood Civic Report PDF styled in strict accordance with Cityscape Brand Guidelines.
+ */
 export function downloadReportPDF(report: Report) {
   try {
     const doc = new jsPDF();
 
-    // Header Banner
-    doc.setFillColor(30, 27, 75);
-    doc.rect(0, 0, 210, 38, 'F');
+    // --- HEADER BANNER: Civic Navy (#0A2540) ---
+    doc.setFillColor(10, 37, 64);
+    doc.rect(0, 0, 210, 48, 'F');
 
+    // Vector Brand Mark
+    drawCityscapeHeaderLogo(doc, 14, 12);
+
+    // Title: CITYSCAPE
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.text('CIVIC INCIDENT REPORT', 15, 20);
+    doc.setFontSize(22);
+    doc.text('CITYSCAPE', 56, 22);
 
+    // Slogan: Inclusive by design. Exclusive by experience.
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text(`CITYSCAPE Infrastructure Tracking System • ID: ${report.id}`, 15, 29);
+    doc.setTextColor(204, 255, 0); // Lime Highlight
+    doc.text('Inclusive by design. Exclusive by experience.', 56, 29);
 
-    // Content
+    doc.setFontSize(8.5);
+    doc.setTextColor(226, 232, 240);
+    doc.text(`Official Neighborhood Civic Report • Ref ID: ${report.id.slice(0, 8)}`, 56, 36);
+
+    // Official Badge
+    doc.setFillColor(0, 128, 128); // Community Teal
+    doc.roundedRect(138, 15, 58, 16, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text('OFFICIAL CIVIC REPORT', 142, 25);
+
+    // --- REPORT CONTENT ---
+    doc.setTextColor(10, 37, 64); // Civic Navy
+    doc.setFontSize(15);
+    doc.setFont('helvetica', 'bold');
+
+    const splitTitle = doc.splitTextToSize(report.title, 180);
+    doc.text(splitTitle, 15, 62);
+
+    let currentY = 62 + splitTitle.length * 7;
+
+    // Key Value Info Card Box (Warm Canvas #F8FAFC)
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(15, currentY, 180, 42, 3, 3, 'FD');
+
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 24, 39);
+
+    doc.text(`Category: ${report.category}`, 22, currentY + 10);
+    doc.text(`Severity Level: ${report.severity}`, 105, currentY + 10);
+
+    doc.text(`Status: ${report.status}`, 22, currentY + 20);
+    const expectedDays = report.slaHoursTarget ? Math.round(report.slaHoursTarget / 24) : 3;
+    doc.text(`Expected Resolution Time: ${expectedDays} Days`, 105, currentY + 20);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(71, 85, 105);
+    doc.text(`Location: ${report.addressText || 'District Ward Boundary'}`, 22, currentY + 30);
+    doc.text(`Reported By: ${report.userName} (${report.isGuest ? 'Community Guest' : 'Verified Resident'})`, 22, currentY + 37);
+
+    currentY += 52;
+
+    // Divider Line
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.5);
+    doc.line(15, currentY, 195, currentY);
+
+    currentY += 10;
+
+    // Issue Description Section
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(10, 37, 64);
+    doc.text('Neighborhood Issue Description:', 15, currentY);
+
+    currentY += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
     doc.setTextColor(30, 41, 59);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text(report.title, 15, 50);
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Category: ${report.category} | Severity: ${report.severity} | Status: ${report.status}`, 15, 58);
-    doc.text(`Location: ${report.addressText}`, 15, 65);
-    doc.text(`Submitted By: ${report.userName} (${report.isGuest ? 'Guest' : 'Verified Resident'})`, 15, 72);
-    doc.text(`Date Filed: ${report.createdAt}`, 15, 79);
+    const splitDesc = doc.splitTextToSize(report.description || 'No detailed description provided by resident.', 180);
+    doc.text(splitDesc, 15, currentY);
 
-    doc.setDrawColor(226, 232, 240);
-    doc.line(15, 86, 195, 86);
+    currentY += splitDesc.length * 6 + 10;
 
-    doc.setFont('helvetica', 'bold');
-    doc.text('Issue Description:', 15, 95);
-    doc.setFont('helvetica', 'normal');
-
-    const splitDesc = doc.splitTextToSize(report.description || 'No description provided.', 180);
-    doc.text(splitDesc, 15, 103);
-
-    let yPos = 103 + splitDesc.length * 6;
-
+    // Official Public Works Dispatch Notes
     if (report.officialNote) {
+      doc.setFillColor(240, 253, 250); // Light Teal
+      doc.setDrawColor(0, 128, 128);
+      doc.roundedRect(15, currentY, 180, 32, 3, 3, 'FD');
+
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(79, 70, 229);
-      doc.text('Official Municipal Dispatch Notes:', 15, yPos + 10);
+      doc.setFontSize(10);
+      doc.setTextColor(0, 109, 91); // Community Teal
+      doc.text('City Team / Public Works Crew Dispatch Note:', 22, currentY + 10);
+
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(30, 41, 59);
-      const splitNote = doc.splitTextToSize(report.officialNote, 180);
-      doc.text(splitNote, 15, yPos + 18);
+      doc.setFontSize(9);
+      doc.setTextColor(17, 24, 39);
+      const splitNote = doc.splitTextToSize(report.officialNote, 168);
+      doc.text(splitNote, 22, currentY + 18);
+
+      currentY += 40;
     }
 
-    doc.save(`Incident-Report-${report.id.slice(0, 8)}.pdf`);
+    // AI Forensic Authenticity Shield Notice
+    if (report.aiForensics) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(0, 128, 128);
+      doc.text(`AI Forensic Shield: Image Authenticity ${report.aiForensics.isAiGenerated ? 'SYNTHETIC WARNING' : 'VERIFIED REAL'} (${report.aiForensics.aiProbability}% AI Probability)`, 15, currentY);
+      currentY += 10;
+    }
+
+    // Footer Verification Box
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(15, 235, 180, 42, 4, 4, 'FD');
+
+    // Action Amber stripe
+    doc.setFillColor(180, 83, 9);
+    doc.rect(15, 235, 4, 42, 'F');
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(10, 37, 64);
+    doc.text('CITYSCAPE CIVIC ENGAGEMENT PLATFORM', 24, 247);
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(71, 85, 105);
+    doc.text('Bridging the gap between residents and local municipal public administration.', 24, 255);
+    doc.text('Inclusive by design. Exclusive by experience.', 24, 261);
+    doc.text('Official Document • Cityscape Civic Network • https://cityscape.solutions', 24, 267);
+
+    doc.save(`Civic-Report-${report.id.slice(0, 8)}.pdf`);
   } catch (err) {
     console.error('PDF Report Export Error:', err);
     try {
-      const fallbackText = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 120 >>\nstream\nBT /F1 16 Tf 50 700 Td (CIVIC INCIDENT REPORT: ${report.title.replace(/[()]/g, '')}) Tj 0 -30 Td (Status: ${report.status}) Tj ET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000244 00000 n\n0000000414 00000 n\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n485\n%%EOF`;
+      const fallbackText = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 160 >>\nstream\nBT /F1 16 Tf 50 700 Td (CITYSCAPE OFFICIAL CIVIC REPORT: ${report.title.replace(/[()]/g, '')}) Tj 0 -25 Td (Inclusive by design. Exclusive by experience.) Tj 0 -25 Td (Status: ${report.status}) Tj ET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000244 00000 n\n0000000454 00000 n\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n525\n%%EOF`;
       const blob = new Blob([fallbackText], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Incident-Report-${report.id.slice(0, 8)}.pdf`;
+      link.download = `Civic-Report-${report.id.slice(0, 8)}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -194,3 +358,4 @@ export function downloadReportPDF(report: Report) {
     }
   }
 }
+
