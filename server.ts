@@ -344,69 +344,74 @@ app.get("/api/auth/me", (req, res) => {
 
 // 1. Get all reports with optional filtering, spatial radius search & sorting
 app.get("/api/reports", (req, res) => {
-  const { status, category, severity, search, sort, lat, lng, radiusKm } = req.query;
+  try {
+    const { status, category, severity, search, sort, lat, lng, radiusKm } = req.query;
 
-  let filtered = [...reports];
+    let filtered = [...reports];
 
-  if (status && status !== 'ALL') {
-    filtered = filtered.filter(r => r.status === status);
-  }
-
-  if (category && category !== 'ALL') {
-    filtered = filtered.filter(r => r.category === category);
-  }
-
-  if (severity && severity !== 'ALL') {
-    filtered = filtered.filter(r => r.severity === severity);
-  }
-
-  if (search && typeof search === 'string' && search.trim() !== '') {
-    const q = search.toLowerCase().trim();
-    filtered = filtered.filter(
-      r =>
-        r.title.toLowerCase().includes(q) ||
-        r.description.toLowerCase().includes(q) ||
-        r.addressText.toLowerCase().includes(q) ||
-        r.userName.toLowerCase().includes(q)
-    );
-  }
-
-  // Spatial radius filter leveraging geometry location coordinates
-  if (lat !== undefined && lng !== undefined && radiusKm !== undefined) {
-    const centerLat = Number(lat);
-    const centerLng = Number(lng);
-    const maxRadius = Number(radiusKm);
-
-    if (!isNaN(centerLat) && !isNaN(centerLng) && !isNaN(maxRadius)) {
-      filtered = filtered.filter(r => {
-        const dLat = ((r.latitude - centerLat) * Math.PI) / 180;
-        const dLon = ((r.longitude - centerLng) * Math.PI) / 180;
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos((centerLat * Math.PI) / 180) *
-            Math.cos((r.latitude * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
-        const distanceKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return distanceKm <= maxRadius;
-      });
+    if (status && status !== 'ALL') {
+      filtered = filtered.filter(r => r.status === status);
     }
-  }
 
-  // Sorting
-  const sortBy = (sort as string) || 'newest';
-  if (sortBy === 'newest') {
-    filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  } else if (sortBy === 'oldest') {
-    filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  } else if (sortBy === 'upvotes') {
-    filtered.sort((a, b) => b.upvotesCount - a.upvotesCount);
-  } else if (sortBy === 'severity') {
-    const severityRank: Record<SeverityLevel, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-    filtered.sort((a, b) => severityRank[b.severity] - severityRank[a.severity]);
-  }
+    if (category && category !== 'ALL') {
+      filtered = filtered.filter(r => r.category === category);
+    }
 
-  res.json({ reports: filtered, total: filtered.length });
+    if (severity && severity !== 'ALL') {
+      filtered = filtered.filter(r => r.severity === severity);
+    }
+
+    if (search && typeof search === 'string' && search.trim() !== '') {
+      const q = search.toLowerCase().trim();
+      filtered = filtered.filter(
+        r =>
+          (r.title && r.title.toLowerCase().includes(q)) ||
+          (r.description && r.description.toLowerCase().includes(q)) ||
+          (r.addressText && r.addressText.toLowerCase().includes(q)) ||
+          (r.userName && r.userName.toLowerCase().includes(q))
+      );
+    }
+
+    // Spatial radius filter leveraging geometry location coordinates
+    if (lat !== undefined && lng !== undefined && radiusKm !== undefined) {
+      const centerLat = Number(lat);
+      const centerLng = Number(lng);
+      const maxRadius = Number(radiusKm);
+
+      if (!isNaN(centerLat) && !isNaN(centerLng) && !isNaN(maxRadius)) {
+        filtered = filtered.filter(r => {
+          const dLat = (((r.latitude || 0) - centerLat) * Math.PI) / 180;
+          const dLon = (((r.longitude || 0) - centerLng) * Math.PI) / 180;
+          const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((centerLat * Math.PI) / 180) *
+              Math.cos(((r.latitude || 0) * Math.PI) / 180) *
+              Math.sin(dLon / 2) *
+              Math.sin(dLon / 2);
+          const distanceKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return distanceKm <= maxRadius;
+        });
+      }
+    }
+
+    // Sorting
+    const sortBy = (sort as string) || 'newest';
+    if (sortBy === 'newest') {
+      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortBy === 'oldest') {
+      filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortBy === 'upvotes') {
+      filtered.sort((a, b) => (b.upvotesCount || 0) - (a.upvotesCount || 0));
+    } else if (sortBy === 'severity') {
+      const severityRank: Record<SeverityLevel, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+      filtered.sort((a, b) => (severityRank[b.severity] || 0) - (severityRank[a.severity] || 0));
+    }
+
+    res.json({ reports: filtered, total: filtered.length });
+  } catch (err: any) {
+    console.error("Error fetching reports:", err);
+    res.status(500).json({ error: err.message || "Failed to fetch reports", reports: reports });
+  }
 });
 
 // Spatial PostGIS GIST index reference endpoint (ST_DWithin on geom_location)

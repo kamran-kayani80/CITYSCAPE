@@ -1,22 +1,28 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* Official Cityscape Brand Theme Variables & Styling (Evergreen Teal #008080, Electric Lime #CCFF00, Slate Black #1A1A1A, Cloud Grey #F2F2F2) */
+/* Official Cityscape Brand Theme Variables & Styling (Civic Navy #0A2540, Warm Sage Teal #006D5B, Action Amber #B45309, Warm Canvas #F8FAFC) */
 :root {
-  --bg-periwinkle: #f2f2f2;
+  --bg-periwinkle: #f8fafc;
   --bg-periwinkle-light: #ffffff;
-  --bg-periwinkle-dark: #1a1a1a;
+  --bg-periwinkle-dark: #0a2540;
   --bg-periwinkle-card: #ffffff;
   --font-display: 'Montserrat', -apple-system, sans-serif;
   --font-body: 'Montserrat', -apple-system, sans-serif;
 }
 
 body {
-  background-color: #f2f2f2;
-  color: #1a1a1a;
+  background-color: #f8fafc;
+  color: #111827;
   font-family: 'Montserrat', -apple-system, sans-serif;
   overflow-x: hidden;
   letter-spacing: -0.01em;
+}
+
+.dark body,
+html.dark body {
+  background-color: #0f172a;
+  color: #f8fafc;
 }
 
 /* Headings Typography Refinement */
@@ -26,7 +32,13 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .heading-gradient {
-  background: linear-gradient(135deg, #1a1a1a 0%, #008080 60%, #006666 100%);
+  background: linear-gradient(135deg, #0a2540 0%, #006d5b 60%, #004d40 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .heading-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #ccff00 70%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -37,89 +49,103 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   -webkit-text-fill-color: transparent;
 }
 
-/* Designer Button Styles */
+/* Designer Button Styles - High Contrast Mobile Accessible */
 .btn-primary-designer {
-  background: #008080;
+  background: #0a2540;
   color: #ccff00;
   font-family: 'Montserrat', sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  box-shadow: 0 6px 20px -2px rgba(0, 128, 128, 0.4), inset 0 1px 0 rgba(204, 255, 0, 0.35);
-  border: 1px solid rgba(204, 255, 0, 0.3);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 16px -2px rgba(10, 37, 64, 0.35);
+  border: 1.5px solid #006d5b;
+  min-height: 48px;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-primary-designer:hover {
-  background: #006666;
+  background: #006d5b;
+  color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px -2px rgba(0, 128, 128, 0.6), inset 0 1px 0 rgba(204, 255, 0, 0.5);
-  filter: brightness(1.06);
+  box-shadow: 0 8px 24px -2px rgba(0, 109, 91, 0.5);
 }
 
 .btn-primary-designer:active {
   transform: translateY(0) scale(0.97);
-  box-shadow: 0 3px 12px rgba(0, 128, 128, 0.4);
 }
 
 .btn-glow-cyan {
-  background: #008080;
+  background: #006d5b;
   color: #ffffff;
   font-family: 'Montserrat', sans-serif;
   font-weight: 800;
-  box-shadow: 0 6px 20px -2px rgba(0, 128, 128, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 20px -2px rgba(0, 109, 91, 0.45);
+  border: 1.5px solid #008080;
+  min-height: 48px;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-glow-cyan:hover {
-  background: #006666;
+  background: #0a2540;
+  color: #ccff00;
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px -2px rgba(0, 128, 128, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .btn-soft-tactile {
   background: #ffffff;
-  color: #1a1a1a;
+  color: #111827;
   font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.95);
-  border: 1.5px solid #f2f2f2;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  border: 2px solid #cbd5e1;
+  min-height: 44px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .btn-soft-tactile {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
 }
 
 .btn-soft-tactile:hover {
   transform: translateY(-1.5px);
-  box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.12), -6px -6px 16px rgba(255, 255, 255, 1);
-  color: #008080;
+  border-color: #0a2540;
+  color: #0a2540;
 }
 
 .btn-soft-tactile:active {
   transform: translateY(0) scale(0.97);
-  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .btn-amber-accent {
-  background: #008080;
-  color: #ccff00;
+  background: #b45309;
+  color: #ffffff;
   font-family: 'Montserrat', sans-serif;
-  font-weight: 800;
-  box-shadow: 0 6px 18px -2px rgba(0, 128, 128, 0.35);
-  border: 1px solid rgba(204, 255, 0, 0.4);
+  font-weight: 900;
+  box-shadow: 0 4px 16px -2px rgba(180, 83, 9, 0.4);
+  border: 1.5px solid #f59e0b;
+  min-height: 48px;
   transition: all 0.2s ease;
 }
 
 .btn-amber-accent:hover {
-  background: #006666;
+  background: #92400e;
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px -2px rgba(0, 128, 128, 0.5);
+  box-shadow: 0 8px 20px -2px rgba(146, 64, 14, 0.6);
 }
 
-/* Custom Cards */
+/* Custom Cards - High Visual Definition & High Contrast Borders */
 .soft-card {
   background: #ffffff;
-  box-shadow: 0 4px 16px rgba(26, 26, 26, 0.06);
-  border: 2px solid #f2f2f2;
+  box-shadow: 0 4px 12px rgba(10, 37, 64, 0.06);
+  border: 1.5px solid #cbd5e1;
   border-radius: 16px;
+}
+
+.dark .soft-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .soft-card-hover {
@@ -128,29 +154,42 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .soft-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0, 128, 128, 0.15);
-  border-color: #008080;
+  box-shadow: 0 12px 28px rgba(10, 37, 64, 0.12);
+  border-color: #0a2540;
+}
+
+.dark .soft-card-hover:hover {
+  border-color: #006d5b;
 }
 
 .soft-inset {
-  background: #f2f2f2;
-  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.06);
+  background: #f1f5f9;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
+}
+
+.dark .soft-inset {
+  background: #0f172a;
 }
 
 .soft-pill {
   background: #ffffff;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border-radius: 9999px;
-  border: 1.5px solid #f2f2f2;
+  border: 1.5px solid #cbd5e1;
+}
+
+.dark .soft-pill {
+  background: #1e293b;
+  border-color: #475569;
 }
 
 .dark-indigo-card {
-  background: #1a1a1a;
+  background: #0a2540;
   color: #ffffff;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  border: 2px solid #008080;
+  border: 2px solid #006d5b;
 }
 
 .glowing-bar {

@@ -456,28 +456,28 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
   // Color theme classes mapping for WCAG AAA high contrast compliance using official brand palette
   const themeStyles = {
     white: {
-      card: 'bg-white text-[#1A1A1A] border-2 border-[#F2F2F2] dark:border-slate-800 shadow-xl',
-      sloganPrefix: 'text-[#1A1A1A] dark:text-white',
-      demonymText: 'text-[#008080] dark:text-[#CCFF00]', // Evergreen Teal / Electric Lime
-      badge: 'bg-[#008080] text-white font-black',
-      wardText: 'text-slate-600 dark:text-slate-400',
-      button: 'bg-[#008080] text-[#CCFF00] hover:bg-[#006666] font-black active:scale-[0.98] border border-[#CCFF00]/40'
+      card: 'bg-white text-[#111827] border-2 border-[#CBD5E1] dark:border-slate-700 shadow-xl',
+      sloganPrefix: 'text-[#111827] dark:text-white font-black',
+      demonymText: 'text-[#006D5B] dark:text-[#CCFF00] font-black',
+      badge: 'bg-[#0A2540] text-white font-black',
+      wardText: 'text-slate-800 dark:text-slate-200 font-bold',
+      button: 'bg-[#B45309] text-white hover:bg-[#92400E] font-black active:scale-[0.98] border-2 border-amber-300 shadow-lg'
     },
     navy: {
-      card: 'bg-[#1A1A1A] text-white border-2 border-[#008080] shadow-2xl',
-      sloganPrefix: 'text-slate-100',
-      demonymText: 'text-[#CCFF00]', // High-energy Electric Lime
-      badge: 'bg-[#008080] text-[#CCFF00] border border-[#CCFF00]/30 font-black',
-      wardText: 'text-slate-300',
-      button: 'bg-[#008080] text-[#CCFF00] hover:bg-[#006666] font-black active:scale-[0.98] border border-[#CCFF00]/40'
+      card: 'bg-[#0A2540] text-white border-2 border-[#006D5B] shadow-2xl',
+      sloganPrefix: 'text-white font-black',
+      demonymText: 'text-[#CCFF00] font-black',
+      badge: 'bg-[#006D5B] text-white border border-[#CCFF00]/40 font-black',
+      wardText: 'text-slate-100 font-bold',
+      button: 'bg-[#B45309] text-white hover:bg-[#92400E] font-black active:scale-[0.98] border-2 border-amber-300 shadow-lg'
     },
     teal: {
-      card: 'bg-[#008080] text-white border-2 border-[#CCFF00]/40 shadow-xl',
-      sloganPrefix: 'text-white',
-      demonymText: 'text-[#CCFF00]', // Electric Lime accent
-      badge: 'bg-[#1A1A1A] text-[#CCFF00] font-black',
-      wardText: 'text-[#F2F2F2]',
-      button: 'bg-[#1A1A1A] text-[#CCFF00] hover:bg-black font-black active:scale-[0.98] border border-[#CCFF00]/40'
+      card: 'bg-[#006D5B] text-white border-2 border-[#CCFF00]/40 shadow-xl',
+      sloganPrefix: 'text-white font-black',
+      demonymText: 'text-[#CCFF00] font-black',
+      badge: 'bg-[#0A2540] text-[#CCFF00] font-black',
+      wardText: 'text-slate-100 font-bold',
+      button: 'bg-[#0A2540] text-[#CCFF00] hover:bg-black font-black active:scale-[0.98] border-2 border-[#CCFF00]/40 shadow-lg'
     }
   }[activeCity.themeBg];
 
@@ -494,8 +494,8 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
         className={`relative w-full min-h-[170px] sm:min-h-[220px] rounded-2xl p-5 sm:p-8 overflow-hidden flex flex-col justify-between transition-colors duration-300 ${themeStyles.card}`}
       >
-        {/* Dynamic Watermark Architectural Silhouette */}
-        <div className="absolute right-0 bottom-0 top-0 w-full sm:w-2/3 pointer-events-none opacity-80 z-0 overflow-hidden flex items-end justify-end">
+        {/* Dynamic Watermark Architectural Silhouette (Low opacity for high text legibility on mobile) */}
+        <div className="absolute right-0 bottom-0 top-0 w-full sm:w-2/3 pointer-events-none opacity-15 dark:opacity-25 z-0 overflow-hidden flex items-end justify-end">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeCity.id}

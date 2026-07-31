@@ -330,7 +330,7 @@ export function downloadReportPDF(report: Report) {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(10, 37, 64);
-    doc.text('CITYSCAPE CIVIC ENGAGEMENT PLATFORM', 24, 247);
+    doc.text('Cityscape "Shape Your Community. Speak Your Mind"', 24, 247);
 
     doc.setFontSize(8.5);
     doc.setFont('helvetica', 'normal');

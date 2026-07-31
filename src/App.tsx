@@ -337,23 +337,27 @@ export default function App() {
               {activeView === 'map' && (
                 <div className="space-y-4">
                   {/* Mobile View Switcher Pill */}
-                  <div className="flex md:hidden items-center justify-center p-1 bg-slate-200 dark:bg-slate-800 rounded-xl max-w-xs mx-auto">
+                  <div className="flex md:hidden items-center justify-center p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl max-w-sm mx-auto border-2 border-slate-300 dark:border-slate-700 shadow-sm">
                     <button
                       onClick={() => setMobileTab('map')}
-                      className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
-                        mobileTab === 'map' ? 'bg-[#008080] text-[#CCFF00] shadow-xs font-extrabold' : 'text-slate-600'
+                      className={`flex-1 flex items-center justify-center space-x-1.5 py-2.5 px-4 rounded-xl text-xs font-black transition-all active:scale-[0.97] cursor-pointer min-h-[44px] ${
+                        mobileTab === 'map'
+                          ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-2 border-[#006D5B]'
+                          : 'text-[#111827] dark:text-slate-100 font-extrabold hover:bg-slate-300/50'
                       }`}
                     >
-                      <Map className="w-3.5 h-3.5" />
+                      <Map className="w-4 h-4 text-[#CCFF00]" />
                       <span>Map View</span>
                     </button>
                     <button
                       onClick={() => setMobileTab('list')}
-                      className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-[0.97] cursor-pointer ${
-                        mobileTab === 'list' ? 'bg-[#008080] text-[#CCFF00] shadow-xs font-extrabold' : 'text-slate-600'
+                      className={`flex-1 flex items-center justify-center space-x-1.5 py-2.5 px-4 rounded-xl text-xs font-black transition-all active:scale-[0.97] cursor-pointer min-h-[44px] ${
+                        mobileTab === 'list'
+                          ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-2 border-[#006D5B]'
+                          : 'text-[#111827] dark:text-slate-100 font-extrabold hover:bg-slate-300/50'
                       }`}
                     >
-                      <List className="w-3.5 h-3.5" />
+                      <List className="w-4 h-4 text-[#CCFF00]" />
                       <span>Issue List ({reports.length})</span>
                     </button>
                   </div>

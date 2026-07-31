@@ -31,12 +31,12 @@ export const AccessibilityToolbar: React.FC = () => {
   return (
     <>
       {/* Top Fixed Accessibility & Senior Citizen Quick Bar */}
-      <div className="w-full bg-[#003333] text-white py-1.5 px-3 sm:px-6 border-b border-[#008080]/60 flex items-center justify-between text-xs flex-wrap gap-2 z-40 sticky top-0 shadow-md font-['Montserrat']">
+      <div className="w-full bg-[#0A2540] text-white py-2 px-3 sm:px-6 border-b-2 border-[#006D5B] flex items-center justify-between text-xs flex-wrap gap-2 z-40 sticky top-0 shadow-md font-['Montserrat']">
         <div className="flex items-center space-x-2">
-          <span className="px-2 py-0.5 rounded-md bg-[#CCFF00] text-slate-950 font-black text-[10px] tracking-wider uppercase">
+          <span className="px-2.5 py-0.5 rounded-md bg-[#CCFF00] text-[#0A2540] font-black text-[10px] tracking-wider uppercase">
             WCAG AAA
           </span>
-          <span className="font-bold text-[11px] hidden sm:inline text-teal-100">
+          <span className="font-extrabold text-xs hidden sm:inline text-slate-100">
             Senior & Universal Accessibility Bar
           </span>
         </div>
@@ -52,21 +52,21 @@ export const AccessibilityToolbar: React.FC = () => {
                 speakText('Standard color mode restored.');
               }
             }}
-            className={`px-2.5 py-1 rounded-lg font-extrabold flex items-center space-x-1.5 transition-all cursor-pointer min-h-[36px] ${
+            className={`px-3 py-1.5 rounded-xl font-black flex items-center space-x-1.5 transition-all cursor-pointer min-h-[40px] border-2 ${
               highContrast
-                ? 'bg-[#CCFF00] text-slate-950 ring-2 ring-[#CCFF00] font-black'
-                : 'bg-[#004d4d] hover:bg-[#006666] text-white border border-[#008080]/60'
+                ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] font-black shadow-md'
+                : 'bg-[#006D5B] hover:bg-[#004d40] text-white border-[#006D5B]'
             }`}
             title="Toggle High-Contrast Visual Mode for Low Vision"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-4 h-4 text-[#CCFF00]" />
             <span>{highContrast ? 'High Contrast ON' : 'High Contrast'}</span>
           </button>
 
           {/* Font Scaling Buttons */}
-          <div className="flex items-center bg-[#002626] p-0.5 rounded-lg border border-[#008080]/60">
-            <span className="px-1.5 text-teal-200 font-bold text-[10px] hidden md:inline">
-              <Type className="w-3 h-3 inline mr-0.5" /> Text:
+          <div className="flex items-center bg-[#07192c] p-1 rounded-xl border-2 border-[#006D5B]">
+            <span className="px-2 text-slate-100 font-extrabold text-[11px] hidden md:inline">
+              <Type className="w-3.5 h-3.5 inline mr-0.5 text-[#CCFF00]" /> Text:
             </span>
             {([100, 125, 150] as FontScale[]).map((scale) => (
               <button
@@ -75,10 +75,10 @@ export const AccessibilityToolbar: React.FC = () => {
                   setFontScale(scale);
                   speakText(`Font size set to ${scale} percent.`);
                 }}
-                className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold transition-all min-h-[32px] cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all min-h-[36px] cursor-pointer ${
                   fontScale === scale
-                    ? 'bg-[#008080] text-white shadow-xs font-black'
-                    : 'text-teal-200 hover:text-white hover:bg-[#004d4d]'
+                    ? 'bg-[#006D5B] text-white shadow-xs font-black border border-[#CCFF00]/40'
+                    : 'text-slate-200 hover:text-white hover:bg-[#006D5B]/50'
                 }`}
               >
                 {scale}%
@@ -89,23 +89,23 @@ export const AccessibilityToolbar: React.FC = () => {
           {/* Voice Guidance Read Aloud Toggle */}
           <button
             onClick={handleReadScreenAloud}
-            className={`px-2.5 py-1 rounded-lg font-bold flex items-center space-x-1 transition-all cursor-pointer min-h-[36px] ${
+            className={`px-3 py-1.5 rounded-xl font-black flex items-center space-x-1 transition-all cursor-pointer min-h-[40px] border-2 ${
               speechEnabled
-                ? 'bg-emerald-500 text-white ring-2 ring-emerald-300 font-black animate-pulse'
-                : 'bg-[#004d4d] hover:bg-[#006666] text-white border border-[#008080]/60'
+                ? 'bg-emerald-600 text-white border-emerald-400 font-black animate-pulse'
+                : 'bg-[#006D5B] hover:bg-[#004d40] text-white border-[#006D5B]'
             }`}
             title="Toggle Voice Guidance Read Aloud"
           >
-            {speechEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+            {speechEnabled ? <Volume2 className="w-4 h-4 text-[#CCFF00]" /> : <VolumeX className="w-4 h-4 text-[#CCFF00]" />}
             <span className="hidden sm:inline">{speechEnabled ? 'Voice ON' : 'Voice Assist'}</span>
           </button>
 
           {/* Senior Guide Modal Trigger */}
           <button
             onClick={() => setIsOpenGuide(true)}
-            className="px-2 py-1 bg-[#004d4d] hover:bg-[#006666] text-teal-100 rounded-lg font-bold flex items-center space-x-1 transition-all min-h-[36px] cursor-pointer"
+            className="px-2.5 py-1.5 bg-[#006D5B] hover:bg-[#004d40] text-white rounded-xl font-black flex items-center space-x-1 transition-all min-h-[40px] cursor-pointer border-2 border-[#006D5B]"
           >
-            <HelpCircle className="w-3.5 h-3.5 text-[#CCFF00]" />
+            <HelpCircle className="w-4 h-4 text-[#CCFF00]" />
             <span className="hidden md:inline">Senior Guide</span>
           </button>
         </div>
