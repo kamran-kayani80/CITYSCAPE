@@ -24,25 +24,42 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isAdminOrWorker() {
+      return isSignedIn() && (request.auth.token.get('role', '') == 'admin' || request.auth.token.get('role', '') == 'municipal_worker');
+    }
+
+    function isValidStatus(status) {
+      return status in ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'REJECTED'];
+    }
+
+    function isValidCategory(cat) {
+      return cat in ['POTHOLE', 'LIGHTING', 'SANITATION', 'VANDALISM', 'WATER_LEAK', 'ROADS_TRAFFIC', 'OTHER'];
+    }
+
+    function isValidSeverity(sev) {
+      return sev in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+    }
+
     function isValidReport(data) {
       return data.title is string && data.title.size() > 0 && data.title.size() <= 150 &&
              data.description is string && data.description.size() <= 2000 &&
-             data.category is string && data.category.size() <= 50 &&
-             data.status is string && data.status.size() <= 50 &&
-             data.severity is string && data.severity.size() <= 50 &&
+             data.category is string && isValidCategory(data.category) &&
+             data.status is string && isValidStatus(data.status) &&
+             data.severity is string && isValidSeverity(data.severity) &&
              data.addressText is string && data.addressText.size() <= 300;
     }
 
     function isValidComment(data) {
       return data.reportId is string &&
              data.userName is string && data.userName.size() <= 100 &&
-             data.content is string && data.content.size() > 0 && data.content.size() <= 1000;
+             data.content is string && data.content.size() > 0 && data.content.size() <= 1000 &&
+             data.userRole is string && data.userRole in ['citizen', 'admin', 'municipal_worker'];
     }
 
     function isValidVerification(data) {
       return data.reportId is string &&
              data.userName is string && data.userName.size() <= 100 &&
-             data.statusConfirmed is string && data.statusConfirmed.size() <= 50;
+             data.statusConfirmed is string && data.statusConfirmed in ['RESOLVED', 'STILL_BROKEN'];
     }
 
     function isValidUserProfile(data) {
@@ -71,7 +88,7 @@ service cloud.firestore {
       allow create: if isValidId(reportId) && isValidReport(incoming());
       allow update: if isValidId(reportId) && (
         (incoming().diff(existing()).affectedKeys().hasOnly(['upvotesCount', 'userHasUpvoted', 'updatedAt'])) ||
-        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'officialNote', 'resolvedAt', 'assignedWorker', 'updatedAt', 'resolutionImageUrl'])) ||
+        (isAdminOrWorker() && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'officialNote', 'resolvedAt', 'assignedWorker', 'updatedAt', 'resolutionImageUrl']) && isValidStatus(incoming().status)) ||
         (incoming().diff(existing()).affectedKeys().hasOnly(['verificationsCount', 'updatedAt'])) ||
         (isSignedIn() && existing().userId == request.auth.uid && isValidReport(incoming()))
       );
@@ -80,21 +97,24 @@ service cloud.firestore {
       // Comments subcollection
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isValidId(commentId) && isValidComment(incoming());
+        allow create: if isSignedIn() && isValidId(commentId) && isValidComment(incoming()) &&
+                       (!('userId' in incoming()) || incoming().userId == request.auth.uid);
         allow update, delete: if false;
       }
 
       // Verifications subcollection
       match /verifications/{verificationId} {
         allow read: if true;
-        allow create: if isValidId(verificationId) && isValidVerification(incoming());
+        allow create: if isSignedIn() && isValidId(verificationId) && isValidVerification(incoming()) &&
+                       (!('userId' in incoming()) || incoming().userId == request.auth.uid);
         allow update, delete: if false;
       }
     }
 
-    // User profiles
+    // User profiles - prevent blanket scraping by blocking list queries
     match /users/{userId} {
-      allow read: if true;
+      allow get: if isSignedIn();
+      allow list: if false;
       allow create, update: if isValidId(userId) && isOwner(userId) && isValidUserProfile(incoming());
       allow delete: if isOwner(userId);
     }
@@ -102,7 +122,7 @@ service cloud.firestore {
     // Hashtags
     match /hashtags/{hashtagId} {
       allow read: if true;
-      allow create, update: if isValidId(hashtagId) && isValidHashtag(incoming());
+      allow create, update: if isSignedIn() && isValidId(hashtagId) && isValidHashtag(incoming());
       allow delete: if false;
     }
   }

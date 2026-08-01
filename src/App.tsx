@@ -88,7 +88,27 @@ export default function App() {
       const res = await fetch(`/api/reports?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch reports');
       const data = await res.json();
-      const fetchedReports = data.reports || [];
+      let fetchedReports: Report[] = data.reports || [];
+
+      // Merge locally cached user reports to ensure immediate persistence
+      try {
+        const savedLocal: Report[] = JSON.parse(localStorage.getItem('cityscape_user_created_reports') || '[]');
+        if (Array.isArray(savedLocal) && savedLocal.length > 0) {
+          const reportMap = new Map<string, Report>();
+          fetchedReports.forEach((r) => reportMap.set(r.id, r));
+          savedLocal.forEach((r) => {
+            if (r && r.id && !reportMap.has(r.id)) {
+              reportMap.set(r.id, r);
+            }
+          });
+          fetchedReports = (Array.from(reportMap.values()) as Report[]).sort(
+            (a: Report, b: Report) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        }
+      } catch (e) {
+        console.warn('Local storage load warning:', e);
+      }
+
       setReports(fetchedReports);
 
       // Deep link support: auto-select report if URL parameter or hash is present
@@ -203,6 +223,16 @@ export default function App() {
 
       if (data && data.report) {
         showToast('🎉 Issue Report Submitted Successfully!');
+
+        // Save newly created report to local storage backup
+        try {
+          const savedLocal = JSON.parse(localStorage.getItem('cityscape_user_created_reports') || '[]');
+          const updatedLocal = [data.report, ...savedLocal.filter((r: any) => r.id !== data.report.id)];
+          localStorage.setItem('cityscape_user_created_reports', JSON.stringify(updatedLocal));
+        } catch (e) {
+          console.warn('Local storage save warning:', e);
+        }
+
         fetchReports();
         fetchStats();
         // Select newly created report to center map
@@ -298,7 +328,7 @@ export default function App() {
 
   return (
     <AccessibilityProvider>
-      <div className="min-h-screen bg-[#f2f2f2] dark:bg-[#1A1A1A] text-[#1A1A1A] dark:text-[#f2f2f2] flex flex-col font-['Montserrat'] antialiased selection:bg-[#008080] selection:text-[#CCFF00]">
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0f172a] text-[#111827] dark:text-[#F8FAFC] flex flex-col font-['Montserrat'] antialiased selection:bg-[#006D5B] selection:text-[#CCFF00]">
         {/* Sticky WCAG AAA Accessibility Toolbar */}
         <AccessibilityToolbar />
 
@@ -322,8 +352,8 @@ export default function App() {
 
         {/* Main View Container */}
         <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
-          {/* Dynamic Citizen Pride Banner */}
-          <CitizenPrideBanner />
+          {/* Dynamic Citizen Pride Banner - Only on Home Screen */}
+          {activeView === 'map' && <CitizenPrideBanner />}
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -363,10 +393,10 @@ export default function App() {
                   </div>
 
                   {/* Split Screen Layout */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 h-[calc(100vh-170px)] min-h-[500px]">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 h-auto md:h-[calc(100vh-180px)] md:min-h-[520px]">
                     {/* Interactive Map Side */}
                     <div
-                      className={`md:col-span-7 lg:col-span-8 h-full rounded-3xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 ${
+                      className={`md:col-span-7 lg:col-span-8 h-[380px] sm:h-[480px] md:h-full rounded-3xl overflow-hidden shadow-sm border-2 border-slate-300 dark:border-slate-700 ${
                         mobileTab === 'list' ? 'hidden md:block' : 'block'
                       }`}
                     >
@@ -380,7 +410,7 @@ export default function App() {
 
                     {/* Reported Issues Feed Side */}
                     <div
-                      className={`md:col-span-5 lg:col-span-4 h-full overflow-y-auto pr-1 ${
+                      className={`md:col-span-5 lg:col-span-4 h-auto md:h-full overflow-y-auto pr-1 ${
                         mobileTab === 'map' ? 'hidden md:block' : 'block'
                       }`}
                     >

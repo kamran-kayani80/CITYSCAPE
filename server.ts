@@ -1,7 +1,17 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import { initializeApp } from "firebase/app";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  setDoc,
+  getDocFromServer,
+} from "firebase/firestore";
 import {
   INITIAL_REPORTS,
   INITIAL_COMMENTS,
@@ -36,6 +46,143 @@ let userProfile: UserProfile = { ...DEFAULT_USER_PROFILE };
 let userBadges = { ...USER_BADGES };
 let verifications: IssueVerification[] = [...INITIAL_VERIFICATIONS];
 let adoptedZones: AdoptedZone[] = [...INITIAL_ADOPTED_ZONES];
+
+// Initialize Firebase Firestore for persistent Cloud DB storage
+let firestoreDb: any = null;
+try {
+  const firebaseConfigPath = path.join(process.cwd(), "firebase-applet-config.json");
+  if (fs.existsSync(firebaseConfigPath)) {
+    const firebaseConfig = JSON.parse(fs.readFileSync(firebaseConfigPath, "utf-8"));
+    const firebaseApp = initializeApp(firebaseConfig);
+    firestoreDb = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
+    console.log("[Firebase] Firestore initialized successfully with DB:", firebaseConfig.firestoreDatabaseId);
+  }
+} catch (err) {
+  console.warn("[Firebase] Config or initialization notice:", err);
+}
+
+// Local filesystem data store persistence file path
+const DATA_STORE_PATH = path.join(process.cwd(), "data_store.json");
+
+// Load stored data from disk if present
+function loadStorageFromDisk() {
+  if (fs.existsSync(DATA_STORE_PATH)) {
+    try {
+      const content = fs.readFileSync(DATA_STORE_PATH, "utf-8");
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed.reports) && parsed.reports.length > 0) {
+        reports = parsed.reports;
+      }
+      if (Array.isArray(parsed.comments)) {
+        comments = parsed.comments;
+      }
+      if (parsed.userProfile) {
+        userProfile = { ...userProfile, ...parsed.userProfile };
+      }
+      if (parsed.userBadges) {
+        userBadges = { ...userBadges, ...parsed.userBadges };
+      }
+      if (Array.isArray(parsed.verifications)) {
+        verifications = parsed.verifications;
+      }
+      if (Array.isArray(parsed.adoptedZones)) {
+        adoptedZones = parsed.adoptedZones;
+      }
+      console.log(`[Storage] Loaded ${reports.length} reports and ${comments.length} comments from local persistent disk store.`);
+    } catch (err) {
+      console.error("[Storage] Failed reading data_store.json:", err);
+    }
+  } else {
+    persistStorageToDisk();
+  }
+}
+
+// Persist active data store to disk
+function persistStorageToDisk() {
+  try {
+    const payload = {
+      reports,
+      comments,
+      userProfile,
+      userBadges,
+      verifications,
+      adoptedZones,
+      updatedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(DATA_STORE_PATH, JSON.stringify(payload, null, 2), "utf-8");
+  } catch (err) {
+    console.error("[Storage] Failed writing data_store.json:", err);
+  }
+}
+
+// Sync report object to Cloud Firestore DB
+async function saveReportToFirestore(report: Report) {
+  if (!firestoreDb) return;
+  try {
+    const ref = doc(firestoreDb, "reports", report.id);
+    await setDoc(ref, report, { merge: true });
+  } catch (err) {
+    console.error(`[Firestore] Error saving report ${report.id}:`, err);
+  }
+}
+
+// Sync comment object to Cloud Firestore DB
+async function saveCommentToFirestore(reportId: string, comment: Comment) {
+  if (!firestoreDb) return;
+  try {
+    const ref = doc(firestoreDb, "reports", reportId, "comments", comment.id);
+    await setDoc(ref, comment, { merge: true });
+  } catch (err) {
+    console.error(`[Firestore] Error saving comment ${comment.id}:`, err);
+  }
+}
+
+// Initial boot synchronization with Firestore Cloud DB
+async function syncFirestoreOnBoot() {
+  // First load local disk store
+  loadStorageFromDisk();
+
+  if (!firestoreDb) return;
+  try {
+    // Validate connection per system skill
+    await getDocFromServer(doc(firestoreDb, "test", "connection")).catch(() => {});
+
+    // Fetch reports from Firestore
+    const snapshot = await getDocs(collection(firestoreDb, "reports"));
+    if (!snapshot.empty) {
+      const fsReports: Report[] = [];
+      snapshot.forEach((d) => {
+        const item = d.data() as Report;
+        if (item && item.id) {
+          fsReports.push(item);
+        }
+      });
+
+      if (fsReports.length > 0) {
+        // Merge Firestore reports into local reports list
+        const map = new Map<string, Report>();
+        reports.forEach((r) => map.set(r.id, r));
+        fsReports.forEach((r) => map.set(r.id, r));
+        
+        reports = Array.from(map.values()).sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        persistStorageToDisk();
+        console.log(`[Firestore] Successfully synced ${reports.length} total reports from Cloud Firestore.`);
+      }
+    } else {
+      // Seed initial reports to Firestore database
+      for (const rep of reports) {
+        await saveReportToFirestore(rep);
+      }
+    }
+  } catch (err) {
+    console.warn("[Firestore] Sync during boot warning:", err);
+  }
+}
+
+// Execute boot sync immediately
+syncFirestoreOnBoot();
 
 // Lazy Gemini AI instance
 let aiClient: GoogleGenAI | null = null;
@@ -533,8 +680,21 @@ app.post("/api/reports", (req, res) => {
       isGuest,
     } = req.body;
 
-    if (!title || !category || latitude === undefined || longitude === undefined) {
-      return res.status(400).json({ error: "Missing required fields: title, category, latitude, longitude" });
+    if (!title || typeof title !== 'string' || !title.trim() || !category || typeof category !== 'string' || latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ error: "Missing or invalid required fields: title, category, latitude, longitude" });
+    }
+
+    if (title.length > 150) {
+      return res.status(400).json({ error: "Title exceeds maximum length of 150 characters." });
+    }
+
+    if (description && (typeof description !== 'string' || description.length > 2000)) {
+      return res.status(400).json({ error: "Description exceeds maximum length of 2000 characters." });
+    }
+
+    const validCategories: ReportCategory[] = ['POTHOLE', 'LIGHTING', 'SANITATION', 'VANDALISM', 'WATER_LEAK', 'ROADS_TRAFFIC', 'OTHER'];
+    if (!validCategories.includes(category as ReportCategory)) {
+      return res.status(400).json({ error: "Invalid category value provided." });
     }
 
     const newReport: Report = {
@@ -559,12 +719,14 @@ app.post("/api/reports", (req, res) => {
     };
 
     reports.unshift(newReport);
+    persistStorageToDisk();
+    saveReportToFirestore(newReport);
 
     // Process & index any hashtags included in title/description
     processTextHashtags(`${newReport.title} ${newReport.description}`);
 
     // Initial system comment
-    comments.push({
+    const sysComment: Comment = {
       id: `comm-${Date.now()}`,
       reportId: newReport.id,
       userName: 'CITYSCAPE System',
@@ -572,7 +734,10 @@ app.post("/api/reports", (req, res) => {
       content: `Report received and logged in municipal database. Assigned tracking ID: ${newReport.id}`,
       isOfficialUpdate: true,
       createdAt: new Date().toISOString(),
-    });
+    };
+    comments.push(sysComment);
+    persistStorageToDisk();
+    saveCommentToFirestore(newReport.id, sysComment);
 
     res.status(201).json({ report: newReport });
   } catch (err: any) {
@@ -607,6 +772,9 @@ app.post("/api/reports/:id/upvote", (req, res) => {
     report.upvotesCount += 1;
     report.userHasUpvoted = true;
   }
+
+  persistStorageToDisk();
+  saveReportToFirestore(report);
 
   res.json({ id: report.id, upvotesCount: report.upvotesCount, userHasUpvoted: report.userHasUpvoted });
 });
@@ -671,6 +839,10 @@ app.post("/api/reports/:id/comments", (req, res) => {
   comments.push(newComment);
   report.updatedAt = new Date().toISOString();
 
+  persistStorageToDisk();
+  saveCommentToFirestore(id, newComment);
+  saveReportToFirestore(report);
+
   res.status(201).json({ comment: newComment });
 });
 
@@ -715,7 +887,7 @@ app.patch("/api/reports/:id/status", (req, res) => {
   report.updatedAt = new Date().toISOString();
 
   // Log official status transition comment
-  comments.push({
+  const statusComment: Comment = {
     id: `comm-${Date.now()}`,
     reportId: id,
     userName: assignedWorker || 'Municipal Operations',
@@ -723,7 +895,12 @@ app.patch("/api/reports/:id/status", (req, res) => {
     content: `Status updated from ${oldStatus} to ${report.status}.${officialNote ? ` Note: ${officialNote}` : ''}`,
     isOfficialUpdate: true,
     createdAt: new Date().toISOString(),
-  });
+  };
+  comments.push(statusComment);
+
+  persistStorageToDisk();
+  saveCommentToFirestore(id, statusComment);
+  saveReportToFirestore(report);
 
   res.json({ report });
 });
@@ -990,7 +1167,7 @@ app.post("/api/reports/:id/verifications", (req, res) => {
   }
 
   // Add system/community comment
-  comments.push({
+  const verifComment: Comment = {
     id: `comm-${Date.now()}`,
     reportId: id,
     userName: `${userProfile.fullName} (${userProfile.title})`,
@@ -1000,11 +1177,16 @@ app.post("/api/reports/:id/verifications", (req, res) => {
     }`,
     isOfficialUpdate: false,
     createdAt: new Date().toISOString(),
-  });
+  };
+  comments.push(verifComment);
 
   // Update user profile karma & stats
   userProfile.civicKarma += karmaAwarded;
   userProfile.impactStats.verificationsCount += 1;
+
+  persistStorageToDisk();
+  saveCommentToFirestore(id, verifComment);
+  saveReportToFirestore(report);
 
   // Check & update Loop Closer badge progress
   const loopCloserBadge = userBadges['badge-loop-closer'];

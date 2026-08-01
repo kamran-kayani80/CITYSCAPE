@@ -43,12 +43,12 @@ export const CivicBulletinHub: React.FC = () => {
   return (
     <div className="space-y-6 font-['Montserrat']">
       {/* Header Banner */}
-      <div className="bg-[#003333] text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border border-[#008080]/60">
-        <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-[#008080]/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-[#0A2540] text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border-2 border-[#006D5B]">
+        <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-[#006D5B]/30 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
-              <span className="px-3 py-1 bg-[#CCFF00] text-slate-950 font-black text-xs uppercase tracking-wider rounded-lg">
+              <span className="px-3 py-1 bg-[#CCFF00] text-[#0A2540] font-black text-xs uppercase tracking-wider rounded-lg">
                 Municipal Official Feed
               </span>
               <span className="text-xs font-bold text-[#CCFF00]">Live Updates & Advisories</span>
@@ -62,7 +62,7 @@ export const CivicBulletinHub: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
-            <div className="p-4 bg-[#004d4d] border border-[#008080]/80 rounded-2xl text-center">
+            <div className="p-4 bg-[#006D5B] border border-[#CCFF00]/40 rounded-2xl text-center">
               <span className="block text-2xl font-black text-[#CCFF00]">{announcements.length}</span>
               <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">Active Bulletins</span>
             </div>

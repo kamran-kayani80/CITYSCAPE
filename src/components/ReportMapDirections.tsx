@@ -1,8 +1,61 @@
 import React, { useState } from 'react';
-import { Navigation, MapPin, Copy, Check, Compass, ExternalLink, Car, Footprints, ShieldCheck } from 'lucide-react';
+import { MapPin, Copy, Check, Compass, ExternalLink, Car, Footprints } from 'lucide-react';
 import { Report } from '../types';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
+
+// Google Maps Brand Icon
+export const GoogleMapsIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+    <path
+      d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z"
+      fill="#EA4335"
+    />
+    <path
+      d="M12 2C8.13 2 5 5.13 5 9C5 10.5 5.5 12 6.3 13.3L12 22V11.5L12 2Z"
+      fill="#4285F4"
+      opacity="0.35"
+    />
+    <circle cx="12" cy="9" r="3" fill="#FFFFFF" />
+    <circle cx="12" cy="9" r="1.5" fill="#4285F4" />
+  </svg>
+);
+
+// Waze Brand Icon
+export const WazeIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+    <path
+      d="M12 3C6.48 3 2 7.03 2 12C2 14.82 3.42 17.32 5.65 18.91C5.46 19.64 5.09 20.65 4.3 21.41C4.12 21.58 4.22 21.88 4.46 21.91C5.69 22.06 7.15 21.75 8.35 20.93C9.48 21.32 10.71 21.5 12 21.5C17.52 21.5 22 17.47 22 12.5C22 7.53 17.52 3 12 3Z"
+      fill="#33CCFF"
+    />
+    <circle cx="8.5" cy="10.5" r="1.5" fill="#0F172A" />
+    <circle cx="15.5" cy="10.5" r="1.5" fill="#0F172A" />
+    <path
+      d="M9 14.5C10 15.5 11 16 12 16C13 16 14 15.5 15 14.5"
+      stroke="#0F172A"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+    />
+    <circle cx="7" cy="19.5" r="1.5" fill="#0F172A" />
+    <circle cx="17" cy="19.5" r="1.5" fill="#0F172A" />
+  </svg>
+);
+
+// Apple Maps Brand Icon
+export const AppleMapsIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+    <rect x="2" y="2" width="20" height="20" rx="5" fill="#007AFF" />
+    <path
+      d="M12 4.5L15.5 12L12 10.8L8.5 12L12 4.5Z"
+      fill="#FFFFFF"
+    />
+    <path
+      d="M12 19.5L15.5 12L12 13.2L8.5 12L12 19.5Z"
+      fill="#FF3B30"
+    />
+    <circle cx="12" cy="12" r="1.5" fill="#FFFFFF" />
+  </svg>
+);
 
 interface ReportMapDirectionsProps {
   report: Report;
@@ -52,68 +105,117 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
 
   if (variant === 'button-only') {
     return (
-      <a
-        href={googleMapsUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black bg-[#008080] hover:bg-[#006666] text-[#CCFF00] shadow-xs transition-all active:scale-95 cursor-pointer ${className}`}
-        title="Open Google Maps turn-by-turn directions"
-      >
-        <Navigation className="w-3.5 h-3.5 text-[#CCFF00]" />
-        <span>Directions</span>
-        <ExternalLink className="w-3 h-3 opacity-70" />
-      </a>
+      <div className={`inline-flex items-center gap-1.5 ${className}`}>
+        <a
+          href={googleMapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-[#008080] dark:bg-slate-800 dark:hover:bg-[#008080] text-slate-800 hover:text-white dark:text-slate-100 font-extrabold text-xs transition-all cursor-pointer border border-slate-300 dark:border-slate-700 min-h-[44px] shadow-xs hover:scale-105 active:scale-95"
+          title="Google Maps"
+          aria-label="Google Maps"
+        >
+          <GoogleMapsIcon className="w-5 h-5 shrink-0" />
+          <span className="hidden sm:inline font-bold">Google Maps</span>
+        </a>
+
+        <a
+          href={wazeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-sky-500 dark:bg-slate-800 dark:hover:bg-sky-500 text-slate-800 hover:text-white dark:text-slate-100 font-extrabold text-xs transition-all cursor-pointer border border-slate-300 dark:border-slate-700 min-h-[44px] shadow-xs hover:scale-105 active:scale-95"
+          title="Waze"
+          aria-label="Waze"
+        >
+          <WazeIcon className="w-5 h-5 shrink-0" />
+          <span className="hidden sm:inline font-bold">Waze</span>
+        </a>
+
+        <a
+          href={appleMapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 hover:text-white dark:text-slate-100 font-extrabold text-xs transition-all cursor-pointer border border-slate-300 dark:border-slate-700 min-h-[44px] shadow-xs hover:scale-105 active:scale-95"
+          title="Apple Maps"
+          aria-label="Apple Maps"
+        >
+          <AppleMapsIcon className="w-5 h-5 shrink-0" />
+          <span className="hidden sm:inline font-bold">Apple Maps</span>
+        </a>
+      </div>
     );
   }
 
   if (variant === 'compact') {
     return (
       <div
-        className={`p-3 bg-teal-950/20 dark:bg-slate-800/80 rounded-2xl border border-[#008080]/30 font-['Montserrat'] text-xs space-y-2 ${className}`}
+        className={`p-3.5 bg-slate-50 dark:bg-slate-800/90 rounded-2xl border border-slate-200 dark:border-slate-700 font-['Montserrat'] text-xs space-y-3 ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-100 font-bold truncate">
-            <MapPin className="w-3.5 h-3.5 text-[#008080] shrink-0" />
+          <div className="flex items-center gap-1.5 text-slate-900 dark:text-slate-100 font-bold truncate">
+            <MapPin className="w-4 h-4 text-[#008080] dark:text-[#CCFF00] shrink-0" />
             <span className="truncate">{report.addressText}</span>
           </div>
 
           {distanceFormatted && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#008080] text-[#CCFF00] shrink-0">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#008080] text-[#CCFF00] shrink-0">
               {distanceFormatted}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2 pt-1 border-t border-slate-200/50 dark:border-slate-700">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-200 dark:border-slate-700">
           <a
             href={googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 py-1.5 px-2 bg-[#008080] hover:bg-[#006666] text-white rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-2xs"
+            title="Google Maps"
+            aria-label="Google Maps"
+            className="py-2 px-2 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-slate-300 dark:border-slate-700 shadow-xs hover:scale-[1.02] active:scale-98 min-h-[40px]"
           >
-            <Navigation className="w-3 h-3 text-[#CCFF00]" />
-            <span>Google Maps</span>
+            <GoogleMapsIcon className="w-5 h-5 shrink-0" />
+            <span className="truncate">Google Maps</span>
           </a>
 
           <a
             href={wazeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="py-1.5 px-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-2xs"
-            title="Navigate with Waze"
+            title="Waze"
+            aria-label="Waze"
+            className="py-2 px-2 bg-white dark:bg-slate-900 hover:bg-sky-50 dark:hover:bg-sky-950 text-slate-900 dark:text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-slate-300 dark:border-slate-700 shadow-xs hover:scale-[1.02] active:scale-98 min-h-[40px]"
           >
-            <Compass className="w-3 h-3" />
-            <span>Waze</span>
+            <WazeIcon className="w-5 h-5 shrink-0" />
+            <span className="truncate">Waze</span>
+          </a>
+
+          <a
+            href={appleMapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Apple Maps"
+            aria-label="Apple Maps"
+            className="py-2 px-2 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-slate-300 dark:border-slate-700 shadow-xs hover:scale-[1.02] active:scale-98 min-h-[40px]"
+          >
+            <AppleMapsIcon className="w-5 h-5 shrink-0" />
+            <span className="truncate">Apple Maps</span>
           </a>
 
           <button
             onClick={handleCopyCoords}
-            className="p-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition-all cursor-pointer"
+            className="col-span-3 sm:col-span-1 py-2 px-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-all cursor-pointer min-h-[40px]"
             title="Copy GPS Coordinates"
+            aria-label="Copy GPS Coordinates"
           >
-            {copiedCoords ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+            {copiedCoords ? (
+              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <Copy className="w-4 h-4 text-slate-600 dark:text-slate-300 shrink-0" />
+            )}
+            <span className="text-[11px] font-mono">{copiedCoords ? 'Copied' : 'GPS'}</span>
           </button>
         </div>
       </div>
@@ -122,39 +224,40 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
 
   // Full Variant for Modal / Municipal Work Order Details
   return (
-    <div className={`p-4 bg-gradient-to-br from-[#003333] via-[#004d4d] to-slate-900 text-white rounded-3xl border border-[#008080]/60 shadow-xl space-y-4 font-['Montserrat'] ${className}`}>
+    <div className={`p-5 bg-gradient-to-br from-[#0A2540] via-[#004d4d] to-slate-900 text-white rounded-3xl border border-[#008080]/60 shadow-xl space-y-4 font-['Montserrat'] ${className}`}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#008080]/40">
-        <div className="flex items-center space-x-2">
-          <div className="w-9 h-9 rounded-2xl bg-[#CCFF00] text-slate-950 flex items-center justify-center font-bold shadow-md">
-            <Navigation className="w-5 h-5 text-slate-950" />
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#CCFF00] text-slate-950 flex items-center justify-center font-bold shadow-md shrink-0">
+            <GoogleMapsIcon className="w-6 h-6" />
           </div>
           <div>
             <h3 className="text-sm font-black uppercase tracking-wider text-[#CCFF00]">
               Field Crew Route & Directions
             </h3>
             <p className="text-[11px] text-teal-100/90 font-medium">
-              Turn-by-turn navigation for public works crew dispatch
+              Turn-by-turn navigation options for field crews & citizens
             </p>
           </div>
         </div>
 
         <button
           onClick={handleCopyCoords}
-          className={`self-start sm:self-auto px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+          className={`self-start sm:self-auto px-3.5 py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer border min-h-[40px] ${
             copiedCoords
               ? 'bg-emerald-600 text-white border-emerald-400'
               : 'bg-white/10 text-teal-100 hover:bg-white/20 border-white/20'
           }`}
+          title="Copy GPS Coordinates"
         >
           {copiedCoords ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-300" />
+              <Check className="w-4 h-4 text-emerald-300" />
               <span>GPS Copied!</span>
             </>
           ) : (
             <>
-              <Copy className="w-3.5 h-3.5 text-[#CCFF00]" />
+              <Copy className="w-4 h-4 text-[#CCFF00]" />
               <span>{lat.toFixed(5)}, {lng.toFixed(5)}</span>
             </>
           )}
@@ -163,7 +266,7 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
 
       {/* Address & Travel Estimates Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="sm:col-span-3 p-3 bg-white/10 rounded-2xl border border-white/10 flex items-start gap-2.5">
+        <div className="sm:col-span-3 p-3.5 bg-white/10 rounded-2xl border border-white/10 flex items-start gap-3">
           <MapPin className="w-5 h-5 text-[#CCFF00] shrink-0 mt-0.5" />
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-teal-200">
@@ -180,7 +283,7 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
 
         {distanceFormatted && (
           <div className="p-3 bg-white/10 rounded-2xl border border-white/10 flex items-center space-x-2.5">
-            <Compass className="w-5 h-5 text-emerald-300" />
+            <Compass className="w-5 h-5 text-emerald-300 shrink-0" />
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-teal-200">Distance</span>
               <p className="text-xs font-black text-[#CCFF00] font-mono">{distanceFormatted}</p>
@@ -190,7 +293,7 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
 
         {driveMinutes !== null && (
           <div className="p-3 bg-white/10 rounded-2xl border border-white/10 flex items-center space-x-2.5">
-            <Car className="w-5 h-5 text-amber-300" />
+            <Car className="w-5 h-5 text-amber-300 shrink-0" />
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-teal-200">Est. Driving</span>
               <p className="text-xs font-black text-amber-300 font-mono">~{driveMinutes} min drive</p>
@@ -200,7 +303,7 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
 
         {walkMinutes !== null && (
           <div className="p-3 bg-white/10 rounded-2xl border border-white/10 flex items-center space-x-2.5">
-            <Footprints className="w-5 h-5 text-cyan-300" />
+            <Footprints className="w-5 h-5 text-cyan-300 shrink-0" />
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-teal-200">Est. Walking</span>
               <p className="text-xs font-black text-cyan-300 font-mono">~{walkMinutes} min walk</p>
@@ -210,38 +313,47 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
       </div>
 
       {/* Navigation Buttons Row */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
         <a
           href={googleMapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 py-3 px-4 bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-98"
+          title="Google Maps"
+          aria-label="Google Maps"
+          className="py-3 px-4 bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg hover:scale-[1.02] active:scale-98 min-h-[48px]"
         >
-          <Navigation className="w-4 h-4 fill-current" />
-          <span>Launch Google Maps Route</span>
-          <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+          <GoogleMapsIcon className="w-5 h-5 shrink-0" />
+          <span>Google Maps</span>
+          <ExternalLink className="w-3.5 h-3.5 opacity-80 ml-auto" />
         </a>
 
         <a
           href={wazeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="py-3 px-4 bg-sky-500 hover:bg-sky-600 text-white font-black rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-98"
+          title="Waze"
+          aria-label="Waze"
+          className="py-3 px-4 bg-sky-500 hover:bg-sky-600 text-white font-black rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-md hover:scale-[1.02] active:scale-98 min-h-[48px]"
         >
-          <Compass className="w-4 h-4" />
-          <span>Open in Waze</span>
+          <WazeIcon className="w-5 h-5 shrink-0" />
+          <span>Waze</span>
+          <ExternalLink className="w-3.5 h-3.5 opacity-80 ml-auto" />
         </a>
 
         <a
           href={appleMapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md border border-slate-700 active:scale-98"
+          title="Apple Maps"
+          aria-label="Apple Maps"
+          className="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-md border border-slate-700 hover:scale-[1.02] active:scale-98 min-h-[48px]"
         >
-          <MapPin className="w-4 h-4 text-slate-300" />
+          <AppleMapsIcon className="w-5 h-5 shrink-0" />
           <span>Apple Maps</span>
+          <ExternalLink className="w-3.5 h-3.5 opacity-80 ml-auto" />
         </a>
       </div>
     </div>
   );
 };
+

@@ -240,12 +240,23 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
             <p class="text-xs text-slate-600 line-clamp-1 mt-0.5 font-medium">${report.addressText}</p>
           </div>
 
-          <div class="flex items-center justify-between pt-2 border-t border-white/80 text-xs gap-1.5">
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-[#008080] text-[#CCFF00] font-black rounded-xl text-[10px] flex items-center gap-1 hover:bg-[#006666] shadow-xs">
-              🧭 Route
-            </a>
-            <button id="popup-btn-${report.id}" class="btn-primary-designer px-3 py-1 rounded-xl text-xs cursor-pointer">
-              View →
+          <div class="flex flex-col gap-2 pt-2 border-t border-slate-200 text-xs">
+            <div class="flex items-center gap-1.5">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}" target="_blank" rel="noopener noreferrer" title="Google Maps" aria-label="Google Maps" class="flex-1 py-1.5 px-2 bg-[#008080] text-white hover:bg-[#006666] font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#EA4335"/><circle cx="12" cy="9" r="2.5" fill="#FFFFFF"/></svg>
+                Google Maps
+              </a>
+              <a href="https://waze.com/ul?ll=${report.latitude},${report.longitude}&navigate=yes" target="_blank" rel="noopener noreferrer" title="Waze" aria-label="Waze" class="py-1.5 px-2 bg-sky-500 text-white hover:bg-sky-600 font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3C6.48 3 2 7.03 2 12C2 14.82 3.42 17.32 5.65 18.91C5.46 19.64 5.09 20.65 4.3 21.41C4.12 21.58 4.22 21.88 4.46 21.91C5.69 22.06 7.15 21.75 8.35 20.93C9.48 21.32 10.71 21.5 12 21.5C17.52 21.5 22 17.47 22 12.5C22 7.53 17.52 3 12 3Z" fill="#33CCFF"/><circle cx="8.5" cy="10.5" r="1.5" fill="#0F172A"/><circle cx="15.5" cy="10.5" r="1.5" fill="#0F172A"/></svg>
+                Waze
+              </a>
+              <a href="https://maps.apple.com/?daddr=${report.latitude},${report.longitude}" target="_blank" rel="noopener noreferrer" title="Apple Maps" aria-label="Apple Maps" class="py-1.5 px-2 bg-slate-800 text-white hover:bg-slate-700 font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="5" fill="#007AFF"/><path d="M12 4.5L15.5 12L12 10.8L8.5 12L12 4.5Z" fill="#FFFFFF"/><path d="M12 19.5L15.5 12L12 13.2L8.5 12L12 19.5Z" fill="#FF3B30"/></svg>
+                Apple Maps
+              </a>
+            </div>
+            <button id="popup-btn-${report.id}" class="w-full btn-primary-designer py-1.5 rounded-xl text-xs font-extrabold cursor-pointer">
+              View Details →
             </button>
           </div>
         </div>
@@ -432,7 +443,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
       {/* Pinning Banner Overlay */}
       {isPinningLocation && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-[#003333] rounded-2xl px-5 py-3 shadow-xl flex items-center space-x-2.5 text-xs font-bold border border-[#008080]/30">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-[#0A2540] rounded-2xl px-5 py-3 shadow-xl flex items-center space-x-2.5 text-xs font-bold border-2 border-[#006D5B]">
           <Navigation className="w-4 h-4 text-[#CCFF00] animate-spin" />
           <span className="text-white font-medium">Click on the map or drag the pin to set issue location</span>
         </div>
@@ -444,15 +455,15 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           onClick={handleLocateUser}
           disabled={isLocating}
           title="Center on My GPS Location"
-          className="btn-soft-tactile p-3 text-[#008080] rounded-2xl cursor-pointer flex items-center justify-center active:scale-95 bg-white dark:bg-slate-800 shadow-md"
+          className="btn-soft-tactile p-3 text-[#006D5B] rounded-2xl cursor-pointer flex items-center justify-center active:scale-95 bg-white dark:bg-slate-800 shadow-md"
         >
-          <Locate className={`w-5 h-5 ${isLocating ? 'animate-spin text-[#008080]' : ''}`} />
+          <Locate className={`w-5 h-5 ${isLocating ? 'animate-spin text-[#006D5B]' : ''}`} />
         </button>
 
         <button
           onClick={handleResetView}
           title="Reset Map View"
-          className="btn-soft-tactile p-3 text-[#008080] rounded-2xl cursor-pointer flex items-center justify-center active:scale-95 bg-white dark:bg-slate-800 shadow-md"
+          className="btn-soft-tactile p-3 text-[#006D5B] rounded-2xl cursor-pointer flex items-center justify-center active:scale-95 bg-white dark:bg-slate-800 shadow-md"
         >
           <RotateCcw className="w-5 h-5" />
         </button>
@@ -462,7 +473,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
       {!isPinningLocation && (
         <>
           {mapMode === 'heatmap' ? (
-            <div className="absolute bottom-6 left-6 z-20 hidden md:block p-3.5 bg-[#003333] rounded-2xl border border-[#008080]/30 shadow-2xl w-64">
+            <div className="absolute bottom-6 left-6 z-20 hidden md:block p-3.5 bg-[#0A2540] rounded-2xl border-2 border-[#006D5B] shadow-2xl w-64">
               <div className="flex items-center space-x-2 text-xs font-['Montserrat'] font-black text-white mb-2">
                 <Flame className="w-4 h-4 text-[#CCFF00] fill-[#CCFF00]" />
                 <span>Hazard Density Heat Map</span>
@@ -475,18 +486,18 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
               </div>
             </div>
           ) : (
-            <div className="absolute bottom-6 left-6 z-20 hidden md:block p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg w-60">
-              <h4 className="text-[10px] font-['Montserrat'] font-black uppercase tracking-widest text-[#008080] mb-2.5">Status Legend</h4>
+            <div className="absolute bottom-6 left-6 z-20 hidden md:block p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border-2 border-slate-300 dark:border-slate-800 shadow-lg w-60">
+              <h4 className="text-[10px] font-['Montserrat'] font-black uppercase tracking-widest text-[#006D5B] mb-2.5">Status Legend</h4>
               <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2.5 text-[#1A1A1A] dark:text-slate-200 font-bold">
+                <div className="flex items-center gap-2.5 text-[#111827] dark:text-slate-200 font-bold">
                   <div className="w-3 h-3 rounded-full bg-red-500 shrink-0 shadow-xs"></div>
                   <span>Open (Priority Hazard)</span>
                 </div>
-                <div className="flex items-center gap-2.5 text-[#1A1A1A] dark:text-slate-200 font-bold">
+                <div className="flex items-center gap-2.5 text-[#111827] dark:text-slate-200 font-bold">
                   <div className="w-3 h-3 rounded-full bg-amber-500 shrink-0 shadow-xs"></div>
                   <span>Work in Progress</span>
                 </div>
-                <div className="flex items-center gap-2.5 text-[#1A1A1A] dark:text-slate-200 font-bold">
+                <div className="flex items-center gap-2.5 text-[#111827] dark:text-slate-200 font-bold">
                   <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0 shadow-xs"></div>
                   <span>Resolved / Fixed</span>
                 </div>
@@ -495,7 +506,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           )}
 
           {/* Statistics Floating Badge */}
-          <div className="absolute bottom-6 right-6 z-20 bg-[#003333] p-4 flex items-center gap-5 border border-[#008080]/30 rounded-2xl shadow-xl">
+          <div className="absolute bottom-6 right-6 z-20 bg-[#0A2540] p-4 flex items-center gap-5 border-2 border-[#006D5B] rounded-2xl shadow-xl">
             <div className="text-center">
               <div className="text-2xl font-['Montserrat'] font-black text-white font-mono">
                 {reports.filter((r) => r.status === 'RESOLVED').length}

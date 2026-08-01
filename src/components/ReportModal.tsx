@@ -320,15 +320,16 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
         </div>
 
         {/* Step Progress Bar */}
-        <div className="w-full bg-slate-100 dark:bg-slate-800 h-2">
+        <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 shrink-0">
           <div
             className="bg-[#008080] h-2 transition-all duration-300"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
 
-        {/* Modal Body Scrollable Content */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5 font-['Montserrat']">
+        {/* Form Container with Scrollable Body & Sticky Footer */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden font-['Montserrat']">
+          <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5 max-h-[calc(92vh-140px)]">
           {/* STEP 1: CATEGORY & WARD SELECTION */}
           {step === 1 && (
             <div className="space-y-5">
@@ -745,48 +746,48 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
               </div>
             </div>
           )}
-        </div>
+          </div>
 
-        {/* Modal Footer Controls */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 soft-card rounded-b-3xl rounded-t-none flex items-center justify-between">
-          {step > 1 ? (
-            <button
-              type="button"
-              onClick={() => setStep((s) => (s - 1) as any)}
-              className="btn-soft-tactile flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer min-h-[48px]"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
-            </button>
-          ) : (
-            <div />
-          )}
+          {/* Modal Footer Controls - Sticky at bottom */}
+          <div className="p-4 border-t border-slate-200 dark:border-slate-800 soft-card rounded-b-3xl rounded-t-none flex items-center justify-between shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky bottom-0 z-20">
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={() => setStep((s) => (s - 1) as any)}
+                className="btn-soft-tactile flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer min-h-[48px]"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back</span>
+              </button>
+            ) : (
+              <div />
+            )}
 
-          {step < 3 ? (
-            <button
-              type="button"
-              onClick={() => setStep((s) => (s + 1) as any)}
-              className="btn-primary-designer flex items-center space-x-2 px-6 py-3 rounded-2xl text-xs font-black cursor-pointer min-h-[48px]"
-            >
-              <span>Next Step</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="btn-primary-designer flex items-center space-x-2 px-7 py-3 rounded-2xl text-xs font-black cursor-pointer disabled:opacity-50 min-h-[48px]"
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <CheckCircle className="w-4 h-4" />
-              )}
-              <span>Submit Issue Ticket</span>
-            </button>
-          )}
-        </div>
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={() => setStep((s) => (s + 1) as any)}
+                className="btn-primary-designer flex items-center space-x-2 px-6 py-3 rounded-2xl text-xs font-black cursor-pointer min-h-[48px]"
+              >
+                <span>Next Step</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn-primary-designer flex items-center space-x-2 px-7 py-3 rounded-2xl text-xs font-black cursor-pointer disabled:opacity-50 min-h-[48px]"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle className="w-4 h-4" />
+                )}
+                <span>Submit Issue Ticket</span>
+              </button>
+            )}
+          </div>
+        </form>
         </motion.div>
       </motion.div>
     </AnimatePresence>

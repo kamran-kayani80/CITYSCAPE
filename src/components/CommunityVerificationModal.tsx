@@ -72,10 +72,10 @@ export const CommunityVerificationModal: React.FC<CommunityVerificationModalProp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-200 overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden relative max-h-[92vh] flex flex-col my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+        <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-xl">
               <ShieldCheck className="w-5 h-5" />
@@ -87,7 +87,7 @@ export const CommunityVerificationModal: React.FC<CommunityVerificationModalProp
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -95,7 +95,7 @@ export const CommunityVerificationModal: React.FC<CommunityVerificationModalProp
 
         {celebrationData ? (
           /* Confetti / Reward Success Splash */
-          <div className="p-8 text-center space-y-4 animate-in zoom-in-95 duration-300">
+          <div className="p-8 text-center space-y-4 animate-in zoom-in-95 duration-300 overflow-y-auto">
             <div className="w-16 h-16 bg-gradient-to-tr from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto text-white shadow-lg shadow-amber-500/30 animate-bounce">
               <Sparkles className="w-8 h-8" />
             </div>
@@ -114,8 +114,9 @@ export const CommunityVerificationModal: React.FC<CommunityVerificationModalProp
           </div>
         ) : (
           /* Main Form */
-          <form onSubmit={handleSubmit} className="p-5 space-y-4">
-            {/* Target Issue Brief */}
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="p-5 space-y-4 overflow-y-auto flex-1 max-h-[calc(92vh-130px)]">
+              {/* Target Issue Brief */}
             <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-800 flex items-center gap-3">
               <img
                 src={report.imageUrls[0]}
@@ -218,19 +219,21 @@ export const CommunityVerificationModal: React.FC<CommunityVerificationModalProp
               />
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/60">
+            </div>
+
+            {/* Actions Footer - Sticky */}
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shrink-0 sticky bottom-0 z-20">
               <button
                 type="button"
                 onClick={onClose}
-                className="btn-soft-tactile px-4 py-2 rounded-xl text-xs cursor-pointer"
+                className="btn-soft-tactile px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer min-h-[44px]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-primary-designer flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs disabled:opacity-50 cursor-pointer"
+                className="btn-primary-designer flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-extrabold disabled:opacity-50 cursor-pointer min-h-[44px]"
               >
                 {isSubmitting ? (
                   <span>Verifying...</span>

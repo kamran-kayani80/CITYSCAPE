@@ -73,10 +73,10 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Brand Logo & Name */}
           <div
             onClick={() => setActiveView('map')}
-            className="flex items-center space-x-2 shrink-0 cursor-pointer group py-1"
+            className="flex items-center gap-2 sm:gap-2.5 shrink-0 cursor-pointer group py-1 transition-transform hover:scale-[1.01]"
           >
-            <CityscapeLogo size="md" showTagline={true} />
-            <span className="hidden xl:inline-block px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md bg-[#008080] text-[#CCFF00] border border-[#CCFF00]/40 self-start mt-1">
+            <CityscapeLogo size="md" showTagline={false} />
+            <span className="hidden sm:inline-flex items-center px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md bg-[#006D5B] text-[#CCFF00] border border-[#CCFF00]/40 shadow-xs">
               Official
             </span>
           </div>
@@ -85,18 +85,18 @@ export const Header: React.FC<HeaderProps> = ({
           {activeView === 'map' && (
             <div className="flex-1 max-w-sm hidden md:block relative">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#008080]" />
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#006D5B]" />
                 <input
                   type="text"
                   placeholder="Search location or hazard..."
                   value={filter.searchQuery || ''}
                   onChange={(e) => setFilter((prev) => ({ ...prev, searchQuery: e.target.value }))}
-                  className="w-full pl-9 pr-8 py-1.5 bg-[#F2F2F2] dark:bg-slate-800 focus:bg-white border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-[#1A1A1A] dark:text-white outline-none transition-all placeholder-slate-500 focus:ring-2 focus:ring-[#008080]"
+                  className="w-full pl-9 pr-8 py-2 bg-slate-100 dark:bg-slate-800 focus:bg-white border-2 border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-[#111827] dark:text-white outline-none transition-all placeholder-slate-500 focus:ring-2 focus:ring-[#006D5B] min-h-[44px]"
                 />
                 {filter.searchQuery && (
                   <button
                     onClick={() => setFilter((prev) => ({ ...prev, searchQuery: '' }))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#008080]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#006D5B]"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -106,9 +106,9 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           {/* Right Action buttons & Identity cluster */}
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Google Sign-In Button */}
-            <div className="hidden md:block">
+            <div>
               <GoogleAuthButton
                 currentUserProfile={userProfile}
                 onAuthChange={onUserProfileChange}
@@ -120,21 +120,21 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => setIsAdminMode(!isAdminMode)}
               title={isAdminMode ? 'Switch to Resident Mode' : 'Switch to Staff Mode'}
-              className={`hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border-2 text-xs font-extrabold transition-all cursor-pointer min-h-[44px] ${
                 isAdminMode
-                  ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
-                  : 'bg-white/80 text-slate-900 border-white hover:bg-white'
+                  ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
+                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white border-slate-300 dark:border-slate-700 hover:bg-slate-100'
               }`}
             >
               {isAdminMode ? (
                 <>
-                  <Building2 className="w-3.5 h-3.5" />
-                  <span>Staff</span>
+                  <Building2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Staff</span>
                 </>
               ) : (
                 <>
-                  <UserCheck className="w-3.5 h-3.5 text-[#008080]" />
-                  <span>Resident</span>
+                  <UserCheck className="w-4 h-4 text-[#006D5B]" />
+                  <span className="hidden sm:inline">Resident</span>
                 </>
               )}
             </button>

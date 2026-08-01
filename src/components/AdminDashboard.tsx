@@ -260,9 +260,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* Municipal Work Order Update Modal */}
       {selectedReportForEdit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[92vh] flex flex-col my-auto">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900 shrink-0">
               <div className="flex items-center space-x-2">
                 <Building2 className="w-5 h-5 text-amber-500" />
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -271,97 +271,99 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
               <button
                 onClick={() => setSelectedReportForEdit(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full"
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveStatus} className="p-5 space-y-4 text-xs">
-              {/* Field Crew Navigation & Dispatch Map */}
-              <ReportMapDirections report={selectedReportForEdit} variant="full" />
+            <form onSubmit={handleSaveStatus} className="flex-1 flex flex-col min-h-0 overflow-hidden text-xs">
+              <div className="p-5 space-y-4 overflow-y-auto flex-1 max-h-[calc(92vh-130px)]">
+                {/* Field Crew Navigation & Dispatch Map */}
+                <ReportMapDirections report={selectedReportForEdit} variant="full" />
 
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Change Issue Status
-                </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value as ReportStatus)}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white outline-none"
-                >
-                  <option value="OPEN">🔴 OPEN / Unresolved</option>
-                  <option value="IN_PROGRESS">🟡 IN PROGRESS / Crew Dispatched</option>
-                  <option value="RESOLVED">🟢 RESOLVED / Work Complete</option>
-                  <option value="REJECTED">⚪ REJECTED / Non-Municipal Issue</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Assigned Maintenance Crew
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Public Works Crew B, SF Water Dept"
-                  value={assignedWorker}
-                  onChange={(e) => setAssignedWorker(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Official Municipal Work Note
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Details on repairs completed or scheduled timeline..."
-                  value={officialNote}
-                  onChange={(e) => setOfficialNote(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                />
-              </div>
-
-              {/* Upload resolution photo if marking resolved */}
-              {newStatus === 'RESOLVED' && (
                 <div>
                   <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Upload Official Resolution Photo (Completion Proof)
+                    Change Issue Status
                   </label>
-                  {resolutionPhoto ? (
-                    <div className="relative h-32 w-full rounded-2xl overflow-hidden border">
-                      <img src={resolutionPhoto} alt="Resolution" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setResolutionPhoto(null)}
-                        className="absolute top-2 right-2 p-1 bg-slate-900 text-white rounded-full"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="flex items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-emerald-500">
-                      <Upload className="w-5 h-5 text-slate-400 mr-2" />
-                      <span className="font-semibold text-slate-600">Select repair completion image</span>
-                      <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                    </label>
-                  )}
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value as ReportStatus)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white outline-none cursor-pointer"
+                  >
+                    <option value="OPEN">🔴 OPEN / Unresolved</option>
+                    <option value="IN_PROGRESS">🟡 IN PROGRESS / Crew Dispatched</option>
+                    <option value="RESOLVED">🟢 RESOLVED / Work Complete</option>
+                    <option value="REJECTED">⚪ REJECTED / Non-Municipal Issue</option>
+                  </select>
                 </div>
-              )}
 
-              <div className="pt-3 border-t border-white/60 flex items-center justify-end space-x-3">
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    Assigned Maintenance Crew
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Public Works Crew B, SF Water Dept"
+                    value={assignedWorker}
+                    onChange={(e) => setAssignedWorker(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    Official Municipal Work Note
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Details on repairs completed or scheduled timeline..."
+                    value={officialNote}
+                    onChange={(e) => setOfficialNote(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  />
+                </div>
+
+                {/* Upload resolution photo if marking resolved */}
+                {newStatus === 'RESOLVED' && (
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Upload Official Resolution Photo (Completion Proof)
+                    </label>
+                    {resolutionPhoto ? (
+                      <div className="relative h-32 w-full rounded-2xl overflow-hidden border">
+                        <img src={resolutionPhoto} alt="Resolution" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setResolutionPhoto(null)}
+                          className="absolute top-2 right-2 p-1 bg-slate-900 text-white rounded-full cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-emerald-500">
+                        <Upload className="w-5 h-5 text-slate-400 mr-2" />
+                        <span className="font-semibold text-slate-600">Select repair completion image</span>
+                        <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                      </label>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-end space-x-3 shrink-0 sticky bottom-0 z-20">
                 <button
                   type="button"
                   onClick={() => setSelectedReportForEdit(null)}
-                  className="btn-soft-tactile px-4 py-2 rounded-xl text-xs cursor-pointer"
+                  className="btn-soft-tactile px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer min-h-[44px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="btn-primary-designer px-5 py-2.5 rounded-2xl text-xs cursor-pointer"
+                  className="btn-primary-designer px-5 py-2.5 rounded-2xl text-xs font-extrabold cursor-pointer min-h-[44px]"
                 >
                   Save Status & Publish
                 </button>

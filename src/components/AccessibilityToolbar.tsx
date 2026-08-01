@@ -41,7 +41,7 @@ export const AccessibilityToolbar: React.FC = () => {
           </span>
         </div>
 
-        <div className="flex items-center space-x-2 sm:space-x-3 text-[11px] flex-wrap">
+        <div className="flex items-center space-x-1 sm:space-x-3 text-[10px] sm:text-[11px] flex-nowrap overflow-x-auto no-scrollbar shrink-0 max-w-full py-0.5">
           {/* High Contrast AAA Toggle */}
           <button
             onClick={() => {
@@ -52,20 +52,21 @@ export const AccessibilityToolbar: React.FC = () => {
                 speakText('Standard color mode restored.');
               }
             }}
-            className={`px-3 py-1.5 rounded-xl font-black flex items-center space-x-1.5 transition-all cursor-pointer min-h-[40px] border-2 ${
+            className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl font-black flex items-center space-x-1 sm:space-x-1.5 transition-all cursor-pointer min-h-[32px] sm:min-h-[40px] text-[10px] sm:text-[11px] border-2 shrink-0 ${
               highContrast
                 ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] font-black shadow-md'
                 : 'bg-[#006D5B] hover:bg-[#004d40] text-white border-[#006D5B]'
             }`}
             title="Toggle High-Contrast Visual Mode for Low Vision"
           >
-            <Eye className="w-4 h-4 text-[#CCFF00]" />
-            <span>{highContrast ? 'High Contrast ON' : 'High Contrast'}</span>
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CCFF00]" />
+            <span className="hidden sm:inline">{highContrast ? 'High Contrast ON' : 'High Contrast'}</span>
+            <span className="sm:hidden">Contrast</span>
           </button>
 
           {/* Font Scaling Buttons */}
-          <div className="flex items-center bg-[#07192c] p-1 rounded-xl border-2 border-[#006D5B]">
-            <span className="px-2 text-slate-100 font-extrabold text-[11px] hidden md:inline">
+          <div className="flex items-center bg-[#07192c] p-0.5 sm:p-1 rounded-lg sm:rounded-xl border-2 border-[#006D5B] shrink-0">
+            <span className="px-1.5 text-slate-100 font-extrabold text-[10px] sm:text-[11px] hidden md:inline">
               <Type className="w-3.5 h-3.5 inline mr-0.5 text-[#CCFF00]" /> Text:
             </span>
             {([100, 125, 150] as FontScale[]).map((scale) => (
@@ -75,7 +76,7 @@ export const AccessibilityToolbar: React.FC = () => {
                   setFontScale(scale);
                   speakText(`Font size set to ${scale} percent.`);
                 }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all min-h-[36px] cursor-pointer ${
+                className={`px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-black transition-all min-h-[28px] sm:min-h-[36px] cursor-pointer ${
                   fontScale === scale
                     ? 'bg-[#006D5B] text-white shadow-xs font-black border border-[#CCFF00]/40'
                     : 'text-slate-200 hover:text-white hover:bg-[#006D5B]/50'
@@ -89,24 +90,26 @@ export const AccessibilityToolbar: React.FC = () => {
           {/* Voice Guidance Read Aloud Toggle */}
           <button
             onClick={handleReadScreenAloud}
-            className={`px-3 py-1.5 rounded-xl font-black flex items-center space-x-1 transition-all cursor-pointer min-h-[40px] border-2 ${
+            className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl font-black flex items-center space-x-1 transition-all cursor-pointer min-h-[32px] sm:min-h-[40px] text-[10px] sm:text-[11px] border-2 shrink-0 ${
               speechEnabled
                 ? 'bg-emerald-600 text-white border-emerald-400 font-black animate-pulse'
                 : 'bg-[#006D5B] hover:bg-[#004d40] text-white border-[#006D5B]'
             }`}
             title="Toggle Voice Guidance Read Aloud"
           >
-            {speechEnabled ? <Volume2 className="w-4 h-4 text-[#CCFF00]" /> : <VolumeX className="w-4 h-4 text-[#CCFF00]" />}
+            {speechEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CCFF00]" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CCFF00]" />}
             <span className="hidden sm:inline">{speechEnabled ? 'Voice ON' : 'Voice Assist'}</span>
+            <span className="sm:hidden">Voice</span>
           </button>
 
           {/* Senior Guide Modal Trigger */}
           <button
             onClick={() => setIsOpenGuide(true)}
-            className="px-2.5 py-1.5 bg-[#006D5B] hover:bg-[#004d40] text-white rounded-xl font-black flex items-center space-x-1 transition-all min-h-[40px] cursor-pointer border-2 border-[#006D5B]"
+            className="px-2 py-1 sm:px-2.5 sm:py-1.5 bg-[#006D5B] hover:bg-[#004d40] text-white rounded-lg sm:rounded-xl font-black flex items-center space-x-1 transition-all min-h-[32px] sm:min-h-[40px] text-[10px] sm:text-[11px] cursor-pointer border-2 border-[#006D5B] shrink-0"
           >
-            <HelpCircle className="w-4 h-4 text-[#CCFF00]" />
+            <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CCFF00]" />
             <span className="hidden md:inline">Senior Guide</span>
+            <span className="md:hidden">Guide</span>
           </button>
         </div>
       </div>

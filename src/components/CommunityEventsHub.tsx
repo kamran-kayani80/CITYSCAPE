@@ -479,9 +479,9 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
 
       {/* POST EVENT / HIRE AD SPACE MODAL */}
       {isHireAdModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto font-['Montserrat']">
-          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-[#008080]/30 dark:border-slate-800 overflow-hidden my-auto p-6 sm:p-7 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto font-['Montserrat']">
+          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-[#008080]/30 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col">
+            <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-900/50">
               <div className="flex items-center space-x-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#008080] text-white flex items-center justify-center font-bold">
                   <Megaphone className="w-5 h-5 text-[#CCFF00]" />
@@ -502,7 +502,8 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
               </button>
             </div>
 
-            {/* Select Ad Tier */}
+            <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 max-h-[calc(92vh-90px)]">
+              {/* Select Ad Tier */}
             <div className="space-y-2">
               <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 Choose Promotion Tier
@@ -541,7 +542,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                   onClick={() => setSelectedAdTier('Platinum Banner')}
                   className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                     selectedAdTier === 'Platinum Banner'
-                      ? 'bg-[#003333] text-white border-[#008080] ring-2 ring-[#CCFF00]'
+                      ? 'bg-[#0A2540] text-white border-2 border-[#006D5B] ring-2 ring-[#CCFF00]'
                       : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
                   }`}
                 >
@@ -685,7 +686,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
               <button
                 type="submit"
                 disabled={isProcessingPayment}
-                className="w-full py-3.5 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full py-3.5 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-2 min-h-[48px]"
               >
                 <Sparkles className="w-4 h-4 text-[#CCFF00]" />
                 <span>
@@ -695,6 +696,7 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                 </span>
               </button>
             </form>
+            </div>
           </div>
         </div>
       )}
