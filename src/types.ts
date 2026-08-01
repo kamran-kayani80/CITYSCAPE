@@ -8,7 +8,8 @@ export type AppViewMode =
   | 'events'
   | 'bulletin'
   | 'sla'
-  | 'brand';
+  | 'brand'
+  | 'strategic';
 
 export type ReportCategory =
   | 'EMERGENCY'

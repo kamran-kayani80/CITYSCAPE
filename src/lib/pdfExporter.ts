@@ -2,58 +2,73 @@ import jsPDF from 'jspdf';
 import { Report } from '../types';
 
 /**
- * Draws the official Cityscape Skyline & Community Mesh Network vector logo onto a jsPDF instance.
+ * Draws the official extracted Cityscape Skyline & Community Mesh Network vector logo onto a jsPDF instance.
  */
 function drawCityscapeHeaderLogo(doc: jsPDF, startX: number, startY: number) {
-  // --- Skyline Buildings (Progressive Blue / Cyan) ---
-  doc.setDrawColor(56, 189, 248); // #38BDF8
+  const scale = 0.25; // Scale factor mapping 140x100 SVG to PDF dimensions (mm)
+  const mapX = (x: number) => startX + x * scale;
+  const mapY = (y: number) => startY + y * scale;
+
+  // --- Progressive Blue (#38BDF8 / Civic Blue) ---
+  doc.setDrawColor(56, 189, 248);
   doc.setLineWidth(0.8);
 
-  // Building 1 (Far left low-rise)
-  doc.line(startX + 2, startY + 16, startX + 2, startY + 9);
-  doc.line(startX + 2, startY + 9, startX + 6, startY + 9);
-  doc.line(startX + 6, startY + 9, startX + 6, startY + 16);
+  // Base Ground Line
+  doc.line(mapX(6), mapY(88), mapX(134), mapY(88));
 
-  // Building 2 (Mid-rise with angled roof)
-  doc.line(startX + 6, startY + 16, startX + 6, startY + 6);
-  doc.line(startX + 6, startY + 6, startX + 9, startY + 3);
-  doc.line(startX + 9, startY + 3, startX + 12, startY + 6);
-  doc.line(startX + 12, startY + 6, startX + 12, startY + 16);
+  // Building 1 (Left low-rise with angled roof)
+  doc.line(mapX(12), mapY(88), mapX(12), mapY(54));
+  doc.line(mapX(12), mapY(54), mapX(26), mapY(42));
+  doc.line(mapX(26), mapY(42), mapX(26), mapY(88));
 
-  // Building 3 (Spire tower)
-  doc.line(startX + 12, startY + 16, startX + 12, startY + 3);
-  doc.line(startX + 12, startY + 3, startX + 15, startY + 0);
-  doc.line(startX + 15, startY + 0, startX + 18, startY + 3);
-  doc.line(startX + 18, startY + 3, startX + 18, startY + 16);
+  // Building 2 (Tall Central Tower with Spire)
+  doc.line(mapX(30), mapY(88), mapX(30), mapY(26));
+  doc.line(mapX(30), mapY(26), mapX(40), mapY(16));
+  doc.line(mapX(40), mapY(16), mapX(50), mapY(26));
+  doc.line(mapX(50), mapY(26), mapX(50), mapY(88));
 
-  // Baseline
-  doc.line(startX + 0, startY + 16, startX + 36, startY + 16);
+  // Spire on Central Tower & Beacon Node
+  doc.line(mapX(40), mapY(16), mapX(40), mapY(6));
+  doc.setFillColor(255, 90, 54); // Engaged Coral
+  doc.circle(mapX(40), mapY(5), 0.7, 'F');
 
-  // --- Community Mesh Network (Coral & Teal) ---
-  doc.setDrawColor(255, 90, 54); // Engaged Coral
-  doc.setLineWidth(0.6);
-  doc.line(startX + 18, startY + 9, startX + 23, startY + 4);
-  doc.line(startX + 23, startY + 4, startX + 29, startY + 1);
-  doc.line(startX + 29, startY + 1, startX + 34, startY + 5);
-  doc.line(startX + 34, startY + 5, startX + 32, startY + 13);
+  // Building 3 (Mid-Right Building)
+  doc.line(mapX(54), mapY(88), mapX(54), mapY(36));
+  doc.line(mapX(54), mapY(36), mapX(70), mapY(48));
+  doc.line(mapX(70), mapY(48), mapX(70), mapY(88));
 
-  doc.setDrawColor(45, 212, 191); // Community Teal
-  doc.line(startX + 23, startY + 4, startX + 32, startY + 13);
-  doc.line(startX + 29, startY + 1, startX + 25, startY + 12);
+  // --- Engaged Coral (#FF5A36 / 255, 90, 54) Network Lines ---
+  doc.setDrawColor(255, 90, 54);
+  doc.setLineWidth(0.7);
+  doc.line(mapX(70), mapY(48), mapX(86), mapY(30));
+  doc.line(mapX(86), mapY(30), mapX(108), mapY(22));
+  doc.line(mapX(108), mapY(22), mapX(128), mapY(40));
 
-  // Nodes
-  doc.setFillColor(56, 189, 248);
-  doc.circle(startX + 18, startY + 9, 1.1, 'F');
-  doc.setFillColor(255, 90, 54);
-  doc.circle(startX + 23, startY + 4, 1.2, 'F');
-  doc.setFillColor(45, 212, 191);
-  doc.circle(startX + 29, startY + 1, 1.3, 'F');
-  doc.setFillColor(255, 90, 54);
-  doc.circle(startX + 34, startY + 5, 1.2, 'F');
-  doc.setFillColor(45, 212, 191);
-  doc.circle(startX + 32, startY + 13, 1.1, 'F');
-  doc.setFillColor(56, 189, 248);
-  doc.circle(startX + 25, startY + 12, 1.1, 'F');
+  doc.line(mapX(70), mapY(64), mapX(98), mapY(56));
+  doc.line(mapX(108), mapY(22), mapX(124), mapY(64));
+
+  // --- Community Teal (#2DD4BF / 45, 212, 191) Network Lines ---
+  doc.setDrawColor(45, 212, 191);
+  doc.setLineWidth(0.7);
+  doc.line(mapX(86), mapY(30), mapX(98), mapY(56));
+  doc.line(mapX(98), mapY(56), mapX(124), mapY(64));
+  doc.line(mapX(124), mapY(64), mapX(128), mapY(40));
+
+  doc.line(mapX(86), mapY(30), mapX(124), mapY(64));
+  doc.line(mapX(98), mapY(56), mapX(128), mapY(40));
+
+  // --- Network Nodes (Circles) ---
+  doc.setFillColor(255, 90, 54); // Coral Nodes
+  doc.circle(mapX(86), mapY(30), 1.1, 'F');
+  doc.circle(mapX(108), mapY(22), 1.3, 'F');
+  doc.circle(mapX(128), mapY(40), 1.1, 'F');
+
+  doc.setFillColor(45, 212, 191); // Teal Nodes
+  doc.circle(mapX(98), mapY(56), 1.2, 'F');
+  doc.circle(mapX(124), mapY(64), 1.1, 'F');
+
+  doc.setFillColor(56, 189, 248); // Blue Node
+  doc.circle(mapX(70), mapY(48), 1.0, 'F');
 }
 
 /**

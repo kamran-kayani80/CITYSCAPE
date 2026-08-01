@@ -37,11 +37,14 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
   const [mapMode, setMapMode] = useState<MapLayerMode>('street');
   const [isLocating, setIsLocating] = useState(false);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
+  const [isGeoTagged, setIsGeoTagged] = useState(false);
 
-  // Initialize Leaflet Map instance
+  // Initialize Leaflet Map instance & Auto Geo-Tag
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
+
+    let isMounted = true;
 
     // Default center: San Francisco center
     const defaultLat = 37.7749;
@@ -71,9 +74,69 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
       }
     });
 
+    // AUTOMATIC GEOTAGGING ON INITIALIZATION
+    if (navigator.geolocation) {
+      setIsLocating(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          if (!isMounted || mapInstanceRef.current !== map) return;
+          const { latitude, longitude, accuracy } = pos.coords;
+          setUserLocation({ lat: latitude, lng: longitude, accuracy });
+          setIsGeoTagged(true);
+          setIsLocating(false);
+
+          map.flyTo([latitude, longitude], 15, { duration: 1.2 });
+
+          // Add pulsing user geotag marker & accuracy halo safely
+          if (userLocMarkerRef.current && map.hasLayer(userLocMarkerRef.current)) {
+            userLocMarkerRef.current.setLatLng([latitude, longitude]);
+          } else {
+            const userIcon = L.divIcon({
+              html: `
+                <div class="relative flex items-center justify-center">
+                  <div class="w-7 h-7 rounded-full bg-[#006D5B] border-3 border-white shadow-xl flex items-center justify-center text-white ring-4 ring-[#006D5B]/30 animate-pulse">
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#CCFF00]"></div>
+                  </div>
+                </div>
+              `,
+              className: 'user-geotag-marker',
+              iconSize: [28, 28],
+              iconAnchor: [14, 14],
+            });
+            userLocMarkerRef.current = L.marker([latitude, longitude], { icon: userIcon }).addTo(map);
+          }
+
+          // Accuracy circle
+          if (accuracy && accuracy < 5000) {
+            L.circle([latitude, longitude], {
+              radius: Math.min(accuracy, 200),
+              color: '#006D5B',
+              weight: 1.5,
+              fillColor: '#006D5B',
+              fillOpacity: 0.12,
+            }).addTo(map);
+          }
+        },
+        (err) => {
+          if (!isMounted) return;
+          console.log('Default geotag fallback to city center:', err.message);
+          setIsLocating(false);
+        },
+        { enableHighAccuracy: true, timeout: 6000 }
+      );
+    }
+
     return () => {
-      map.remove();
-      mapInstanceRef.current = null;
+      isMounted = false;
+      userLocMarkerRef.current = null;
+      pinMarkerRef.current = null;
+      tileLayerRef.current = null;
+      markersLayerRef.current = null;
+      heatmapLayerRef.current = null;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
     };
   }, []);
 
@@ -82,7 +145,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    if (tileLayerRef.current) {
+    if (tileLayerRef.current && map.hasLayer(tileLayerRef.current)) {
       map.removeLayer(tileLayerRef.current);
     }
 
@@ -295,7 +358,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     if (!map) return;
 
     if (isPinningLocation && pinnedLocation) {
-      if (pinMarkerRef.current) {
+      if (pinMarkerRef.current && map.hasLayer(pinMarkerRef.current)) {
         pinMarkerRef.current.setLatLng([pinnedLocation.lat, pinnedLocation.lng]);
       } else {
         const pinIcon = L.divIcon({
@@ -330,10 +393,10 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
       map.flyTo([pinnedLocation.lat, pinnedLocation.lng], 16, { duration: 0.5 });
     } else {
-      if (pinMarkerRef.current) {
+      if (pinMarkerRef.current && map.hasLayer(pinMarkerRef.current)) {
         pinMarkerRef.current.remove();
-        pinMarkerRef.current = null;
       }
+      pinMarkerRef.current = null;
     }
   }, [isPinningLocation, pinnedLocation]);
 
@@ -356,7 +419,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           map.flyTo([latitude, longitude], 16, { duration: 1 });
 
           // Add user teal pulsing dot
-          if (userLocMarkerRef.current) {
+          if (userLocMarkerRef.current && map.hasLayer(userLocMarkerRef.current)) {
             userLocMarkerRef.current.setLatLng([latitude, longitude]);
           } else {
             const userIcon = L.divIcon({
@@ -396,6 +459,25 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     <div className="relative w-full h-full min-h-[350px] bg-slate-100 dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-inner font-['Montserrat']">
       {/* Leaflet map container element */}
       <div ref={mapContainerRef} className="w-full h-full min-h-[350px] z-1" />
+
+      {/* Geotagged Status Badge Overlay */}
+      {!isPinningLocation && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 hidden sm:flex items-center space-x-2 px-3.5 py-1.5 bg-[#0A2540]/90 backdrop-blur-md rounded-full shadow-lg border border-[#006D5B] text-white">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#CCFF00] animate-ping" />
+          <span className="text-[11px] font-black uppercase tracking-wider text-[#CCFF00]">
+            GEO-TAGGED MAP ACTIVE
+          </span>
+          {userLocation ? (
+            <span className="text-[10px] font-mono text-slate-300 border-l border-white/20 pl-2">
+              {userLocation.lat.toFixed(4)}°N, {Math.abs(userLocation.lng).toFixed(4)}°W
+            </span>
+          ) : (
+            <span className="text-[10px] font-mono text-slate-300 border-l border-white/20 pl-2">
+              GPS SENSOR READY
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Layer Control Toggle (Top Left Overlay) */}
       {!isPinningLocation && (

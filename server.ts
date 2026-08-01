@@ -1089,12 +1089,22 @@ app.get("/api/profile", (req, res) => {
   });
 });
 
-// 9. Update User Profile (e.g., active Title or Avatar)
+// 9. Update User Profile (e.g., active Title, Username, Full Name, or Avatar)
 app.patch("/api/profile", (req, res) => {
-  const { title } = req.body;
+  const { title, username, fullName, avatarUrl } = req.body;
   if (title && userProfile.unlockedTitles.includes(title)) {
     userProfile.title = title;
   }
+  if (username && typeof username === 'string' && username.trim()) {
+    userProfile.username = username.trim().replace(/^@/, '');
+  }
+  if (fullName && typeof fullName === 'string' && fullName.trim()) {
+    userProfile.fullName = fullName.trim();
+  }
+  if (avatarUrl && typeof avatarUrl === 'string' && avatarUrl.trim()) {
+    userProfile.avatarUrl = avatarUrl.trim();
+  }
+  persistStorageToDisk();
   res.json({ profile: userProfile });
 });
 

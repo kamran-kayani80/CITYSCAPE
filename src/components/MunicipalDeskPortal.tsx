@@ -24,6 +24,7 @@ import {
 import { Report, ReportStatus } from '../types';
 import { AdminDashboard } from './AdminDashboard';
 import { downloadInvoicePDF } from '../lib/pdfExporter';
+import { CityscapeLogo } from './CityscapeLogo';
 
 interface MunicipalDeskPortalProps {
   reports: Report[];
@@ -678,15 +679,18 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
       {activeTab === 'subscription' && (
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="soft-card p-6 space-y-5">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600">
-                  CURRENT PLAN STATUS
-                </span>
-                <h3 className="text-xl font-heading font-black text-[#1c1a3b] dark:text-white">
-                  CITYSCAPE Municipal Enterprise SaaS
-                </h3>
-                <p className="text-xs text-slate-500">Auto-renews on August 25, 2026</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="space-y-1">
+                <CityscapeLogo size="md" showTagline={true} />
+                <div className="pt-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600">
+                    CURRENT PLAN STATUS
+                  </span>
+                  <h3 className="text-xl font-heading font-black text-[#1c1a3b] dark:text-white">
+                    CITYSCAPE Municipal Enterprise SaaS
+                  </h3>
+                  <p className="text-xs text-slate-500">Auto-renews on August 25, 2026</p>
+                </div>
               </div>
 
               <div className="text-right">

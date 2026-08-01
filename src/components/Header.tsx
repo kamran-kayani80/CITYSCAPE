@@ -248,6 +248,23 @@ export const Header: React.FC<HeaderProps> = ({
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
+              onClick={() => setActiveView('strategic')}
+              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
+                activeView === 'strategic'
+                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
+                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Strategic AI</span>
+              <span className="bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
+                ROADMAP
+              </span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setActiveView('blog')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'blog'

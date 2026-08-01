@@ -18,6 +18,7 @@ import { CivicBulletinHub } from './components/CivicBulletinHub';
 import { SlaDashboard } from './components/SlaDashboard';
 import { CitizenPrideBanner } from './components/CitizenPrideBanner';
 import { BrandIdentitySystem } from './components/BrandIdentitySystem';
+import { StrategicArchitectureView } from './components/StrategicArchitectureView';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
 import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map, List } from 'lucide-react';
@@ -452,6 +453,11 @@ export default function App() {
                     setSelectedReport(report);
                     setActiveView('map');
                   }}
+                  onProfileUpdate={(updated) => {
+                    setUserProfile(updated);
+                    setUserKarma(updated.civicKarma);
+                    showToast(`Profile updated! Username set to @${updated.username}`);
+                  }}
                 />
               )}
 
@@ -491,6 +497,9 @@ export default function App() {
 
               {/* VIEW 10: OFFICIAL BRAND IDENTITY SYSTEM & GUIDELINES */}
               {activeView === 'brand' && <BrandIdentitySystem />}
+
+              {/* VIEW 11: STRATEGIC AI & GOVERNANCE ROADMAP ARCHITECTURE */}
+              {activeView === 'strategic' && <StrategicArchitectureView />}
             </motion.div>
           </AnimatePresence>
         </main>

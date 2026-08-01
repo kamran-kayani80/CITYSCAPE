@@ -23,15 +23,58 @@ import {
   Lock,
   Leaf,
   Plus,
+  Camera,
+  Upload,
+  Edit3,
+  X,
+  Image as ImageIcon,
+  Loader2,
+  CheckCircle,
 } from 'lucide-react';
 import { UserProfile, Badge, AdoptedZone, Report } from '../types';
 import { GoogleAuthButton } from './GoogleAuthButton';
 
 interface UserProfileViewProps {
   onSelectReport?: (report: Report) => void;
+  onProfileUpdate?: (profile: UserProfile) => void;
 }
 
-export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport }) => {
+const PRESET_AVATARS = [
+  {
+    name: 'Civic Sentinel',
+    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    name: 'Eco Guardian',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    name: 'Ward Leader',
+    url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    name: 'Public Works Lead',
+    url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    name: 'Community Historian',
+    url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    name: 'Neighborhood Watch',
+    url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
+  },
+];
+
+const SUGGESTED_USERNAMES = [
+  'clean_street_hero',
+  'ward4_sentinel',
+  'civic_leader_sf',
+  'eco_neighborhood',
+  'kaamika_civic',
+];
+
+export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport, onProfileUpdate }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [badges, setBadges] = useState<(Badge & { userProgress: number; unlockedAt?: string; isUnlocked: boolean })[]>([]);
   const [adoptedZones, setAdoptedZones] = useState<AdoptedZone[]>([]);
@@ -40,6 +83,14 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
   const [selectedBadgeFilter, setSelectedBadgeFilter] = useState<'ALL' | 'UNLOCKED' | 'IN_PROGRESS'>('ALL');
   const [selectedTitle, setSelectedTitle] = useState('');
   const [titleSuccessMsg, setTitleSuccessMsg] = useState(false);
+
+  // Profile & Avatar Editing State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editFullName, setEditFullName] = useState('');
+  const [editUsername, setEditUsername] = useState('');
+  const [editAvatarUrl, setEditAvatarUrl] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfileData();
@@ -58,6 +109,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
         setProfile(pData.profile);
         setBadges(pData.badges || []);
         setSelectedTitle(pData.profile.title);
+        setEditFullName(pData.profile.fullName || '');
+        setEditUsername(pData.profile.username || '');
+        setEditAvatarUrl(pData.profile.avatarUrl || '');
       }
 
       if (zonesRes.ok) {
@@ -76,6 +130,71 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
     }
   };
 
+  const handleOpenEditModal = () => {
+    if (profile) {
+      setEditFullName(profile.fullName);
+      setEditUsername(profile.username);
+      setEditAvatarUrl(profile.avatarUrl);
+    }
+    setIsEditModalOpen(true);
+  };
+
+  const handleAvatarFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      alert('File size exceeds 8MB limit.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setEditAvatarUrl(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveProfile = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!editUsername.trim() || !editFullName.trim()) {
+      alert('Please enter both a name and username.');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const cleanUsername = editUsername.trim().replace(/^@/, '');
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: editFullName.trim(),
+          username: cleanUsername,
+          avatarUrl: editAvatarUrl.trim(),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data.profile);
+        setIsEditModalOpen(false);
+        setUpdateMessage(`Profile updated! Username set to @${data.profile.username}`);
+        setTimeout(() => setUpdateMessage(null), 3500);
+
+        if (onProfileUpdate) {
+          onProfileUpdate(data.profile);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleTitleChange = async (newTitle: string) => {
     setSelectedTitle(newTitle);
     try {
@@ -89,6 +208,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
         setProfile(data.profile);
         setTitleSuccessMsg(true);
         setTimeout(() => setTitleSuccessMsg(false), 2000);
+        if (onProfileUpdate) {
+          onProfileUpdate(data.profile);
+        }
       }
     } catch (err) {
       console.error('Failed to update title:', err);
@@ -103,6 +225,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
         setAdoptedZones((prev) => prev.map((z) => (z.id === zoneId ? data.zone : z)));
         if (data.userProfile) {
           setProfile(data.userProfile);
+          if (onProfileUpdate) {
+            onProfileUpdate(data.userProfile);
+          }
         }
       }
     } catch (err) {
@@ -112,7 +237,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
 
   if (isLoading || !profile) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-slate-500 animate-pulse">
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-slate-500 animate-pulse font-['Montserrat']">
         Loading Civic Passport & Profile...
       </div>
     );
@@ -140,7 +265,20 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
   const heatmapDays = generateHeatmapDays();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-300">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-300 font-['Montserrat']">
+      {/* Toast feedback banner */}
+      {updateMessage && (
+        <div className="p-4 bg-emerald-600 text-white rounded-2xl shadow-lg font-extrabold text-xs flex items-center justify-between animate-in slide-in-from-top duration-200">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-5 h-5 text-[#CCFF00]" />
+            <span>{updateMessage}</span>
+          </div>
+          <button onClick={() => setUpdateMessage(null)} className="p-1 text-white/80 hover:text-white cursor-pointer">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* 1. HERO CIVIC PASSPORT HEADER (Dark Midnight Indigo Card with Glowing Bar like in prompt image) */}
       <div className="dark-indigo-card p-6 sm:p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -148,23 +286,39 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
           {/* Avatar & Title / Name */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="relative">
+            <div className="relative group cursor-pointer" onClick={handleOpenEditModal} title="Click to upload picture or edit profile">
               <img
                 src={profile.avatarUrl}
                 alt={profile.fullName}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-indigo-400/30 shadow-xl"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-indigo-400/30 shadow-xl transition-transform group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-slate-900/60 rounded-2xl flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="w-6 h-6 text-[#CCFF00]" />
+                <span className="text-[10px] font-black uppercase mt-1">Change</span>
+              </div>
               <span className="absolute -bottom-2 -right-2 p-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 rounded-xl shadow-md">
                 <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
               </span>
             </div>
 
             <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {profile.fullName}
                 </h1>
-                <span className="text-xs font-mono font-bold text-indigo-200/80">@{profile.username}</span>
+                <span className="text-xs font-mono font-extrabold text-[#CCFF00] bg-white/10 px-2.5 py-1 rounded-xl border border-white/20">
+                  @{profile.username}
+                </span>
+
+                {/* Edit Profile & Upload Picture Button */}
+                <button
+                  onClick={handleOpenEditModal}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white rounded-xl text-xs font-black transition-all cursor-pointer border border-white/30 shadow-xs"
+                  title="Upload picture as avatar and change username"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Edit Profile & Avatar</span>
+                </button>
               </div>
 
               {/* Title Selector Dropdown */}
@@ -204,7 +358,10 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
               <div className="pt-2">
                 <GoogleAuthButton
                   currentUserProfile={profile}
-                  onAuthChange={(updated) => setProfile(updated)}
+                  onAuthChange={(updated) => {
+                    setProfile(updated);
+                    if (onProfileUpdate) onProfileUpdate(updated);
+                  }}
                   variant="profile"
                 />
               </div>
@@ -298,6 +455,196 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
           </div>
         </div>
       </div>
+
+      {/* EDIT PROFILE & AVATAR UPLOAD MODAL */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto font-['Montserrat']">
+          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50 dark:bg-slate-900">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 bg-[#008080] text-[#CCFF00] rounded-xl shadow-xs">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                    Customize Civic Profile
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">Upload avatar picture and select username</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="flex-1 flex flex-col min-h-0 overflow-hidden text-xs">
+              <div className="p-5 space-y-5 overflow-y-auto flex-1 max-h-[calc(92vh-130px)]">
+                {/* 1. Avatar Picture Upload & Selection */}
+                <div className="space-y-3">
+                  <label className="font-extrabold text-slate-900 dark:text-white block text-xs uppercase tracking-wider">
+                    1. Profile Picture / Avatar
+                  </label>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <div className="relative shrink-0">
+                      <img
+                        src={editAvatarUrl || profile.avatarUrl}
+                        alt="Avatar Preview"
+                        className="w-20 h-20 rounded-2xl object-cover ring-4 ring-[#008080] shadow-md"
+                      />
+                      <span className="absolute -bottom-1 -right-1 p-1 bg-[#008080] text-[#CCFF00] rounded-lg text-[9px] font-black">
+                        PREVIEW
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 w-full">
+                      <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#008080] hover:bg-[#006666] text-white font-black rounded-xl cursor-pointer shadow-xs transition-all text-xs min-h-[44px]">
+                        <Upload className="w-4 h-4 text-[#CCFF00]" />
+                        <span>Upload Picture from Device</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+
+                      <div className="text-[10px] text-slate-500 text-center sm:text-left font-medium">
+                        Supports PNG, JPG, WEBP (Max 8MB).
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preset Avatar Selection */}
+                  <div className="space-y-2 pt-1">
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
+                      Or Select a Pre-Curated Civic Avatar:
+                    </span>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                      {PRESET_AVATARS.map((preset) => (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => setEditAvatarUrl(preset.url)}
+                          className={`relative rounded-xl overflow-hidden border-2 transition-all cursor-pointer aspect-square ${
+                            editAvatarUrl === preset.url
+                              ? 'border-[#008080] ring-2 ring-[#008080]'
+                              : 'border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100'
+                          }`}
+                          title={preset.name}
+                        >
+                          <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Image URL fallback input */}
+                  <div className="pt-1">
+                    <span className="text-[10px] font-bold text-slate-500 block mb-1">
+                      Direct Image Web Link:
+                    </span>
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      value={editAvatarUrl}
+                      onChange={(e) => setEditAvatarUrl(e.target.value)}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]"
+                    />
+                  </div>
+                </div>
+
+                <hr className="border-slate-200 dark:border-slate-800" />
+
+                {/* 2. Resident Name & Username Selector */}
+                <div className="space-y-4">
+                  <label className="font-extrabold text-slate-900 dark:text-white block text-xs uppercase tracking-wider">
+                    2. Resident Identity & Username
+                  </label>
+
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Full Display Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Kaamika Yani"
+                      value={editFullName}
+                      onChange={(e) => setEditFullName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-[#008080] rounded-xl outline-none font-bold text-slate-900 dark:text-white min-h-[44px]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Civic Username Handle (@)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-black text-[#008080] text-sm">
+                        @
+                      </span>
+                      <input
+                        type="text"
+                        required
+                        placeholder="kaamika_yani"
+                        value={editUsername}
+                        onChange={(e) => setEditUsername(e.target.value.replace(/\s+/g, '_'))}
+                        className="w-full pl-8 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-[#008080] rounded-xl outline-none font-mono font-bold text-slate-900 dark:text-white min-h-[44px]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Suggested Usernames */}
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">
+                      Quick Handle Suggestions:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {SUGGESTED_USERNAMES.map((handle) => (
+                        <button
+                          key={handle}
+                          type="button"
+                          onClick={() => setEditUsername(handle)}
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-[#008080] hover:text-white dark:bg-slate-800 dark:hover:bg-[#008080] text-slate-700 dark:text-slate-300 rounded-lg text-[11px] font-mono font-bold cursor-pointer transition-colors"
+                        >
+                          @{handle}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions Footer - Sticky */}
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-end space-x-3 shrink-0 sticky bottom-0 z-20">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="btn-soft-tactile px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="btn-primary-designer px-6 py-2.5 rounded-2xl text-xs font-black cursor-pointer min-h-[44px] flex items-center space-x-2"
+                >
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-[#CCFF00]" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4 text-[#CCFF00]" />
+                  )}
+                  <span>Save Profile & Avatar</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* 2. ACTIVITY HEATMAP GRID (Soft Tactile Card) */}
       <div className="soft-card p-6 space-y-4">
