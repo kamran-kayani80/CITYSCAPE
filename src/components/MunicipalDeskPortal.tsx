@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Report, ReportStatus } from '../types';
 import { AdminDashboard } from './AdminDashboard';
+import { MunicipalBillingDashboard } from './MunicipalBillingDashboard';
 import { downloadInvoicePDF } from '../lib/pdfExporter';
 import { CityscapeLogo } from './CityscapeLogo';
 
@@ -62,7 +63,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
     return localStorage.getItem('civic_muni_subscribed') === 'true';
   });
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'board' | 'subscription' | 'settings'>('board');
+  const [activeTab, setActiveTab] = useState<'board' | 'analytics' | 'subscription' | 'settings'>('analytics');
 
   // Checkout Form State
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'po' | 'ach'>('card');
@@ -114,7 +115,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
     localStorage.removeItem('civic_muni_authenticated');
   };
 
-  // Handle SaaS $25/mo Subscription Checkout
+  // Handle SaaS Subscription Checkout
   const handleSubscribePayment = (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessingPayment(true);
@@ -123,7 +124,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
       setIsSubscribed(true);
       setIsProcessingPayment(false);
       setLicenseKey(generatedKey);
-      setPaymentSuccessMsg(`🎉 Municipal SaaS Subscription Active ($25.00/mo)! License Issued: ${generatedKey}`);
+      setPaymentSuccessMsg(`🎉 Municipal SaaS License Active ($1,250.00/mo)! License Issued: ${generatedKey}`);
       setTimeout(() => {
         setShowCheckoutModal(false);
         setPaymentSuccessMsg('');
@@ -223,7 +224,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-center space-y-2">
           <div className="flex items-center justify-center space-x-1.5 text-xs text-slate-500 font-medium">
             <CreditCard className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Requires Municipal SaaS Desk Subscription ($25.00 USD / month)</span>
+            <span>Requires Municipal SaaS Desk Subscription ($1,250.00 USD / month)</span>
           </div>
           <p className="text-[11px] text-slate-400">
             Includes multi-department dispatching, real-time SLA trackers, verified official seals, and CSV work order exports.
@@ -252,7 +253,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
               Activate Municipal Operations Subscription
             </h2>
             <p className="text-xs text-slate-300">
-              Get access to the protected municipal work desk for city maintenance staff, automated dispatching, emergency alerts, and verified official responses for <strong className="text-white font-extrabold">$25 USD / month</strong>.
+              Get access to the protected municipal work desk for city maintenance staff, automated dispatching, emergency alerts, and verified official responses for <strong className="text-white font-extrabold">$1,250 USD / month</strong>.
             </p>
           </div>
 
@@ -261,7 +262,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
             className="px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer shrink-0 flex items-center space-x-2"
           >
             <CreditCard className="w-4 h-4" />
-            <span>Subscribe for $25/Month</span>
+            <span>Subscribe for $1,250/Month</span>
           </button>
         </div>
 
@@ -353,12 +354,12 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
                       ENTERPRISE SAAS PLAN
                     </span>
                     <p className="text-sm font-heading font-extrabold text-[#1c1a3b] dark:text-white">
-                      Municipal Operations Work Desk
+                      Municipal Operations Work Desk (Ward License)
                     </p>
                   </div>
                   <div className="text-right">
                     <span className="text-2xl font-heading font-black text-indigo-700 dark:text-indigo-300">
-                      $25.00
+                      $1,250.00
                     </span>
                     <span className="text-xs text-slate-500"> / mo</span>
                   </div>
@@ -570,7 +571,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
                   ) : (
                     <>
                       <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                      <span>Authorize $25.00 USD Monthly Govt Subscription</span>
+                      <span>Authorize $1,250.00 USD Monthly Govt Subscription</span>
                     </>
                   )}
                 </button>
@@ -612,7 +613,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
               </h2>
               <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-mono font-black rounded-full border border-emerald-300 flex items-center gap-1">
                 <Check className="w-3 h-3 text-emerald-600" />
-                SaaS Active ($25/mo)
+                SaaS Active ($1,250/mo)
               </span>
             </div>
             <p className="text-xs text-slate-500">
@@ -635,6 +636,20 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('analytics')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'analytics'
+                ? 'bg-[#006D5B] text-white shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
+            }`}
+          >
+            <span>📊 Gated Billing Usage</span>
+            <span className="px-1.5 py-0.2 bg-amber-400 text-slate-950 font-black text-[9px] rounded-full uppercase">
+              Recharts
+            </span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('subscription')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'subscription'
@@ -642,7 +657,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
             }`}
           >
-            💳 SaaS Billing ($25/mo)
+            💳 SaaS Billing ($1,250/mo)
           </button>
 
           <button
@@ -675,6 +690,11 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
         />
       )}
 
+      {/* TAB 2: GATED COMMUNITIES BILLING & USAGE DASHBOARD */}
+      {activeTab === 'analytics' && (
+        <MunicipalBillingDashboard officerEmail={officerEmail} />
+      )}
+
       {/* TAB 2: SAAS BILLING & SUBSCRIPTION MANAGEMENT */}
       {activeTab === 'subscription' && (
         <div className="max-w-3xl mx-auto space-y-6">
@@ -695,7 +715,7 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
 
               <div className="text-right">
                 <span className="text-3xl font-heading font-black text-indigo-700 dark:text-indigo-300">
-                  $25.00
+                  $1,250.00
                 </span>
                 <span className="text-xs text-slate-500"> / month</span>
               </div>
@@ -725,10 +745,10 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
               <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-between text-xs font-medium">
                 <div className="flex items-center space-x-2">
                   <FileText className="w-4 h-4 text-indigo-600" />
-                  <span>Invoice #INV-2026-0725 ($25.00 USD)</span>
+                  <span>Invoice #INV-2026-0725 ($1,250.00 USD)</span>
                 </div>
                 <button
-                  onClick={() => downloadInvoicePDF('INV-2026-0725', '25.00', officerEmail || 'procurement@sfpublicworks.org')}
+                  onClick={() => downloadInvoicePDF('INV-2026-0725', '1,250.00', officerEmail || 'procurement@sfpublicworks.org')}
                   className="px-2.5 py-1 bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-[11px] font-bold border border-slate-200 dark:border-slate-600 flex items-center space-x-1 cursor-pointer active:scale-95 transition-all"
                 >
                   <Download className="w-3 h-3" />
@@ -742,13 +762,13 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
               <span className="text-xs text-slate-500">Need to pause municipal billing?</span>
               <button
                 onClick={() => {
-                  if (confirm('Are you sure you want to pause your $25/month SaaS subscription?')) {
+                  if (confirm('Are you sure you want to pause your $1,250/month SaaS subscription?')) {
                     setIsSubscribed(false);
                   }
                 }}
                 className="px-3 py-1.5 bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-300 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors cursor-pointer"
               >
-                Cancel $25/mo Plan
+                Cancel $1,250/mo Plan
               </button>
             </div>
           </div>

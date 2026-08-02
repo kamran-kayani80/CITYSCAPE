@@ -220,6 +220,23 @@ export const Header: React.FC<HeaderProps> = ({
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
+              onClick={() => setActiveView('estate')}
+              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
+                activeView === 'estate'
+                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black ring-2 ring-amber-500/40'
+                  : 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-100 border-emerald-300 dark:border-emerald-700 hover:bg-[#006D5B] hover:text-white font-black'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <span>HOA & Gated Estate</span>
+              <span className="bg-[#B45309] text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
+                PRIVATE
+              </span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setActiveView('bulletin')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'bulletin'
@@ -316,7 +333,7 @@ export const Header: React.FC<HeaderProps> = ({
               {isAdminMode ? (
                 <span className="bg-[#0A2540] text-[#CCFF00] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5 border border-[#CCFF00]/40">
                   <ShieldCheck className="w-2.5 h-2.5 text-[#CCFF00]" />
-                  <span>$25/mo</span>
+                  <span>$1,250/mo</span>
                 </span>
               ) : (
                 <span className="bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5">

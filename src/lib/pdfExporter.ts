@@ -76,7 +76,7 @@ function drawCityscapeHeaderLogo(doc: jsPDF, startX: number, startY: number) {
  */
 export function downloadInvoicePDF(
   invoiceNumber = 'INV-2026-0725',
-  amount = '25.00',
+  amount = '1,250.00',
   email = 'procurement@sfpublicworks.org'
 ) {
   try {

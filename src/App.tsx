@@ -19,6 +19,8 @@ import { SlaDashboard } from './components/SlaDashboard';
 import { CitizenPrideBanner } from './components/CitizenPrideBanner';
 import { BrandIdentitySystem } from './components/BrandIdentitySystem';
 import { StrategicArchitectureView } from './components/StrategicArchitectureView';
+import { EstatePortalView } from './components/EstatePortalView';
+import { INITIAL_REPORTS } from './data/seedData';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
 import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map, List } from 'lucide-react';
@@ -78,6 +80,7 @@ export default function App() {
   // Fetch reports from Express API
   const fetchReports = async () => {
     setIsLoading(true);
+    let fetchedReports: Report[] = [];
     try {
       const queryParams = new URLSearchParams();
       if (filter.status && filter.status !== 'ALL') queryParams.append('status', filter.status);
@@ -87,47 +90,52 @@ export default function App() {
       if (filter.sortBy) queryParams.append('sort', filter.sortBy);
 
       const res = await fetch(`/api/reports?${queryParams.toString()}`);
-      if (!res.ok) throw new Error('Failed to fetch reports');
-      const data = await res.json();
-      let fetchedReports: Report[] = data.reports || [];
-
-      // Merge locally cached user reports to ensure immediate persistence
-      try {
-        const savedLocal: Report[] = JSON.parse(localStorage.getItem('cityscape_user_created_reports') || '[]');
-        if (Array.isArray(savedLocal) && savedLocal.length > 0) {
-          const reportMap = new Map<string, Report>();
-          fetchedReports.forEach((r) => reportMap.set(r.id, r));
-          savedLocal.forEach((r) => {
-            if (r && r.id && !reportMap.has(r.id)) {
-              reportMap.set(r.id, r);
-            }
-          });
-          fetchedReports = (Array.from(reportMap.values()) as Report[]).sort(
-            (a: Report, b: Report) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        }
-      } catch (e) {
-        console.warn('Local storage load warning:', e);
-      }
-
-      setReports(fetchedReports);
-
-      // Deep link support: auto-select report if URL parameter or hash is present
-      const urlParams = new URLSearchParams(window.location.search);
-      const hash = window.location.hash;
-      const deepLinkId = urlParams.get('reportId') || (hash.startsWith('#report-') ? hash.replace('#report-', '') : null);
-
-      if (deepLinkId) {
-        const match = fetchedReports.find((r: Report) => r.id === deepLinkId);
-        if (match) {
-          handleSelectReport(match);
-        }
+      if (res.ok) {
+        const data = await res.json();
+        fetchedReports = data.reports || [];
+      } else {
+        console.warn('API returned non-OK status, falling back to initial seed reports');
+        fetchedReports = INITIAL_REPORTS;
       }
     } catch (err) {
-      console.error('Fetch reports error:', err);
-    } finally {
-      setIsLoading(false);
+      console.warn('API fetch unavailable, falling back to initial seed reports:', err);
+      fetchedReports = INITIAL_REPORTS;
     }
+
+    // Merge locally cached user reports to ensure immediate persistence
+    try {
+      const savedLocal: Report[] = JSON.parse(localStorage.getItem('cityscape_user_created_reports') || '[]');
+      if (Array.isArray(savedLocal) && savedLocal.length > 0) {
+        const reportMap = new Map<string, Report>();
+        fetchedReports.forEach((r) => reportMap.set(r.id, r));
+        savedLocal.forEach((r) => {
+          if (r && r.id && !reportMap.has(r.id)) {
+            reportMap.set(r.id, r);
+          }
+        });
+        fetchedReports = (Array.from(reportMap.values()) as Report[]).sort(
+          (a: Report, b: Report) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      }
+    } catch (e) {
+      console.warn('Local storage load warning:', e);
+    }
+
+    setReports(fetchedReports);
+
+    // Deep link support: auto-select report if URL parameter or hash is present
+    const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
+    const deepLinkId = urlParams.get('reportId') || (hash.startsWith('#report-') ? hash.replace('#report-', '') : null);
+
+    if (deepLinkId) {
+      const match = fetchedReports.find((r: Report) => r.id === deepLinkId);
+      if (match) {
+        handleSelectReport(match);
+      }
+    }
+
+    setIsLoading(false);
   };
 
   // Fetch Stats
@@ -497,6 +505,14 @@ export default function App() {
 
               {/* VIEW 10: OFFICIAL BRAND IDENTITY SYSTEM & GUIDELINES */}
               {activeView === 'brand' && <BrandIdentitySystem />}
+
+              {/* VIEW 12: PRIVATE HOUSING SOCIETIES & GATED COMMUNITY HOA PORTAL */}
+              {activeView === 'estate' && (
+                <EstatePortalView
+                  onOpenPublicReportModal={() => setIsReportModalOpen(true)}
+                  onSelectReportDetail={(report) => setSelectedReport(report)}
+                />
+              )}
 
               {/* VIEW 11: STRATEGIC AI & GOVERNANCE ROADMAP ARCHITECTURE */}
               {activeView === 'strategic' && <StrategicArchitectureView />}

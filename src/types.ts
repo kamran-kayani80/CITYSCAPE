@@ -9,7 +9,8 @@ export type AppViewMode =
   | 'bulletin'
   | 'sla'
   | 'brand'
-  | 'strategic';
+  | 'strategic'
+  | 'estate';
 
 export type ReportCategory =
   | 'EMERGENCY'
@@ -215,4 +216,73 @@ export interface AdoptedZone {
   karmaMultiplier: number;
   description: string;
 }
+
+// ==========================================
+// PRIVATE ESTATE & HOA PORTAL TYPES
+// ==========================================
+
+export type EstateUserRole = 'owner' | 'tenant' | 'admin' | 'technician';
+export type EstateScope = 'INSIDE_ESTATE' | 'OUTER_MUNICIPAL';
+export type WorkOrderTier = 'PRIVATE_UNIT' | 'COMMUNITY_SHARED';
+export type DuesPaymentStatus = 'PAID' | 'DUE' | 'OVERDUE';
+
+export interface EstateContext {
+  id: string;
+  estateName: string;
+  phaseSector: string;
+  unitPlotNumber: string;
+  userRole: EstateUserRole;
+  membershipStatus: 'VERIFIED_OWNER' | 'VERIFIED_TENANT' | 'ESTATE_STAFF';
+  duesStatus: DuesPaymentStatus;
+  duesAmountUsd: number;
+  duePeriod: string;
+  gateContactPhone: string;
+  securityDutyOfficer: string;
+}
+
+export interface EstateAsset {
+  id: string;
+  name: string;
+  category: 'GENERATOR' | 'WATER_PUMP' | 'SECURITY_GATE' | 'CLUBHOUSE_POOL' | 'SOLAR_GRID' | 'SECTOR_LIGHTING';
+  status: 'OPERATIONAL' | 'MAINTENANCE' | 'CRITICAL_FAULT';
+  metricsText: string;
+  scheduleText?: string;
+  locationSector: string;
+  lastInspectedAt: string;
+}
+
+export interface VisitorPass {
+  id: string;
+  visitorName: string;
+  visitorPhone: string;
+  vehiclePlate?: string;
+  entryPurpose: string;
+  validDate: string;
+  passCode: string;
+  status: 'APPROVED' | 'CHECKED_IN' | 'EXPIRED';
+  gateNumber: string;
+  createdAt: string;
+}
+
+export interface EstateMaintenanceBill {
+  id: string;
+  periodLabel: string;
+  amountUsd: number;
+  dueDate: string;
+  status: DuesPaymentStatus;
+  paidOn?: string;
+  receiptNumber?: string;
+}
+
+export interface EstateStaffMember {
+  id: string;
+  name: string;
+  roleTitle: string;
+  phone: string;
+  status: 'ON_DUTY_PATROL' | 'DISPATCHED' | 'OFF_DUTY';
+  sectorAssigned: string;
+  activeWorkOrdersCount: number;
+  avatarUrl?: string;
+}
+
 

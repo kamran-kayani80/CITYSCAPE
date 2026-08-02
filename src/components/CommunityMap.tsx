@@ -7,6 +7,12 @@ import { formatTimeAgo } from '../lib/utils';
 
 export type MapLayerMode = 'street' | 'satellite' | 'heatmap';
 
+function isValidLatLng(lat: any, lng: any): boolean {
+  const nLat = Number(lat);
+  const nLng = Number(lng);
+  return !isNaN(nLat) && !isNaN(nLng) && isFinite(nLat) && isFinite(nLng) && Math.abs(nLat) <= 90 && Math.abs(nLng) <= 180;
+}
+
 interface CommunityMapProps {
   reports: Report[];
   selectedReportId?: string | null;
@@ -69,7 +75,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
     // Global map click handler when in location picking mode
     map.on('click', (e: L.LeafletMouseEvent) => {
-      if (isPinningLocation && onPinLocationChange) {
+      if (isPinningLocation && onPinLocationChange && e.latlng && isValidLatLng(e.latlng.lat, e.latlng.lng)) {
         onPinLocationChange(e.latlng.lat, e.latlng.lng);
       }
     });
@@ -81,6 +87,11 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
         (pos) => {
           if (!isMounted || mapInstanceRef.current !== map) return;
           const { latitude, longitude, accuracy } = pos.coords;
+          if (!isValidLatLng(latitude, longitude)) {
+            setIsLocating(false);
+            return;
+          }
+
           setUserLocation({ lat: latitude, lng: longitude, accuracy });
           setIsGeoTagged(true);
           setIsLocating(false);
@@ -244,6 +255,10 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     if (isPinningLocation) return; // Hide report pins if actively picking pin location
 
     reports.forEach((report) => {
+      const lat = Number(report.latitude);
+      const lng = Number(report.longitude);
+      if (!isValidLatLng(lat, lng)) return;
+
       const statusConf = STATUS_CONFIG[report.status] || STATUS_CONFIG.OPEN;
       const isSelected = report.id === selectedReportId;
       const isEmergency = report.category === 'EMERGENCY';
@@ -276,7 +291,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
         popupAnchor: [0, -32],
       });
 
-      const marker = L.marker([report.latitude, report.longitude], { icon: customIcon });
+      const marker = L.marker([lat, lng], { icon: customIcon });
 
       // Build popup content HTML
       const catConf = CATEGORY_CONFIG[report.category] || CATEGORY_CONFIG.OTHER;
@@ -305,15 +320,15 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
           <div class="flex flex-col gap-2 pt-2 border-t border-slate-200 text-xs">
             <div class="flex items-center gap-1.5">
-              <a href="https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}" target="_blank" rel="noopener noreferrer" title="Google Maps" aria-label="Google Maps" class="flex-1 py-1.5 px-2 bg-[#008080] text-white hover:bg-[#006666] font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" rel="noopener noreferrer" title="Google Maps" aria-label="Google Maps" class="flex-1 py-1.5 px-2 bg-[#008080] text-white hover:bg-[#006666] font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
                 <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#EA4335"/><circle cx="12" cy="9" r="2.5" fill="#FFFFFF"/></svg>
                 Google Maps
               </a>
-              <a href="https://waze.com/ul?ll=${report.latitude},${report.longitude}&navigate=yes" target="_blank" rel="noopener noreferrer" title="Waze" aria-label="Waze" class="py-1.5 px-2 bg-sky-500 text-white hover:bg-sky-600 font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+              <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" rel="noopener noreferrer" title="Waze" aria-label="Waze" class="py-1.5 px-2 bg-sky-500 text-white hover:bg-sky-600 font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
                 <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3C6.48 3 2 7.03 2 12C2 14.82 3.42 17.32 5.65 18.91C5.46 19.64 5.09 20.65 4.3 21.41C4.12 21.58 4.22 21.88 4.46 21.91C5.69 22.06 7.15 21.75 8.35 20.93C9.48 21.32 10.71 21.5 12 21.5C17.52 21.5 22 17.47 22 12.5C22 7.53 17.52 3 12 3Z" fill="#33CCFF"/><circle cx="8.5" cy="10.5" r="1.5" fill="#0F172A"/><circle cx="15.5" cy="10.5" r="1.5" fill="#0F172A"/></svg>
                 Waze
               </a>
-              <a href="https://maps.apple.com/?daddr=${report.latitude},${report.longitude}" target="_blank" rel="noopener noreferrer" title="Apple Maps" aria-label="Apple Maps" class="py-1.5 px-2 bg-slate-800 text-white hover:bg-slate-700 font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+              <a href="https://maps.apple.com/?daddr=${lat},${lng}" target="_blank" rel="noopener noreferrer" title="Apple Maps" aria-label="Apple Maps" class="py-1.5 px-2 bg-slate-800 text-white hover:bg-slate-700 font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
                 <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="5" fill="#007AFF"/><path d="M12 4.5L15.5 12L12 10.8L8.5 12L12 4.5Z" fill="#FFFFFF"/><path d="M12 19.5L15.5 12L12 13.2L8.5 12L12 19.5Z" fill="#FF3B30"/></svg>
                 Apple Maps
               </a>
@@ -346,8 +361,8 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     // If report is selected, pan map to its coordinates
     if (selectedReportId) {
       const selected = reports.find((r) => r.id === selectedReportId);
-      if (selected) {
-        map.flyTo([selected.latitude, selected.longitude], 15, { duration: 0.8 });
+      if (selected && isValidLatLng(selected.latitude, selected.longitude)) {
+        map.flyTo([Number(selected.latitude), Number(selected.longitude)], 15, { duration: 0.8 });
       }
     }
   }, [reports, selectedReportId, isPinningLocation]);
@@ -357,9 +372,12 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    if (isPinningLocation && pinnedLocation) {
+    if (isPinningLocation && pinnedLocation && isValidLatLng(pinnedLocation.lat, pinnedLocation.lng)) {
+      const pLat = Number(pinnedLocation.lat);
+      const pLng = Number(pinnedLocation.lng);
+
       if (pinMarkerRef.current && map.hasLayer(pinMarkerRef.current)) {
-        pinMarkerRef.current.setLatLng([pinnedLocation.lat, pinnedLocation.lng]);
+        pinMarkerRef.current.setLatLng([pLat, pLng]);
       } else {
         const pinIcon = L.divIcon({
           html: `
@@ -376,14 +394,14 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           iconAnchor: [20, 40],
         });
 
-        const marker = L.marker([pinnedLocation.lat, pinnedLocation.lng], {
+        const marker = L.marker([pLat, pLng], {
           icon: pinIcon,
           draggable: true,
         }).addTo(map);
 
         marker.on('dragend', (e) => {
           const newPos = e.target.getLatLng();
-          if (onPinLocationChange) {
+          if (onPinLocationChange && isValidLatLng(newPos.lat, newPos.lng)) {
             onPinLocationChange(newPos.lat, newPos.lng);
           }
         });
@@ -391,7 +409,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
         pinMarkerRef.current = marker;
       }
 
-      map.flyTo([pinnedLocation.lat, pinnedLocation.lng], 16, { duration: 0.5 });
+      map.flyTo([pLat, pLng], 16, { duration: 0.5 });
     } else {
       if (pinMarkerRef.current && map.hasLayer(pinMarkerRef.current)) {
         pinMarkerRef.current.remove();
@@ -411,6 +429,11 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
+        if (!isValidLatLng(latitude, longitude)) {
+          setIsLocating(false);
+          return;
+        }
+
         setUserLocation({ lat: latitude, lng: longitude });
         setIsLocating(false);
 

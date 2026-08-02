@@ -66,17 +66,17 @@ export async function testConnection() {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
     console.log('Firebase connection verified.');
-  } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message.includes('the client is offline') ||
-        error.message.includes('Could not reach Cloud Firestore backend') ||
-        error.message.includes('permission-denied')
-      ) {
-        console.warn('Firebase network state notice:', error.message);
-      } else {
-        console.warn('Firebase test connection message:', error.message);
-      }
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (
+      msg.includes('offline') ||
+      msg.includes('Could not reach Cloud Firestore') ||
+      msg.includes('unavailable') ||
+      msg.includes('permission-denied')
+    ) {
+      console.warn('Firebase network state notice (offline mode ready):', msg);
+    } else {
+      console.warn('Firebase test connection notice:', msg);
     }
   }
 }
