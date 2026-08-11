@@ -1,6 +1,25 @@
-import React, { useState } from 'react';
-import { Eye, Type, Volume2, VolumeX, HelpCircle, ShieldAlert, Sparkles, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  Eye,
+  Type,
+  HelpCircle,
+  Sparkles,
+  ChevronUp,
+  Play,
+  Pause,
+  Megaphone,
+  ChevronRight,
+} from 'lucide-react';
 import { useAccessibility, FontScale } from '../context/AccessibilityContext';
+
+const MUNICIPAL_BULLETINS = [
+  '🚧 Public Works crew repair active on 4th Street for water pipe main.',
+  '🌳 Ward 2 Community Park cleanup & greening drive this Saturday at 9 AM.',
+  '⚡ Streetlight maintenance completed across Elm Street & 8th Avenue.',
+  '📢 Town Hall Civic Forum on Neighborhood Improvement scheduled for Thursday at 6 PM.',
+  '💧 Seasonal municipal water conservation advisory active across all wards.',
+];
 
 export const AccessibilityToolbar: React.FC = () => {
   const {
@@ -15,6 +34,39 @@ export const AccessibilityToolbar: React.FC = () => {
   } = useAccessibility();
 
   const [isOpenGuide, setIsOpenGuide] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [bulletinIndex, setBulletinIndex] = useState(0);
+  const [isTapePlaying, setIsTapePlaying] = useState(true);
+
+  // Auto-collapse / slide up bar when scrolling down for maximum screen visibility, slide down when at top
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      if (window.scrollY > 60 && window.scrollY > lastScrollY) {
+        setIsCollapsed(true);
+      } else if (window.scrollY <= 20) {
+        setIsCollapsed(false);
+      }
+      lastScrollY = window.scrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // News Bulletin Ticker Tape Rotation
+  useEffect(() => {
+    if (!isTapePlaying) return;
+
+    const interval = setInterval(() => {
+      setBulletinIndex((prev) => (prev + 1) % MUNICIPAL_BULLETINS.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isTapePlaying]);
 
   const handleReadScreenAloud = () => {
     if (speechEnabled) {
@@ -28,90 +80,134 @@ export const AccessibilityToolbar: React.FC = () => {
     }
   };
 
+  const handleCycleFontScale = () => {
+    const scales: FontScale[] = [100, 125, 150];
+    const nextIndex = (scales.indexOf(fontScale) + 1) % scales.length;
+    const nextScale = scales[nextIndex];
+    setFontScale(nextScale);
+    speakText(`Text size changed to ${nextScale} percent.`);
+  };
+
   return (
     <>
-      {/* Top Fixed Accessibility & Senior Citizen Quick Bar */}
-      <div className="w-full bg-[#0A2540] text-white py-2 px-3 sm:px-6 border-b-2 border-[#006D5B] flex items-center justify-between text-xs flex-wrap gap-2 z-40 sticky top-0 shadow-md font-['Montserrat']">
-        <div className="flex items-center space-x-2">
-          <span className="px-2.5 py-0.5 rounded-md bg-[#CCFF00] text-[#0A2540] font-black text-[10px] tracking-wider uppercase">
-            WCAG AAA
-          </span>
-          <span className="font-extrabold text-xs hidden sm:inline text-slate-100">
-            Senior & Universal Accessibility Bar
-          </span>
-        </div>
+      {/* Top Fixed News Bulletin Tape & Compact Accessibility Bar */}
+      <div className="relative z-40 w-full font-['Montserrat']">
+        <motion.div
+          initial={false}
+          animate={{
+            y: isCollapsed ? '-100%' : '0%',
+            opacity: isCollapsed ? 0 : 1,
+          }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full bg-[#0A2540] text-white py-1.5 px-3 sm:px-6 border-b-2 border-[#006D5B] flex items-center justify-between gap-3 sticky top-0 shadow-md"
+        >
+          {/* Left: News Bulletin Marquee Ticker Tape with Play/Pause */}
+          <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden py-0.5">
+            <div className="flex items-center space-x-1.5 shrink-0 bg-[#006D5B] text-white px-2 py-1 rounded-md text-[10px] font-black border border-[#CCFF00]/40">
+              <Megaphone className="w-3.5 h-3.5 text-[#CCFF00] animate-pulse" />
+              <span className="hidden sm:inline uppercase tracking-wider text-[9px] text-[#CCFF00]">
+                CITY BULLETIN
+              </span>
+            </div>
 
-        <div className="flex items-center space-x-1 sm:space-x-3 text-[10px] sm:text-[11px] flex-nowrap overflow-x-auto no-scrollbar shrink-0 max-w-full py-0.5">
-          {/* High Contrast AAA Toggle */}
-          <button
-            onClick={() => {
-              setHighContrast((prev) => !prev);
-              if (!highContrast) {
-                speakText('High contrast pitch-black mode enabled.');
-              } else {
-                speakText('Standard color mode restored.');
-              }
-            }}
-            className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl font-black flex items-center space-x-1 sm:space-x-1.5 transition-all cursor-pointer min-h-[32px] sm:min-h-[40px] text-[10px] sm:text-[11px] border-2 shrink-0 ${
-              highContrast
-                ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] font-black shadow-md'
-                : 'bg-[#006D5B] hover:bg-[#004d40] text-white border-[#006D5B]'
-            }`}
-            title="Toggle High-Contrast Visual Mode for Low Vision"
-          >
-            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CCFF00]" />
-            <span className="hidden sm:inline">{highContrast ? 'High Contrast ON' : 'High Contrast'}</span>
-            <span className="sm:hidden">Contrast</span>
-          </button>
+            {/* Play / Pause News Tape Control */}
+            <button
+              onClick={() => setIsTapePlaying(!isTapePlaying)}
+              className="p-1.5 bg-[#07192c] hover:bg-[#006D5B] text-[#CCFF00] rounded-md transition-colors border border-[#006D5B] shrink-0 cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
+              title={isTapePlaying ? 'Pause News Bulletin Tape' : 'Play News Bulletin Tape'}
+            >
+              {isTapePlaying ? (
+                <Pause className="w-3.5 h-3.5 text-[#CCFF00]" />
+              ) : (
+                <Play className="w-3.5 h-3.5 text-[#CCFF00] fill-current" />
+              )}
+            </button>
 
-          {/* Font Scaling Buttons */}
-          <div className="flex items-center bg-[#07192c] p-0.5 sm:p-1 rounded-lg sm:rounded-xl border-2 border-[#006D5B] shrink-0">
-            <span className="px-1.5 text-slate-100 font-extrabold text-[10px] sm:text-[11px] hidden md:inline">
-              <Type className="w-3.5 h-3.5 inline mr-0.5 text-[#CCFF00]" /> Text:
-            </span>
-            {([100, 125, 150] as FontScale[]).map((scale) => (
-              <button
-                key={scale}
-                onClick={() => {
-                  setFontScale(scale);
-                  speakText(`Font size set to ${scale} percent.`);
-                }}
-                className={`px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-black transition-all min-h-[28px] sm:min-h-[36px] cursor-pointer ${
-                  fontScale === scale
-                    ? 'bg-[#006D5B] text-white shadow-xs font-black border border-[#CCFF00]/40'
-                    : 'text-slate-200 hover:text-white hover:bg-[#006D5B]/50'
-                }`}
-              >
-                {scale}%
-              </button>
-            ))}
+            {/* Scrolling / Animated News Tape Content */}
+            <div className="flex-1 overflow-hidden relative h-6 flex items-center text-xs text-slate-100 font-medium">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={bulletinIndex}
+                  initial={{ y: 16, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -16, opacity: 0 }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  className="whitespace-nowrap truncate text-[11px] sm:text-xs font-semibold text-slate-100 flex items-center gap-1"
+                >
+                  <span className="text-[#CCFF00] font-black text-[10px] uppercase font-mono">
+                    [{bulletinIndex + 1}/{MUNICIPAL_BULLETINS.length}]
+                  </span>
+                  <span className="truncate">{MUNICIPAL_BULLETINS[bulletinIndex]}</span>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Next Bulletin Quick Skip */}
+            <button
+              onClick={() => setBulletinIndex((prev) => (prev + 1) % MUNICIPAL_BULLETINS.length)}
+              className="p-1 text-slate-300 hover:text-white shrink-0 cursor-pointer hidden md:block"
+              title="Next Bulletin"
+            >
+              <ChevronRight className="w-4 h-4 text-[#CCFF00]" />
+            </button>
           </div>
 
-          {/* Voice Guidance Read Aloud Toggle */}
-          <button
-            onClick={handleReadScreenAloud}
-            className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl font-black flex items-center space-x-1 transition-all cursor-pointer min-h-[32px] sm:min-h-[40px] text-[10px] sm:text-[11px] border-2 shrink-0 ${
-              speechEnabled
-                ? 'bg-emerald-600 text-white border-emerald-400 font-black animate-pulse'
-                : 'bg-[#006D5B] hover:bg-[#004d40] text-white border-[#006D5B]'
-            }`}
-            title="Toggle Voice Guidance Read Aloud"
-          >
-            {speechEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CCFF00]" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CCFF00]" />}
-            <span className="hidden sm:inline">{speechEnabled ? 'Voice ON' : 'Voice Assist'}</span>
-            <span className="sm:hidden">Voice</span>
-          </button>
+          {/* Right: Small Icon Accessibility Functions Bar */}
+          <div className="flex items-center space-x-1 shrink-0">
+            {/* WCAG AAA Badge */}
+            <span className="hidden xl:inline-block px-2 py-0.5 rounded bg-[#CCFF00] text-[#0A2540] font-black text-[9px] tracking-wider uppercase mr-1">
+              AAA
+            </span>
 
-          {/* Senior Guide Modal Trigger */}
-          <button
-            onClick={() => setIsOpenGuide(true)}
-            className="px-2 py-1 sm:px-2.5 sm:py-1.5 bg-[#006D5B] hover:bg-[#004d40] text-white rounded-lg sm:rounded-xl font-black flex items-center space-x-1 transition-all min-h-[32px] sm:min-h-[40px] text-[10px] sm:text-[11px] cursor-pointer border-2 border-[#006D5B] shrink-0"
-          >
-            <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CCFF00]" />
-            <span className="hidden md:inline">Senior Guide</span>
-            <span className="md:hidden">Guide</span>
-          </button>
-        </div>
+            {/* High Contrast Icon Button */}
+            <button
+              onClick={() => {
+                setHighContrast((prev) => !prev);
+                if (!highContrast) {
+                  speakText('High contrast pitch-black mode enabled.');
+                } else {
+                  speakText('Standard color mode restored.');
+                }
+              }}
+              className={`p-1.5 sm:p-2 rounded-lg font-black transition-all cursor-pointer min-h-[34px] min-w-[34px] flex items-center justify-center border ${
+                highContrast
+                  ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] shadow-md'
+                  : 'bg-[#006D5B] hover:bg-[#004d40] text-white border-[#006D5B]'
+              }`}
+              title={highContrast ? 'High Contrast Mode ON (Tap to toggle)' : 'Enable High-Contrast Mode'}
+            >
+              <Eye className="w-4 h-4 text-[#CCFF00]" />
+            </button>
+
+            {/* Font Scale Cycle Icon Button */}
+            <button
+              onClick={handleCycleFontScale}
+              className="p-1.5 sm:p-2 bg-[#07192c] hover:bg-[#006D5B] text-white rounded-lg font-black border border-[#006D5B] transition-all cursor-pointer min-h-[34px] min-w-[34px] flex items-center justify-center space-x-0.5"
+              title={`Text Scale: ${fontScale}% (Tap to cycle)`}
+            >
+              <Type className="w-3.5 h-3.5 text-[#CCFF00]" />
+              <span className="text-[9px] font-mono font-black text-[#CCFF00]">{fontScale}%</span>
+            </button>
+
+            {/* Senior Guide Modal Icon Button */}
+            <button
+              onClick={() => setIsOpenGuide(true)}
+              className="p-1.5 sm:p-2 bg-[#006D5B] hover:bg-[#004d40] text-white rounded-lg font-black transition-all min-h-[34px] min-w-[34px] flex items-center justify-center cursor-pointer border border-[#006D5B]"
+              title="Open Senior & Accessibility Help Guide"
+            >
+              <HelpCircle className="w-4 h-4 text-[#CCFF00]" />
+            </button>
+
+            {/* Slide Up / Collapse Bar Action Icon Button */}
+            <button
+              onClick={() => setIsCollapsed(true)}
+              className="p-1.5 bg-[#07192c] hover:bg-[#006D5B] text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer border border-[#006D5B]/50 shrink-0 min-h-[34px] min-w-[34px] flex items-center justify-center"
+              title="Slide up bar for full screen view"
+            >
+              <ChevronUp className="w-4 h-4 text-[#CCFF00]" />
+            </button>
+          </div>
+        </motion.div>
       </div>
 
       {/* Senior Citizen & Accessibility Quick Guide Modal */}

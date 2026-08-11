@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -21,6 +21,12 @@ import {
   Scan,
   Download,
   Navigation,
+  MessageCircle,
+  Twitter,
+  Facebook,
+  Mail,
+  Link2,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { Report, Comment } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
@@ -32,7 +38,7 @@ import { ReportMapDirections } from './ReportMapDirections';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
 import { ShareModal } from './ShareModal';
-import { getShareableUrl, ShareDataPayload } from '../lib/shareUtils';
+import { getShareableUrl, ShareDataPayload, getSocialShareLinks } from '../lib/shareUtils';
 
 interface ReportDetailModalProps {
   report: Report | null;
@@ -62,11 +68,54 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const { userCoords } = useUserLocation();
 
+  // Dynamically update Open Graph and Twitter card meta tags for deep-link social media previews
+  useEffect(() => {
+    if (!report) return;
+
+    const title = `${report.title} | Cityscape Civic Request #${report.id.slice(-6)}`;
+    const description = `${report.description?.slice(0, 180)} | Status: ${report.status} | Location: ${report.addressText || 'Local Ward'}`;
+    const previewImage = report.imageUrls?.[0] || report.resolutionImageUrl || 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=1200&q=80';
+    const reportDeepLink = getShareableUrl('report', report.id);
+
+    const setMetaTag = (nameAttr: string, attrVal: string, contentVal: string) => {
+      let element = document.querySelector(`meta[${nameAttr}="${attrVal}"]`);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(nameAttr, attrVal);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', contentVal);
+    };
+
+    // Set page title for current browser tab / web scrapers
+    document.title = title;
+
+    // Set Open Graph Meta Tags
+    setMetaTag('property', 'og:title', title);
+    setMetaTag('property', 'og:description', description);
+    setMetaTag('property', 'og:image', previewImage);
+    setMetaTag('property', 'og:image:alt', report.title);
+    setMetaTag('property', 'og:image:width', '1200');
+    setMetaTag('property', 'og:image:height', '630');
+    setMetaTag('property', 'og:url', reportDeepLink);
+    setMetaTag('property', 'og:type', 'article');
+    setMetaTag('property', 'og:site_name', 'Cityscape Civic Platform');
+
+    // Set Twitter Card Meta Tags
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
+    setMetaTag('name', 'twitter:title', title);
+    setMetaTag('name', 'twitter:description', description);
+    setMetaTag('name', 'twitter:image', previewImage);
+    setMetaTag('name', 'twitter:image:alt', report.title);
+  }, [report]);
+
   if (!report) return null;
 
   const statusConf = STATUS_CONFIG[report.status] || STATUS_CONFIG.OPEN;
   const catConf = CATEGORY_CONFIG[report.category] || CATEGORY_CONFIG.OTHER;
   const sevConf = SEVERITY_CONFIG[report.severity] || SEVERITY_CONFIG.MEDIUM;
+
+  const isHighSeverity = report.severity === 'HIGH' || report.severity === 'CRITICAL' || report.category === 'EMERGENCY';
 
   let distanceTag: string | null = null;
   if (userCoords && report.latitude && report.longitude) {
@@ -126,17 +175,26 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
         className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col"
       >
         {/* Header bar */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="flex items-center space-x-2">
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 gap-2 flex-wrap">
+          <div className="flex items-center space-x-2 flex-wrap gap-y-1">
             <span
-              className="px-2.5 py-1 text-xs font-bold uppercase rounded-lg text-white"
+              className="px-2.5 py-1 text-xs font-bold uppercase rounded-lg text-white shrink-0"
               style={{ backgroundColor: statusConf.pinHex }}
             >
               {statusConf.label}
             </span>
-            <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg border ${sevConf.colorClass}`}>
+            <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg border shrink-0 ${sevConf.colorClass}`}>
               {sevConf.label}
             </span>
+
+            {/* Pulsating 'Civic Urgent' Status Badge for High Severity Reports */}
+            {isHighSeverity && (
+              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-red-600 text-white border-2 border-red-500 shadow-md animate-pulse shrink-0">
+                <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
+                <ShieldAlert className="w-3.5 h-3.5 text-white shrink-0" />
+                <span>Civic Urgent</span>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -172,7 +230,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
         {/* Modal Scrollable Content Body */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6">
           {/* Emergency High Contrast Alert Banner */}
-          {report.category === 'EMERGENCY' && (
+          {report.category === 'EMERGENCY' ? (
             <div className="p-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-2xl shadow-lg border border-red-400 flex items-center justify-between">
               <div className="flex items-center space-x-2.5">
                 <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
@@ -187,7 +245,32 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 PRIORITY 1
               </span>
             </div>
-          )}
+          ) : isHighSeverity ? (
+            <div className="p-3.5 bg-gradient-to-r from-red-600/90 via-red-600 to-rose-700 text-white rounded-2xl shadow-lg border-2 border-red-400 flex items-center justify-between gap-3 animate-pulse font-['Montserrat']">
+              <div className="flex items-center space-x-3">
+                <div className="relative flex items-center justify-center shrink-0">
+                  <span className="absolute inline-flex h-8 w-8 rounded-full bg-white/40 animate-ping" />
+                  <div className="relative w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30">
+                    <ShieldAlert className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-white">Civic Urgent Risk</h4>
+                    <span className="px-2 py-0.5 bg-white text-red-700 text-[10px] font-black uppercase rounded-md shadow-2xs">
+                      {sevConf.label}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-red-100 font-medium leading-tight mt-0.5">
+                    High-severity infrastructure hazard flagged for immediate municipal inspection & priority dispatch.
+                  </p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 bg-red-950/80 text-red-200 rounded-xl text-[10px] font-mono font-black border border-red-400/60 shrink-0">
+                HIGH PRIORITY
+              </span>
+            </div>
+          ) : null}
 
           {/* Main Title & Category */}
           <div>
@@ -357,6 +440,133 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* DEDICATED DEEP-LINK & SOCIAL MEDIA SHARING BAR */}
+          <div className="p-4 bg-gradient-to-r from-[#0A2540] via-[#0A2540]/95 to-[#006D5B] text-white rounded-2xl border-2 border-[#006D5B] shadow-lg space-y-3 font-['Montserrat']">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 rounded-xl bg-[#006D5B] text-[#CCFF00] flex items-center justify-center shrink-0 border border-[#CCFF00]/30">
+                  <Link2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-white">Share Deep Link & Spread the Word</h4>
+                  <p className="text-[11px] text-slate-300">Direct report link for neighbors, ward reps, or social media</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="px-3 py-1.5 bg-[#CCFF00] hover:bg-lime-400 text-[#0A2540] text-xs font-black rounded-xl transition-all cursor-pointer shadow-xs shrink-0 flex items-center space-x-1 min-h-[36px]"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>All Share Options</span>
+              </button>
+            </div>
+
+            {/* Deep Link URL input & Copy Button */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  readOnly
+                  value={sharePayload.url}
+                  className="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-200 focus:outline-none pr-8"
+                />
+              </div>
+
+              <button
+                onClick={handleCopyLink}
+                className={`px-4 py-2.5 rounded-xl text-xs font-black flex items-center space-x-1.5 transition-all cursor-pointer min-h-[42px] shrink-0 border ${
+                  copiedLink
+                    ? 'bg-emerald-600 text-white border-emerald-400'
+                    : 'bg-[#B45309] hover:bg-amber-600 text-white border-amber-400/40'
+                }`}
+              >
+                {copiedLink ? (
+                  <>
+                    <Check className="w-4 h-4 text-white" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copy Link</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Open Graph Social Media Preview Badge */}
+            <div className="flex items-center gap-2.5 p-2 bg-slate-900/70 rounded-xl border border-slate-700/80 text-[11px] text-slate-300">
+              <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-[#006D5B] bg-slate-800">
+                <img
+                  src={report.imageUrls?.[0] || report.resolutionImageUrl || 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=400&q=80'}
+                  alt={report.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center space-x-1.5">
+                  <span className="font-bold text-white truncate text-xs">{report.title}</span>
+                  <span className="px-1.5 py-0.5 bg-[#006D5B] text-[#CCFF00] text-[9px] font-mono font-black rounded border border-[#CCFF00]/30 shrink-0">
+                    OG Card Active
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-300 truncate">
+                  Social media platforms will auto-render this image, title & deep-link summary
+                </p>
+              </div>
+            </div>
+
+            {/* Direct Messaging & Social Shortcuts */}
+            {(() => {
+              const socialLinks = getSocialShareLinks(sharePayload);
+              return (
+                <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-white/10">
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider hidden sm:inline">Quick Send:</span>
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                    <a
+                      href={socialLinks.whatsapp}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 sm:flex-initial px-3 py-1.5 bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 hover:text-white rounded-xl text-xs font-bold border border-emerald-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>WhatsApp</span>
+                    </a>
+
+                    <a
+                      href={socialLinks.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 sm:flex-initial px-3 py-1.5 bg-sky-600/30 hover:bg-sky-600 text-sky-200 hover:text-white rounded-xl text-xs font-bold border border-sky-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                    >
+                      <Twitter className="w-3.5 h-3.5 text-sky-400" />
+                      <span>X</span>
+                    </a>
+
+                    <a
+                      href={socialLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 sm:flex-initial px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white rounded-xl text-xs font-bold border border-blue-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                    >
+                      <Facebook className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Facebook</span>
+                    </a>
+
+                    <a
+                      href={socialLinks.email}
+                      className="flex-1 sm:flex-initial px-3 py-1.5 bg-amber-600/30 hover:bg-amber-600 text-amber-200 hover:text-white rounded-xl text-xs font-bold border border-amber-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Email</span>
+                    </a>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Official Municipal Work Order Status */}

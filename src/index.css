@@ -261,6 +261,31 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: #f5f4fd;
 }
 
+/* Mobile Touch & Layout Animation Utilities */
+@layer utilities {
+  .touch-target-lg {
+    min-height: 56px;
+    min-width: 56px;
+  }
+  .touch-target-md {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+html, body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
+
 /* Custom Marker Pin Animation & Filter Transitions */
 .custom-map-pin {
   transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;

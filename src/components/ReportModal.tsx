@@ -787,7 +787,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
               <button
                 type="button"
                 onClick={() => setStep((s) => (s + 1) as any)}
-                className="btn-primary-designer flex items-center space-x-2 px-6 py-3 rounded-2xl text-xs font-black cursor-pointer min-h-[48px]"
+                className="btn-primary-designer flex items-center space-x-2 px-6 py-3.5 rounded-2xl text-xs font-black cursor-pointer min-h-[52px]"
               >
                 <span>Next Step</span>
                 <ArrowRight className="w-4 h-4" />
@@ -796,14 +796,14 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-primary-designer flex items-center space-x-2 px-7 py-3 rounded-2xl text-xs font-black cursor-pointer disabled:opacity-50 min-h-[48px]"
+                className="btn-primary-designer flex items-center space-x-2 px-7 py-3.5 rounded-2xl text-xs font-black cursor-pointer disabled:opacity-50 min-h-[52px]"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <CheckCircle className="w-4 h-4" />
                 )}
-                <span>Submit Issue Ticket</span>
+                <span>Submit Neighborhood Request</span>
               </button>
             )}
           </div>

@@ -666,20 +666,6 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
           </AnimatePresence>
         </div>
 
-        {/* Bottom Call to Action Bar */}
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/15 font-['Montserrat']">
-          <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
-            <Award className="w-4 h-4 text-[#CCFF00]" />
-            <span>24/7 Municipal Public Works Response Active</span>
-          </div>
-
-          <a
-            href="#issue-list-section"
-            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-extrabold tracking-wide bg-[#B45309] hover:bg-[#92400E] text-white border-2 border-amber-300 shadow-xl transition-all cursor-pointer min-h-[48px] hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <span>Explore {activeCity.cityName} Reports</span>
-          </a>
-        </div>
       </motion.div>
     </motion.section>
   );

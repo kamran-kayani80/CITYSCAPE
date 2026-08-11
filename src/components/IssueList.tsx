@@ -1,7 +1,28 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { ThumbsUp, MapPin, MessageSquare, Clock, ArrowUpRight, ShieldCheck, CheckCircle2, Siren, AlertOctagon, ShieldAlert, Navigation, Locate, WifiOff } from 'lucide-react';
-import { Report } from '../types';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  ThumbsUp,
+  MapPin,
+  MessageSquare,
+  Clock,
+  ArrowUpRight,
+  ShieldCheck,
+  CheckCircle2,
+  Siren,
+  AlertOctagon,
+  ShieldAlert,
+  Navigation,
+  Locate,
+  WifiOff,
+  Search,
+  X,
+  Tag,
+  Sparkles,
+  Filter,
+  Check,
+  ChevronRight,
+} from 'lucide-react';
+import { Report, ReportFilter } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 import { CategoryIcon } from './CategoryIcon';
 import { formatTimeAgo } from '../lib/utils';
@@ -15,6 +36,17 @@ interface IssueListProps {
   onSelectReport: (report: Report) => void;
   onUpvoteReport: (reportId: string, e: React.MouseEvent) => void;
   isLoading?: boolean;
+  filter?: ReportFilter;
+  setFilter?: React.Dispatch<React.SetStateAction<ReportFilter>>;
+}
+
+interface SuggestionItem {
+  id: string;
+  type: 'category' | 'location' | 'hazard';
+  title: string;
+  subtitle: string;
+  categoryKey?: string;
+  count: number;
 }
 
 export const IssueList: React.FC<IssueListProps> = ({
@@ -23,8 +55,179 @@ export const IssueList: React.FC<IssueListProps> = ({
   onSelectReport,
   onUpvoteReport,
   isLoading = false,
+  filter,
+  setFilter,
 }) => {
   const { userCoords, isLocating, hasPermission, requestLocation } = useUserLocation();
+
+  // Search Query & Auto-Suggest State
+  const [query, setQuery] = useState<string>(filter?.searchQuery || '');
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState<boolean>(false);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>(filter?.category || 'ALL');
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Sync internal query with parent filter prop if provided
+  useEffect(() => {
+    if (filter?.searchQuery !== undefined) {
+      setQuery(filter.searchQuery);
+    }
+  }, [filter?.searchQuery]);
+
+  useEffect(() => {
+    if (filter?.category !== undefined) {
+      setSelectedCategoryFilter(filter.category);
+    }
+  }, [filter?.category]);
+
+  // Handle outside click to close auto-suggest dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSuggestionsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Compute Auto-Suggest Predictions for Categories, Locations/Wards, and Hazard Titles
+  const suggestions = useMemo(() => {
+    const rawQuery = query.trim().toLowerCase();
+
+    const items: SuggestionItem[] = [];
+
+    // 1. Predict Issue Categories
+    Object.entries(CATEGORY_CONFIG).forEach(([catKey, catObj]) => {
+      if (catKey === 'ALL') return;
+
+      const matchesQuery =
+        !rawQuery ||
+        catObj.label.toLowerCase().includes(rawQuery) ||
+        catObj.description?.toLowerCase().includes(rawQuery) ||
+        catKey.toLowerCase().includes(rawQuery);
+
+      if (matchesQuery) {
+        const count = reports.filter((r) => r.category === catKey).length;
+        items.push({
+          id: `cat-${catKey}`,
+          type: 'category',
+          title: catObj.label,
+          subtitle: `Category • ${count} ${count === 1 ? 'report' : 'reports'}`,
+          categoryKey: catKey,
+          count,
+        });
+      }
+    });
+
+    // 2. Predict Locations & Wards
+    const locationMap = new Map<string, number>();
+    reports.forEach((r) => {
+      if (r.addressText) {
+        // Extract ward or street address
+        const addr = r.addressText.trim();
+        locationMap.set(addr, (locationMap.get(addr) || 0) + 1);
+      }
+    });
+
+    // Add standard Ward locations if not present
+    ['Ward 1', 'Ward 2', 'Ward 3', 'Ward 4', 'Central Ward', 'North District'].forEach((ward) => {
+      if (!locationMap.has(ward)) {
+        const matchingCount = reports.filter((r) => r.addressText?.toLowerCase().includes(ward.toLowerCase())).length;
+        locationMap.set(ward, matchingCount || 1);
+      }
+    });
+
+    locationMap.forEach((count, loc) => {
+      if (!rawQuery || loc.toLowerCase().includes(rawQuery)) {
+        items.push({
+          id: `loc-${loc}`,
+          type: 'location',
+          title: loc,
+          subtitle: `Location / Ward • ${count} active ${count === 1 ? 'item' : 'items'}`,
+          count,
+        });
+      }
+    });
+
+    // 3. Predict Hazard Keywords & Titles
+    reports.forEach((r) => {
+      if (r.title && rawQuery && r.title.toLowerCase().includes(rawQuery)) {
+        items.push({
+          id: `hazard-${r.id}`,
+          type: 'hazard',
+          title: r.title,
+          subtitle: `Report #${r.id.slice(-6)} • ${r.addressText || 'Local Ward'}`,
+          count: 1,
+        });
+      }
+    });
+
+    // Sort by relevance and limit
+    return items.slice(0, 8);
+  }, [query, reports]);
+
+  // Update query and trigger parent filter update
+  const handleQueryChange = (val: string) => {
+    setQuery(val);
+    setIsSuggestionsOpen(true);
+    if (setFilter) {
+      setFilter((prev) => ({ ...prev, searchQuery: val }));
+    }
+  };
+
+  const handleSelectSuggestion = (item: SuggestionItem) => {
+    setIsSuggestionsOpen(false);
+
+    if (item.type === 'category' && item.categoryKey) {
+      setSelectedCategoryFilter(item.categoryKey);
+      setQuery('');
+      if (setFilter) {
+        setFilter((prev) => ({ ...prev, category: item.categoryKey, searchQuery: '' }));
+      }
+    } else {
+      setQuery(item.title);
+      if (setFilter) {
+        setFilter((prev) => ({ ...prev, searchQuery: item.title }));
+      }
+    }
+  };
+
+  const handleSelectCategoryChip = (catKey: string) => {
+    setSelectedCategoryFilter(catKey);
+    if (setFilter) {
+      setFilter((prev) => ({ ...prev, category: catKey }));
+    }
+  };
+
+  const clearSearch = () => {
+    setQuery('');
+    if (setFilter) {
+      setFilter((prev) => ({ ...prev, searchQuery: '' }));
+    }
+  };
+
+  // Client-side filtering fallback if reports aren't already filtered by parent
+  const displayedReports = useMemo(() => {
+    return reports.filter((r) => {
+      // Category match
+      if (selectedCategoryFilter !== 'ALL' && r.category !== selectedCategoryFilter) {
+        return false;
+      }
+      // Search query match
+      if (query.trim()) {
+        const q = query.toLowerCase().trim();
+        const titleMatch = r.title.toLowerCase().includes(q);
+        const descMatch = r.description.toLowerCase().includes(q);
+        const addrMatch = r.addressText?.toLowerCase().includes(q);
+        const catMatch = CATEGORY_CONFIG[r.category]?.label.toLowerCase().includes(q);
+        const tagMatch = r.hashtags?.some((t) => t.toLowerCase().includes(q));
+        if (!titleMatch && !descMatch && !addrMatch && !catMatch && !tagMatch) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [reports, selectedCategoryFilter, query]);
 
   if (isLoading) {
     return (
@@ -55,11 +258,130 @@ export const IssueList: React.FC<IssueListProps> = ({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 font-['Montserrat']">
+      {/* Auto-Suggest Search Bar Section */}
+      <div ref={searchContainerRef} className="relative z-30">
+        <div className="relative flex items-center">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#006D5B] dark:text-[#CCFF00] pointer-events-none">
+            <Search className="w-4 h-4" />
+          </div>
+
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => handleQueryChange(e.target.value)}
+            onFocus={() => setIsSuggestionsOpen(true)}
+            placeholder="Search categories (pothole, water), wards, streets..."
+            className="w-full pl-10 pr-9 py-2.5 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 focus:border-[#006D5B] dark:focus:border-[#CCFF00] rounded-2xl text-xs font-bold text-[#111827] dark:text-white outline-none shadow-xs transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 min-h-[48px]"
+          />
+
+          {query && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Auto-Suggest Predictive Dropdown */}
+        <AnimatePresence>
+          {isSuggestionsOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 4, scale: 0.98 }}
+              transition={{ duration: 0.15 }}
+              className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 rounded-2xl border-2 border-[#006D5B] dark:border-slate-700 shadow-2xl overflow-hidden z-50 divide-y divide-slate-100 dark:divide-slate-800 max-h-80 overflow-y-auto"
+            >
+              {/* Dropdown Header Label */}
+              <div className="px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <span className="flex items-center space-x-1.5 text-[#006D5B] dark:text-[#CCFF00]">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Predicted Suggestions</span>
+                </span>
+                <span className="font-mono text-[9px] text-slate-400">{suggestions.length} items</span>
+              </div>
+
+              {suggestions.length === 0 ? (
+                <div className="p-4 text-center text-xs font-bold text-slate-500">
+                  No matching category, ward, or hazard suggestions found.
+                </div>
+              ) : (
+                suggestions.map((item) => {
+                  let badgeBg = 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300';
+                  let Icon = Tag;
+
+                  if (item.type === 'category') {
+                    badgeBg = 'bg-[#006D5B]/10 text-[#006D5B] dark:bg-[#006D5B]/30 dark:text-[#CCFF00]';
+                    Icon = Tag;
+                  } else if (item.type === 'location') {
+                    badgeBg = 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+                    Icon = MapPin;
+                  } else if (item.type === 'hazard') {
+                    badgeBg = 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300';
+                    Icon = ShieldAlert;
+                  }
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSelectSuggestion(item)}
+                      className="w-full text-left p-3 hover:bg-slate-50 dark:hover:bg-slate-800/90 flex items-center justify-between gap-3 transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-center space-x-3 min-w-0">
+                        <div className={`p-2 rounded-xl shrink-0 ${badgeBg}`}>
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-black text-[#111827] dark:text-white truncate group-hover:text-[#006D5B] dark:group-hover:text-[#CCFF00]">
+                            {item.title}
+                          </p>
+                          <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {item.subtitle}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-1 shrink-0 text-slate-400 group-hover:text-[#006D5B] dark:group-hover:text-[#CCFF00]">
+                        <span className="text-[10px] font-extrabold uppercase hidden sm:inline">Select</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Category Filter Chips */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+        {Object.entries(CATEGORY_CONFIG).map(([key, config]) => {
+          const isActive = selectedCategoryFilter === key;
+          return (
+            <button
+              key={key}
+              onClick={() => handleSelectCategoryChip(key)}
+              className={`px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1.5 border min-h-[36px] ${
+                isActive
+                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] border-[#006D5B] shadow-xs'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <span>{config.label}</span>
+              {isActive && <Check className="w-3 h-3 text-[#CCFF00]" />}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Sidebar header */}
-      <div className="p-3.5 soft-card flex items-center justify-between mb-3 shadow-sm">
-        <span className="text-xs font-black uppercase tracking-widest text-[#242242]">
-          Nearby Reports ({reports.length})
+      <div className="p-3.5 soft-card flex items-center justify-between shadow-sm">
+        <span className="text-xs font-black uppercase tracking-widest text-[#242242] dark:text-slate-200">
+          Nearby Reports ({displayedReports.length})
         </span>
 
         {userCoords ? (
@@ -82,7 +404,29 @@ export const IssueList: React.FC<IssueListProps> = ({
         )}
       </div>
 
-      {reports.map((report, idx) => {
+      {displayedReports.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 min-h-[220px]">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
+            <MapPin className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">No Issues Match Search</h3>
+          <p className="text-xs text-slate-500 max-w-xs mt-1">
+            No civic reports match "{query || selectedCategoryFilter}". Try clearing your search query or selecting a different category filter!
+          </p>
+          {(query || selectedCategoryFilter !== 'ALL') && (
+            <button
+              onClick={() => {
+                clearSearch();
+                handleSelectCategoryChip('ALL');
+              }}
+              className="mt-3 px-4 py-2 bg-[#006D5B] text-white rounded-xl text-xs font-black hover:bg-[#005244] transition-colors cursor-pointer"
+            >
+              Reset Search & Filters
+            </button>
+          )}
+        </div>
+      ) : (
+        displayedReports.map((report, idx) => {
         const isSelected = report.id === selectedReportId;
         const statusConf = STATUS_CONFIG[report.status] || STATUS_CONFIG.OPEN;
         const catConf = CATEGORY_CONFIG[report.category] || CATEGORY_CONFIG.OTHER;
@@ -207,7 +551,7 @@ export const IssueList: React.FC<IssueListProps> = ({
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.92 }}
                   onClick={(e) => onUpvoteReport(report.id, e)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer min-h-[40px] ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black transition-all cursor-pointer min-h-[48px] min-w-[48px] justify-center ${
                     report.userHasUpvoted
                       ? 'bg-[#B45309] text-white shadow-md border-2 border-amber-300'
                       : 'bg-slate-100 dark:bg-slate-800 text-[#111827] dark:text-white border-2 border-slate-300 dark:border-slate-600 hover:bg-[#0A2540] hover:text-white'
@@ -220,7 +564,8 @@ export const IssueList: React.FC<IssueListProps> = ({
             </div>
           </motion.div>
         );
-      })}
-    </div>
-  );
+      })
+    )}
+  </div>
+);
 };

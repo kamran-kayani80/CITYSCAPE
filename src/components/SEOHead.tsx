@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { AppViewMode, Report } from '../types';
+import { getShareableUrl } from '../lib/shareUtils';
 
 interface SEOHeadProps {
   activeView: AppViewMode;
@@ -106,6 +107,15 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView, selectedReport, re
       element.setAttribute('content', contentVal);
     };
 
+    // Determine image and URL for Open Graph preview
+    const ogImageUrl = selectedReport
+      ? (selectedReport.imageUrls?.[0] || selectedReport.resolutionImageUrl || 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=1200&q=80')
+      : 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=80';
+
+    const ogPageUrl = selectedReport
+      ? getShareableUrl('report', selectedReport.id)
+      : window.location.origin + window.location.pathname;
+
     // Update Meta Description & Keywords
     setMetaTag('name', 'description', description);
     setMetaTag('name', 'keywords', keywords);
@@ -113,10 +123,20 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView, selectedReport, re
     // Update Open Graph Meta
     setMetaTag('property', 'og:title', title);
     setMetaTag('property', 'og:description', description);
+    setMetaTag('property', 'og:image', ogImageUrl);
+    setMetaTag('property', 'og:image:alt', selectedReport?.title || 'Cityscape Civic Request');
+    setMetaTag('property', 'og:image:width', '1200');
+    setMetaTag('property', 'og:image:height', '630');
+    setMetaTag('property', 'og:url', ogPageUrl);
+    setMetaTag('property', 'og:type', selectedReport ? 'article' : 'website');
+    setMetaTag('property', 'og:site_name', 'Cityscape Civic Platform');
 
-    // Update Twitter Meta
+    // Update Twitter Card Meta
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
     setMetaTag('name', 'twitter:title', title);
     setMetaTag('name', 'twitter:description', description);
+    setMetaTag('name', 'twitter:image', ogImageUrl);
+    setMetaTag('name', 'twitter:image:alt', selectedReport?.title || 'Cityscape Civic Request');
 
     // Update Dynamic Breadcrumb & ItemList Schema
     let breadcrumbSchema = document.getElementById('seo-breadcrumb-schema');

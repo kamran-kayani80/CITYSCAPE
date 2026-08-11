@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Header } from './components/Header';
 import { CommunityMap } from './components/CommunityMap';
@@ -20,11 +20,13 @@ import { CitizenPrideBanner } from './components/CitizenPrideBanner';
 import { BrandIdentitySystem } from './components/BrandIdentitySystem';
 import { StrategicArchitectureView } from './components/StrategicArchitectureView';
 import { EstatePortalView } from './components/EstatePortalView';
+import { MobileNavigation } from './components/MobileNavigation';
 import { SEOHead } from './components/SEOHead';
+import { UndoSnackbar, UndoUpvoteState } from './components/UndoSnackbar';
 import { INITIAL_REPORTS } from './data/seedData';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
-import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map, List } from 'lucide-react';
+import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map as MapIcon, List } from 'lucide-react';
 import { useOfflineSync } from './hooks/useOfflineSync';
 import { OfflineSyncBanner } from './components/OfflineSyncBanner';
 import {
@@ -50,8 +52,17 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [userKarma, setUserKarma] = useState(840);
 
-  // Toast Notification State
+  // Toast Notification & 5-second Undo Upvote State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [undoUpvoteState, setUndoUpvoteState] = useState<UndoUpvoteState | null>(null);
+  const pendingUpvoteRef = useRef<Map<string, { timeout: NodeJS.Timeout; isUpvoted: boolean }>>(new Map());
+
+  // Cleanup pending upvote timers on unmount
+  useEffect(() => {
+    return () => {
+      pendingUpvoteRef.current.forEach((item) => clearTimeout(item.timeout));
+    };
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -247,45 +258,108 @@ export default function App() {
     fetchComments(report.id);
   };
 
-  // Upvote / Endorse issue handler with Offline Support
-  const handleUpvoteReport = async (reportId: string, e: React.MouseEvent) => {
+  // Upvote / Endorse issue handler with 5-second Undo Snackbar and Offline Support
+  const handleUpvoteReport = (reportId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Find targeted report
+    const targetReport = reports.find((r) => r.id === reportId);
+    if (!targetReport) return;
+
+    const newUserHasUpvoted = !targetReport.userHasUpvoted;
 
     // Optimistic UI update
     setReports((prev) =>
       prev.map((r) => {
         if (r.id === reportId) {
-          const userHasUpvoted = !r.userHasUpvoted;
-          const upvotesCount = userHasUpvoted ? r.upvotesCount + 1 : Math.max(0, r.upvotesCount - 1);
-          return { ...r, userHasUpvoted, upvotesCount };
+          const upvotesCount = newUserHasUpvoted ? r.upvotesCount + 1 : Math.max(0, r.upvotesCount - 1);
+          return { ...r, userHasUpvoted: newUserHasUpvoted, upvotesCount };
         }
         return r;
       })
     );
 
     if (selectedReport && selectedReport.id === reportId) {
-      const userHasUpvoted = !selectedReport.userHasUpvoted;
-      const upvotesCount = userHasUpvoted ? selectedReport.upvotesCount + 1 : Math.max(0, selectedReport.upvotesCount - 1);
-      setSelectedReport({ ...selectedReport, userHasUpvoted, upvotesCount });
+      const upvotesCount = newUserHasUpvoted ? selectedReport.upvotesCount + 1 : Math.max(0, selectedReport.upvotesCount - 1);
+      setSelectedReport({ ...selectedReport, userHasUpvoted: newUserHasUpvoted, upvotesCount });
     }
 
-    if (!offlineSync.isOnline) {
-      enqueueOfflineItem('UPVOTE_REPORT', `Endorsement for report #${reportId}`, { reportId });
-      showToast('📡 Endorsement Saved Offline (Queued for Auto-Sync)');
-      return;
+    // Cancel any existing pending backend sync timer for this specific report
+    const existingTimer = pendingUpvoteRef.current.get(reportId);
+    if (existingTimer) {
+      clearTimeout(existingTimer.timeout);
+      pendingUpvoteRef.current.delete(reportId);
     }
 
-    try {
-      const res = await fetch(`/api/reports/${reportId}/upvote`, { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        showToast(data.userHasUpvoted ? '👍 Issue Endorsed! "I see this too"' : 'Endorsement removed');
+    // Backend sync task that runs after 5-second window
+    const commitUpvoteToBackend = async () => {
+      pendingUpvoteRef.current.delete(reportId);
+      setUndoUpvoteState((curr) => (curr?.reportId === reportId ? null : curr));
+
+      if (!offlineSync.isOnline) {
+        enqueueOfflineItem('UPVOTE_REPORT', `Endorsement for report #${reportId}`, { reportId });
+        showToast('📡 Endorsement Saved Offline (Queued for Auto-Sync)');
+        return;
       }
-    } catch (err) {
-      console.warn('Upvote queued for offline sync:', err);
-      enqueueOfflineItem('UPVOTE_REPORT', `Endorsement for report #${reportId}`, { reportId });
-      showToast('📡 Endorsement Saved Offline (Queued for Auto-Sync)');
+
+      try {
+        const res = await fetch(`/api/reports/${reportId}/upvote`, { method: 'POST' });
+        if (res.ok) {
+          // Successfully synced to backend
+        }
+      } catch (err) {
+        console.warn('Upvote queued for offline sync:', err);
+        enqueueOfflineItem('UPVOTE_REPORT', `Endorsement for report #${reportId}`, { reportId });
+        showToast('📡 Endorsement Saved Offline (Queued for Auto-Sync)');
+      }
+    };
+
+    // Schedule 5-second window
+    const timeoutId = setTimeout(commitUpvoteToBackend, 5000);
+    pendingUpvoteRef.current.set(reportId, { timeout: timeoutId, isUpvoted: newUserHasUpvoted });
+
+    // Show Undo Snackbar Notification
+    setUndoUpvoteState({
+      reportId,
+      reportTitle: targetReport.title,
+      isUpvoted: newUserHasUpvoted,
+      expiresAt: Date.now() + 5000,
+    });
+  };
+
+  // Handle Undo Endorsement Action within 5-second window
+  const handleUndoUpvote = () => {
+    if (!undoUpvoteState) return;
+
+    const { reportId } = undoUpvoteState;
+
+    // Clear pending backend sync timer
+    const pending = pendingUpvoteRef.current.get(reportId);
+    if (pending) {
+      clearTimeout(pending.timeout);
+      pendingUpvoteRef.current.delete(reportId);
     }
+
+    // Revert Optimistic UI State
+    setReports((prev) =>
+      prev.map((r) => {
+        if (r.id === reportId) {
+          const revertedUserHasUpvoted = !r.userHasUpvoted;
+          const upvotesCount = revertedUserHasUpvoted ? r.upvotesCount + 1 : Math.max(0, r.upvotesCount - 1);
+          return { ...r, userHasUpvoted: revertedUserHasUpvoted, upvotesCount };
+        }
+        return r;
+      })
+    );
+
+    if (selectedReport && selectedReport.id === reportId) {
+      const revertedUserHasUpvoted = !selectedReport.userHasUpvoted;
+      const upvotesCount = revertedUserHasUpvoted ? selectedReport.upvotesCount + 1 : Math.max(0, selectedReport.upvotesCount - 1);
+      setSelectedReport({ ...selectedReport, userHasUpvoted: revertedUserHasUpvoted, upvotesCount });
+    }
+
+    setUndoUpvoteState(null);
+    showToast('↩️ Endorsement reverted');
   };
 
   // Create Report Handler with Offline Support for Underground Facilities
@@ -560,7 +634,7 @@ export default function App() {
         />
 
         {/* Main View Container */}
-        <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 pb-28 lg:pb-8 space-y-6">
           {/* Dynamic Citizen Pride Banner - Only on Home Screen */}
           {activeView === 'map' && <CitizenPrideBanner />}
 
@@ -579,18 +653,18 @@ export default function App() {
                   <div className="flex md:hidden items-center justify-center p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl max-w-sm mx-auto border-2 border-slate-300 dark:border-slate-700 shadow-sm">
                     <button
                       onClick={() => setMobileTab('map')}
-                      className={`flex-1 flex items-center justify-center space-x-1.5 py-2.5 px-4 rounded-xl text-xs font-black transition-all active:scale-[0.97] cursor-pointer min-h-[44px] ${
+                      className={`flex-1 flex items-center justify-center space-x-1.5 py-3 px-4 rounded-xl text-xs font-black transition-all active:scale-[0.96] cursor-pointer min-h-[52px] ${
                         mobileTab === 'map'
                           ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-2 border-[#006D5B]'
                           : 'text-[#111827] dark:text-slate-100 font-extrabold hover:bg-slate-300/50'
                       }`}
                     >
-                      <Map className="w-4 h-4 text-[#CCFF00]" />
+                      <MapIcon className="w-4 h-4 text-[#CCFF00]" />
                       <span>Map View</span>
                     </button>
                     <button
                       onClick={() => setMobileTab('list')}
-                      className={`flex-1 flex items-center justify-center space-x-1.5 py-2.5 px-4 rounded-xl text-xs font-black transition-all active:scale-[0.97] cursor-pointer min-h-[44px] ${
+                      className={`flex-1 flex items-center justify-center space-x-1.5 py-3 px-4 rounded-xl text-xs font-black transition-all active:scale-[0.96] cursor-pointer min-h-[52px] ${
                         mobileTab === 'list'
                           ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-2 border-[#006D5B]'
                           : 'text-[#111827] dark:text-slate-100 font-extrabold hover:bg-slate-300/50'
@@ -632,6 +706,8 @@ export default function App() {
                         onSelectReport={handleSelectReport}
                         onUpvoteReport={handleUpvoteReport}
                         isLoading={isLoading}
+                        filter={filter}
+                        setFilter={setFilter}
                       />
                     </div>
                   </div>
@@ -760,6 +836,25 @@ export default function App() {
         />
       )}
 
+      {/* Undo Upvote 5-Second Window Snackbar Notification */}
+      <UndoSnackbar
+        undoState={undoUpvoteState}
+        onUndo={handleUndoUpvote}
+        onDismiss={() => setUndoUpvoteState(null)}
+      />
+
+      {/* Mobile Fixed Dock Navigation & Sheet Menu */}
+      <MobileNavigation
+        activeView={activeView}
+        setActiveView={setActiveView}
+        onOpenReportModal={() => setIsReportModalOpen(true)}
+        totalReportsCount={reports.length}
+        userKarma={userKarma}
+        isAdminMode={isAdminMode}
+        filter={filter}
+        setFilter={setFilter}
+      />
+
       {/* Toast Notification Popup with Spring Entrance */}
       <AnimatePresence>
         {toastMessage && (
@@ -768,7 +863,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-            className="fixed bottom-6 right-6 z-50 bg-[#1A1A1A] text-white px-4 py-3 rounded-2xl shadow-2xl border-2 border-[#008080] flex items-center space-x-3 text-xs font-bold font-['Montserrat']"
+            className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-[#1A1A1A] text-white px-4 py-3 rounded-2xl shadow-2xl border-2 border-[#008080] flex items-center space-x-3 text-xs font-bold font-['Montserrat']"
           >
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
             <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
