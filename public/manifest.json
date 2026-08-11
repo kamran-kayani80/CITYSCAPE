@@ -1,0 +1,17 @@
+{
+  "short_name": "Cityscape",
+  "name": "Cityscape - Civic Engagement & Municipal Request Platform",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512 192x192 64x64 32x32"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0A2540",
+  "theme_color": "#0A2540",
+  "display": "standalone",
+  "orientation": "portrait",
+  "description": "Report neighborhood issues, upvote municipal priority requests, track real-time public works crew updates, and build a stronger community together."
+}

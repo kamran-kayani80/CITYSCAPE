@@ -1,0 +1,9 @@
+# Cityscape Civic Engagement Platform Robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
+# Sitemaps
+Sitemap: https://cityscape.gov/sitemap.xml

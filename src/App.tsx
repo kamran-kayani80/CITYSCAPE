@@ -20,6 +20,7 @@ import { CitizenPrideBanner } from './components/CitizenPrideBanner';
 import { BrandIdentitySystem } from './components/BrandIdentitySystem';
 import { StrategicArchitectureView } from './components/StrategicArchitectureView';
 import { EstatePortalView } from './components/EstatePortalView';
+import { SEOHead } from './components/SEOHead';
 import { INITIAL_REPORTS } from './data/seedData';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
@@ -521,6 +522,7 @@ export default function App() {
 
   return (
     <AccessibilityProvider>
+      <SEOHead activeView={activeView} selectedReport={selectedReport} reportsCount={reports.length} />
       <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0f172a] text-[#111827] dark:text-[#F8FAFC] flex flex-col font-['Montserrat'] antialiased selection:bg-[#006D5B] selection:text-[#CCFF00]">
         {/* Sticky WCAG AAA Accessibility Toolbar */}
         <AccessibilityToolbar />

@@ -1,17 +1,169 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CITYSCAPE - Let's Fix Our City</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Cityscape | Citizen Engagement Platform & Municipal Issue Reporting</title>
+    <meta name="title" content="Cityscape | Citizen Engagement Platform & Municipal Issue Reporting" />
+    <meta name="description" content="Report local neighborhood issues, track public works repairs in real-time, upvote civic priorities, and collaborate with your city team on 311 services." />
+    <meta name="keywords" content="Cityscape, civic reporting, 311 municipal requests, pothole repair app, public works crew, street repair, neighborhood requests, local ward representative, community engagement, civic tech platform" />
+    <meta name="author" content="Cityscape Public Works & Civic Engagement Team" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="application-name" content="Cityscape" />
+    <meta name="theme-color" content="#0A2540" />
+    <link rel="canonical" href="https://cityscape.gov/" />
+
+    <!-- Open Graph / Facebook / LinkedIn SEO Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cityscape.gov/" />
+    <meta property="og:title" content="Cityscape | Connect with Your Municipal Public Works Team" />
+    <meta property="og:description" content="Report potholes, broken streetlights, or park maintenance needs. Track real-time public works resolution timelines for your neighborhood." />
+    <meta property="og:image" content="https://cityscape.gov/favicon.svg" />
+    <meta property="og:site_name" content="Cityscape Civic Engagement Platform" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card SEO Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://cityscape.gov/" />
+    <meta name="twitter:title" content="Cityscape | Empowering Neighbors to Build Better Communities" />
+    <meta name="twitter:description" content="Submit neighborhood requests, upvote local infrastructure priorities, and track municipal crew resolution times." />
+    <meta name="twitter:image" content="https://cityscape.gov/favicon.svg" />
+
+    <!-- Favicon & PWA Links -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Preconnect Fonts & Critical CSS Preloads -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+    <!-- Structured Data (JSON-LD) for Search Engine Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://cityscape.gov/#application",
+          "name": "Cityscape Civic Platform",
+          "operatingSystem": "All",
+          "applicationCategory": "GovernmentApplication",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "description": "Cityscape is a civic engagement app connecting residents with local municipal public administration to report, map, upvote, and resolve community infrastructure issues."
+        },
+        {
+          "@type": "GovernmentOrganization",
+          "@id": "https://cityscape.gov/#organization",
+          "name": "Cityscape Public Works & Civic Services",
+          "url": "https://cityscape.gov/",
+          "logo": "https://cityscape.gov/favicon.svg",
+          "description": "Bridging the gap between citizens of all generations and local municipal public administration.",
+          "areaServed": "Municipal Neighborhoods and Civic Wards",
+          "knowsAbout": ["311 Municipal Services", "Public Works Maintenance", "Street Infrastructure", "Civic Engagement"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://cityscape.gov/#website",
+          "url": "https://cityscape.gov/",
+          "name": "Cityscape",
+          "description": "Report neighborhood issues, upvote municipal priority requests, and track public works resolutions.",
+          "publisher": {
+            "@id": "https://cityscape.gov/#organization"
+          }
+        },
+        {
+          "@type": "Place",
+          "@id": "https://cityscape.gov/#civic-district",
+          "name": "Cityscape Municipal Service Area & Ward District",
+          "description": "Geographic coverage region for municipal public works crew dispatch and 311 citizen requests.",
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 37.7749,
+            "longitude": -122.4194
+          },
+          "containsPlace": [
+            {
+              "@type": "Place",
+              "@id": "https://cityscape.gov/#issue-market-st-pothole",
+              "name": "Market & 4th Street Road Surface Repair Site",
+              "description": "Reported severe pothole hazard affecting crosswalk traffic.",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Market St & 4th St",
+                "addressLocality": "San Francisco",
+                "addressRegion": "CA",
+                "addressCountry": "US"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 37.7858,
+                "longitude": -122.4065
+              }
+            },
+            {
+              "@type": "Place",
+              "@id": "https://cityscape.gov/#issue-mission-park-lighting",
+              "name": "Mission Dolores Park Lighting Maintenance Site",
+              "description": "Broken park lighting and pedestrian walkway safety request.",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Dolores St & 19th St",
+                "addressLocality": "San Francisco",
+                "addressRegion": "CA",
+                "addressCountry": "US"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 37.7599,
+                "longitude": -122.4269
+              }
+            }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://cityscape.gov/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How do I report a neighborhood issue on Cityscape?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Tap the 'Report an Issue' button, pin the precise location on the interactive map, select a category like Potholes or Streetlights, attach photo evidence if available, and submit your request directly to the City Public Works Crew."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I track the status of my neighborhood request?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Open the 'My Requests' tab or click any pin on the Community Map to view live resolution updates, estimated repair timelines, assigned municipal crew status, and verification badges."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the 'I See This Too' upvote button?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Upvoting a report signals to municipal public works officers that an issue affects multiple community members, helping the city prioritize high-impact neighborhood repairs."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
-  <body>
+  <body class="bg-[#F8FAFC] text-[#111827] antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
