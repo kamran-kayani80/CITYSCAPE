@@ -65,8 +65,10 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
 
       if (savedCity) {
         const known = KNOWN_CITIES.find((c) => c.name.toLowerCase() === savedCity.toLowerCase());
-        const lat = savedLat ? parseFloat(savedLat) : (known ? known.lat : 33.5970);
-        const lng = savedLng ? parseFloat(savedLng) : (known ? known.lng : 73.0449);
+        const parsedLat = savedLat ? parseFloat(savedLat) : NaN;
+        const parsedLng = savedLng ? parseFloat(savedLng) : NaN;
+        const lat = !isNaN(parsedLat) && isFinite(parsedLat) ? parsedLat : (known ? known.lat : 33.5970);
+        const lng = !isNaN(parsedLng) && isFinite(parsedLng) ? parsedLng : (known ? known.lng : 73.0449);
         setLatitude(lat);
         setLongitude(lng);
         setAddressText(`${savedCity}, Municipal Center`);
@@ -131,6 +133,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
 
   // Handle location pin change on Step 1
   const handleLocationChange = async (lat: number, lng: number) => {
+    if (isNaN(lat) || isNaN(lng) || !isFinite(lat) || !isFinite(lng)) return;
     setLatitude(lat);
     setLongitude(lng);
     setIsGeocoding(true);
@@ -182,9 +185,26 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
           if (result.severity) setSeverity(result.severity);
           if (result.description) setDescription(result.description);
         }
+      } else {
+        throw new Error('Offline or invalid response');
       }
     } catch (err) {
-      console.error('AI Scan Error:', err);
+      console.warn('AI Scan offline fallback activated:', err);
+      const textLower = `${title} ${description}`.toLowerCase();
+      let fallbackCat: ReportCategory = category || 'ROADS_TRAFFIC';
+      if (textLower.includes('water') || textLower.includes('pipe') || textLower.includes('leak')) fallbackCat = 'WATER_LEAK';
+      else if (textLower.includes('light') || textLower.includes('power') || textLower.includes('wire')) fallbackCat = 'LIGHTING';
+      else if (textLower.includes('trash') || textLower.includes('waste') || textLower.includes('garbage')) fallbackCat = 'SANITATION';
+      else if (textLower.includes('pothole') || textLower.includes('road')) fallbackCat = 'POTHOLE';
+
+      setCategory(fallbackCat);
+      setAiAnalysisResult({
+        title: title || 'Underground Facility Request',
+        category: fallbackCat,
+        severity: severity || 'MEDIUM',
+        description: description || 'Issue recorded in offline mode.',
+        suggestedTags: ['#UndergroundSync', '#SubSurfaceReport'],
+      });
     } finally {
       setIsAnalyzingAI(false);
     }

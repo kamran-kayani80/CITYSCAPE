@@ -24,6 +24,14 @@ import { INITIAL_REPORTS } from './data/seedData';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
 import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map, List } from 'lucide-react';
+import { useOfflineSync } from './hooks/useOfflineSync';
+import { OfflineSyncBanner } from './components/OfflineSyncBanner';
+import {
+  getCachedReports,
+  saveCachedReports,
+  enqueueOfflineItem,
+  PendingOfflineItem,
+} from './lib/offlineQueue';
 
 export default function App() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -40,6 +48,72 @@ export default function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userKarma, setUserKarma] = useState(840);
+
+  // Toast Notification State
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Offline Sync Dispatcher Handler
+  const handleDispatchSyncItem = async (item: PendingOfflineItem): Promise<boolean> => {
+    try {
+      if (item.type === 'CREATE_REPORT') {
+        const res = await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item.payload),
+        });
+        if (res.ok) {
+          fetchReports();
+          return true;
+        }
+        return false;
+      }
+      if (item.type === 'UPVOTE_REPORT') {
+        const res = await fetch(`/api/reports/${item.payload.reportId}/upvote`, { method: 'POST' });
+        return res.ok;
+      }
+      if (item.type === 'ADD_COMMENT') {
+        const res = await fetch(`/api/reports/${item.payload.reportId}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item.payload),
+        });
+        return res.ok;
+      }
+      if (item.type === 'UPDATE_STATUS') {
+        const res = await fetch(`/api/reports/${item.payload.reportId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Role': isAdminMode ? 'admin' : 'citizen',
+          },
+          body: JSON.stringify(item.payload),
+        });
+        return res.ok;
+      }
+      if (item.type === 'CONFIRM_RESOLUTION') {
+        const res = await fetch(`/api/reports/${item.payload.reportId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status: item.payload.confirmed ? 'CLOSED' : 'IN_PROGRESS',
+            resolutionDisputeReason: item.payload.disputeReason,
+          }),
+        });
+        return res.ok;
+      }
+      return false;
+    } catch (err) {
+      console.warn('Sync dispatch error for queued item:', item, err);
+      return false;
+    }
+  };
+
+  const offlineSync = useOfflineSync(handleDispatchSyncItem);
 
   useEffect(() => {
     fetchProfile();
@@ -69,15 +143,7 @@ export default function App() {
     sortBy: 'newest',
   });
 
-  // Toast Notification State
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
-  };
-
-  // Fetch reports from Express API
+  // Fetch reports from Express API with offline caching support
   const fetchReports = async () => {
     setIsLoading(true);
     let fetchedReports: Report[] = [];
@@ -93,13 +159,16 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         fetchedReports = data.reports || [];
+        saveCachedReports(fetchedReports);
       } else {
-        console.warn('API returned non-OK status, falling back to initial seed reports');
-        fetchedReports = INITIAL_REPORTS;
+        console.warn('API returned non-OK status, falling back to cached & seed reports');
+        const cached = getCachedReports();
+        fetchedReports = cached.length > 0 ? cached : INITIAL_REPORTS;
       }
     } catch (err) {
-      console.warn('API fetch unavailable, falling back to initial seed reports:', err);
-      fetchedReports = INITIAL_REPORTS;
+      console.warn('API fetch unavailable (Offline Mode), loading from local cache:', err);
+      const cached = getCachedReports();
+      fetchedReports = cached.length > 0 ? cached : INITIAL_REPORTS;
     }
 
     // Merge locally cached user reports to ensure immediate persistence
@@ -177,7 +246,7 @@ export default function App() {
     fetchComments(report.id);
   };
 
-  // Upvote / Endorse issue handler
+  // Upvote / Endorse issue handler with Offline Support
   const handleUpvoteReport = async (reportId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -199,6 +268,12 @@ export default function App() {
       setSelectedReport({ ...selectedReport, userHasUpvoted, upvotesCount });
     }
 
+    if (!offlineSync.isOnline) {
+      enqueueOfflineItem('UPVOTE_REPORT', `Endorsement for report #${reportId}`, { reportId });
+      showToast('📡 Endorsement Saved Offline (Queued for Auto-Sync)');
+      return;
+    }
+
     try {
       const res = await fetch(`/api/reports/${reportId}/upvote`, { method: 'POST' });
       if (res.ok) {
@@ -206,12 +281,63 @@ export default function App() {
         showToast(data.userHasUpvoted ? '👍 Issue Endorsed! "I see this too"' : 'Endorsement removed');
       }
     } catch (err) {
-      console.error('Upvote failed:', err);
+      console.warn('Upvote queued for offline sync:', err);
+      enqueueOfflineItem('UPVOTE_REPORT', `Endorsement for report #${reportId}`, { reportId });
+      showToast('📡 Endorsement Saved Offline (Queued for Auto-Sync)');
     }
   };
 
-  // Create Report Handler
+  // Create Report Handler with Offline Support for Underground Facilities
   const handleSubmitNewReport = async (newReportData: any) => {
+    if (!offlineSync.isOnline) {
+      const tempId = `off_rep_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const offlineReport: Report = {
+        id: tempId,
+        title: newReportData.title,
+        description: newReportData.description || 'Recorded in subterranean/offline mode.',
+        category: newReportData.category,
+        severity: newReportData.severity || 'MEDIUM',
+        status: 'OPEN',
+        wardZone: newReportData.wardZone || 'Central Ward 4',
+        latitude: Number(newReportData.latitude) || 33.5970,
+        longitude: Number(newReportData.longitude) || 73.0449,
+        addressText: newReportData.addressText || 'Underground Facility / Sub-Surface Site',
+        imageUrls: newReportData.imageUrls || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userName: newReportData.userName || 'Local Resident',
+        userEmail: newReportData.userEmail || '',
+        isGuest: newReportData.isGuest || false,
+        upvotesCount: 1,
+        userHasUpvoted: true,
+        verificationsCount: 0,
+        verifications: [],
+        slaHoursTarget: newReportData.slaHoursTarget || 48,
+        slaDueDate: newReportData.slaDueDate || new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+        slaStatus: 'ON_TRACK',
+        isProxyReport: newReportData.isProxyReport || false,
+        proxyResidentName: newReportData.proxyResidentName,
+        proxyResidentContact: newReportData.proxyResidentContact,
+        aiForensics: newReportData.aiForensics,
+        isFlaggedAsAiFake: newReportData.isFlaggedAsAiFake || false,
+      };
+
+      enqueueOfflineItem('CREATE_REPORT', newReportData.title, newReportData, tempId);
+
+      try {
+        const savedLocal = JSON.parse(localStorage.getItem('cityscape_user_created_reports') || '[]');
+        const updatedLocal = [offlineReport, ...savedLocal.filter((r: any) => r.id !== tempId)];
+        localStorage.setItem('cityscape_user_created_reports', JSON.stringify(updatedLocal));
+      } catch (e) {
+        console.warn('Local storage save warning:', e);
+      }
+
+      setReports((prev) => [offlineReport, ...prev]);
+      setSelectedReport(offlineReport);
+      showToast('📡 Saved Offline! Automatically queued for auto-sync when network connectivity resumes.');
+      return;
+    }
+
     try {
       const res = await fetch('/api/reports', {
         method: 'POST',
@@ -231,9 +357,8 @@ export default function App() {
       }
 
       if (data && data.report) {
-        showToast('🎉 Issue Report Submitted Successfully!');
+        showToast('🎉 Neighborhood Request Submitted Successfully!');
 
-        // Save newly created report to local storage backup
         try {
           const savedLocal = JSON.parse(localStorage.getItem('cityscape_user_created_reports') || '[]');
           const updatedLocal = [data.report, ...savedLocal.filter((r: any) => r.id !== data.report.id)];
@@ -244,36 +369,95 @@ export default function App() {
 
         fetchReports();
         fetchStats();
-        // Select newly created report to center map
         setSelectedReport(data.report);
       }
     } catch (err: any) {
-      console.error('Create report failed', err);
-      alert(`Failed to submit report: ${err.message || 'Please try again.'}`);
+      console.warn('Online submission failed, queuing offline:', err);
+      const tempId = `off_rep_${Date.now()}`;
+      const offlineReport: Report = {
+        id: tempId,
+        title: newReportData.title,
+        description: newReportData.description || 'Recorded in subterranean/offline mode.',
+        category: newReportData.category,
+        severity: newReportData.severity || 'MEDIUM',
+        status: 'OPEN',
+        wardZone: newReportData.wardZone || 'Central Ward 4',
+        latitude: Number(newReportData.latitude) || 33.5970,
+        longitude: Number(newReportData.longitude) || 73.0449,
+        addressText: newReportData.addressText || 'Underground Facility / Sub-Surface Site',
+        imageUrls: newReportData.imageUrls || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userName: newReportData.userName || 'Local Resident',
+        userEmail: newReportData.userEmail || '',
+        isGuest: newReportData.isGuest || false,
+        upvotesCount: 1,
+        userHasUpvoted: true,
+        verificationsCount: 0,
+        verifications: [],
+        slaHoursTarget: newReportData.slaHoursTarget || 48,
+        slaDueDate: newReportData.slaDueDate || new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+        slaStatus: 'ON_TRACK',
+      };
+
+      enqueueOfflineItem('CREATE_REPORT', newReportData.title, newReportData, tempId);
+      setReports((prev) => [offlineReport, ...prev]);
+      setSelectedReport(offlineReport);
+      showToast('📡 Saved Offline! Automatically queued for auto-sync when network connectivity resumes.');
     }
   };
 
-  // Add comment handler
+  // Add comment handler with Offline Support
   const handleAddComment = async (reportId: string, content: string, isOfficial: boolean) => {
+    const newComment: Comment = {
+      id: `c_${Date.now()}`,
+      reportId,
+      userName: isAdminMode ? 'Municipal Operations' : 'Local Resident',
+      userRole: isAdminMode ? 'admin' : 'citizen',
+      content,
+      isOfficialUpdate: isOfficial || isAdminMode,
+      createdAt: new Date().toISOString(),
+    };
+
+    setComments((prev) => [...prev, newComment]);
+
+    if (!offlineSync.isOnline) {
+      enqueueOfflineItem('ADD_COMMENT', `Comment on report #${reportId}`, {
+        reportId,
+        userName: newComment.userName,
+        userRole: newComment.userRole,
+        content,
+        isOfficialUpdate: newComment.isOfficialUpdate,
+      });
+      showToast('📡 Comment Saved Offline (Queued for Auto-Sync)');
+      return;
+    }
+
     try {
       const res = await fetch(`/api/reports/${reportId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userName: isAdminMode ? 'Municipal Operations' : 'Local Resident',
-          userRole: isAdminMode ? 'admin' : 'citizen',
+          userName: newComment.userName,
+          userRole: newComment.userRole,
           content,
-          isOfficialUpdate: isOfficial || isAdminMode,
+          isOfficialUpdate: newComment.isOfficialUpdate,
         }),
       });
 
       if (res.ok) {
-        const data = await res.json();
-        setComments((prev) => [...prev, data.comment]);
         showToast('Comment posted successfully');
       }
     } catch (err) {
-      console.error('Add comment failed', err);
+      console.warn('Add comment queued offline:', err);
+      enqueueOfflineItem('ADD_COMMENT', `Comment on report #${reportId}`, {
+        reportId,
+        userName: newComment.userName,
+        userRole: newComment.userRole,
+        content,
+        isOfficialUpdate: newComment.isOfficialUpdate,
+      });
+      showToast('📡 Comment Saved Offline (Queued for Auto-Sync)');
     }
   };
 
@@ -340,6 +524,20 @@ export default function App() {
       <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0f172a] text-[#111827] dark:text-[#F8FAFC] flex flex-col font-['Montserrat'] antialiased selection:bg-[#006D5B] selection:text-[#CCFF00]">
         {/* Sticky WCAG AAA Accessibility Toolbar */}
         <AccessibilityToolbar />
+
+        {/* Offline Sync Banner (Underground Facility / Sub-Surface Ready) */}
+        <OfflineSyncBanner
+          isOnline={offlineSync.isOnline}
+          isBrowserOnline={offlineSync.isBrowserOnline}
+          isUndergroundSimulated={offlineSync.isUndergroundSimulated}
+          onToggleUnderground={offlineSync.toggleUndergroundMode}
+          pendingQueue={offlineSync.pendingQueue}
+          isSyncing={offlineSync.isSyncing}
+          onTriggerSync={offlineSync.triggerSync}
+          lastSyncTime={offlineSync.lastSyncTime}
+          cachedReportsCount={reports.length}
+          lastSyncSummary={offlineSync.lastSyncSummary}
+        />
 
         {/* Navigation Header */}
         <Header
@@ -414,6 +612,9 @@ export default function App() {
                         selectedReportId={selectedReport?.id}
                         onSelectReport={handleSelectReport}
                         onUpvoteReport={handleUpvoteReport}
+                        currentUserName={userProfile?.fullName}
+                        currentUserEmail={userProfile?.email}
+                        currentUserId={userProfile?.id}
                       />
                     </div>
 
@@ -528,15 +729,19 @@ export default function App() {
       />
 
       {/* Individual Report Detail Modal */}
-      <ReportDetailModal
-        report={selectedReport}
-        comments={comments}
-        onClose={() => setSelectedReport(null)}
-        onUpvote={handleUpvoteReport}
-        onAddComment={handleAddComment}
-        isAdminMode={isAdminMode}
-        onOpenVerificationModal={(report) => setVerificationReport(report)}
-      />
+      <AnimatePresence>
+        {selectedReport && (
+          <ReportDetailModal
+            report={selectedReport}
+            comments={comments}
+            onClose={() => setSelectedReport(null)}
+            onUpvote={handleUpvoteReport}
+            onAddComment={handleAddComment}
+            isAdminMode={isAdminMode}
+            onOpenVerificationModal={(report) => setVerificationReport(report)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Community Verification Modal */}
       {verificationReport && (

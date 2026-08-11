@@ -48,18 +48,18 @@ const MONTHLY_USAGE_TRENDS = [
 ];
 
 const SUBSCRIPTION_TIERS_DISTRIBUTION = [
-  { name: 'Standard ($99/mo)', value: 18, count: '18 Estates', color: '#006D5B', maxUnits: 'Up to 100 Units' },
-  { name: 'Premier ($399/mo)', value: 24, count: '24 Estates', color: '#0A2540', maxUnits: 'Up to 500 Units' },
-  { name: 'Enterprise ($899/mo)', value: 6, count: '6 Estates', color: '#B45309', maxUnits: '500+ Units / Custom' },
+  { name: 'Standard ($39/mo)', value: 18, count: '18 Estates', color: '#006D5B', maxUnits: 'Up to 100 Units' },
+  { name: 'Premier ($119/mo)', value: 24, count: '24 Estates', color: '#0A2540', maxUnits: 'Up to 500 Units' },
+  { name: 'Enterprise ($249/mo)', value: 6, count: '6 Estates', color: '#B45309', maxUnits: '500+ Units / Custom' },
 ];
 
 const TOP_GATED_COMMUNITIES = [
-  { id: 'EST-101', name: 'Oakridge Royal Palms Society', plan: 'Premier ($399/mo)', units: 480, status: 'Active', mrr: 399, rfidScans: '28.4k', telemetryUptime: '99.9%', monthlyFeeTotal: 584 },
-  { id: 'EST-102', name: 'Silverwood Heights Enclave', plan: 'Enterprise ($899/mo)', units: 620, status: 'Active', mrr: 899, rfidScans: '41.2k', telemetryUptime: '100%', monthlyFeeTotal: 1214 },
-  { id: 'EST-103', name: 'Greenfield Valley Residences', plan: 'Premier ($399/mo)', units: 310, status: 'Active', mrr: 399, rfidScans: '19.8k', telemetryUptime: '99.7%', monthlyFeeTotal: 489 },
-  { id: 'EST-104', name: 'Pinewood Meadows Community', plan: 'Standard ($99/mo)', units: 88, status: 'Active', mrr: 99, rfidScans: '6.1k', telemetryUptime: '99.4%', monthlyFeeTotal: 144 },
-  { id: 'EST-105', name: 'Grand Horizon Towers & Villas', plan: 'Enterprise ($899/mo)', units: 750, status: 'Active', mrr: 899, rfidScans: '52.0k', telemetryUptime: '100%', monthlyFeeTotal: 1424 },
-  { id: 'EST-106', name: 'Whispering Pines Gated Sector', plan: 'Standard ($99/mo)', units: 95, status: 'Active', mrr: 99, rfidScans: '7.3k', telemetryUptime: '99.8%', monthlyFeeTotal: 159 },
+  { id: 'EST-101', name: 'Oakridge Royal Palms Society', plan: 'Premier ($119/mo)', units: 480, status: 'Active', mrr: 119, rfidScans: '28.4k', telemetryUptime: '99.9%', monthlyFeeTotal: 304 },
+  { id: 'EST-102', name: 'Silverwood Heights Enclave', plan: 'Enterprise ($249/mo)', units: 620, status: 'Active', mrr: 249, rfidScans: '41.2k', telemetryUptime: '100%', monthlyFeeTotal: 564 },
+  { id: 'EST-103', name: 'Greenfield Valley Residences', plan: 'Premier ($119/mo)', units: 310, status: 'Active', mrr: 119, rfidScans: '19.8k', telemetryUptime: '99.7%', monthlyFeeTotal: 209 },
+  { id: 'EST-104', name: 'Pinewood Meadows Community', plan: 'Standard ($39/mo)', units: 88, status: 'Active', mrr: 39, rfidScans: '6.1k', telemetryUptime: '99.4%', monthlyFeeTotal: 84 },
+  { id: 'EST-105', name: 'Grand Horizon Towers & Villas', plan: 'Enterprise ($249/mo)', units: 750, status: 'Active', mrr: 249, rfidScans: '52.0k', telemetryUptime: '100%', monthlyFeeTotal: 774 },
+  { id: 'EST-106', name: 'Whispering Pines Gated Sector', plan: 'Standard ($39/mo)', units: 95, status: 'Active', mrr: 39, rfidScans: '7.3k', telemetryUptime: '99.8%', monthlyFeeTotal: 99 },
 ];
 
 export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps> = ({

@@ -88,6 +88,9 @@ function loadStorageFromDisk() {
       if (Array.isArray(parsed.adoptedZones)) {
         adoptedZones = parsed.adoptedZones;
       }
+      if (Array.isArray(parsed.estateCommunities) && parsed.estateCommunities.length > 0) {
+        estateCommunities = parsed.estateCommunities;
+      }
       console.log(`[Storage] Loaded ${reports.length} reports and ${comments.length} comments from local persistent disk store.`);
     } catch (err) {
       console.error("[Storage] Failed reading data_store.json:", err);
@@ -107,6 +110,7 @@ function persistStorageToDisk() {
       userBadges,
       verifications,
       adoptedZones,
+      estateCommunities,
       updatedAt: new Date().toISOString()
     };
     fs.writeFileSync(DATA_STORE_PATH, JSON.stringify(payload, null, 2), "utf-8");
@@ -256,8 +260,8 @@ app.get(["/auth/google/callback", "/auth/google/callback/"], async (req, res) =>
   try {
     let googleUser = {
       id: `google-${Date.now()}`,
-      email: "kaamikayani@gmail.com",
-      name: "Kaamika Yani",
+      email: "resident@cityscape.org",
+      name: "Civic Resident",
       picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
     };
 
@@ -412,11 +416,11 @@ app.get("/auth/google/demo-login", (req, res) => {
           <h2>Sign in with Google</h2>
           <p>Choose an account to continue to CITYSCAPE</p>
 
-          <button class="account-btn" onclick="signIn('kaamikayani@gmail.com', 'Kaamika Yani')">
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="avatar" alt="User" />
+          <button class="account-btn" onclick="signIn('resident@cityscape.org', 'Civic Resident')">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: #008080; color: #CCFF00; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 14px;">CR</div>
             <div>
-              <p class="name">Kaamika Yani</p>
-              <p class="email">kaamikayani@gmail.com</p>
+              <p class="name">Civic Resident</p>
+              <p class="email">resident@cityscape.org</p>
             </div>
           </button>
 
@@ -1243,6 +1247,149 @@ app.post("/api/zones/:id/adopt", (req, res) => {
   res.json({ zone, userProfile });
 });
 
+// ==========================================
+// GATED COMMUNITY & HOA CUSTOMIZATION API ROUTES
+// ==========================================
+
+import { PRESET_GATED_COMMUNITIES } from "./src/data/estateData";
+
+// In-memory data store for Gated Communities
+let estateCommunities: any[] = [...PRESET_GATED_COMMUNITIES];
+let estateVisitorPassesMap: Record<string, any[]> = {};
+let estateUnitsMap: Record<string, any[]> = {};
+
+// 1. Get all registered Gated Communities
+app.get("/api/estates", (req, res) => {
+  res.json({ estates: estateCommunities });
+});
+
+// 2. Get specific Gated Community by ID
+app.get("/api/estates/:id", (req, res) => {
+  const { id } = req.params;
+  const estate = estateCommunities.find((e) => e.id === id);
+  if (!estate) {
+    return res.status(404).json({ error: "Gated Community not found." });
+  }
+  const passes = estateVisitorPassesMap[id] || [];
+  const units = estateUnitsMap[id] || [];
+  res.json({ estate, visitorPasses: passes, units });
+});
+
+// 3. Register / Onboard New Gated Community
+app.post("/api/estates", (req, res) => {
+  const {
+    estateName,
+    phaseSector,
+    unitPlotNumber,
+    duesAmountUsd,
+    gateContactPhone,
+    securityDutyOfficer,
+    bylawsText,
+    customRules,
+    gateOperatingHours,
+    emergencyHotline,
+    amenityPoolHours,
+    quietHoursText,
+  } = req.body;
+
+  if (!estateName || !estateName.trim()) {
+    return res.status(400).json({ error: "Estate Name is required." });
+  }
+
+  const newEstate = {
+    id: `estate-${Date.now()}`,
+    estateName: estateName.trim(),
+    phaseSector: phaseSector || 'Phase 1 - Central',
+    unitPlotNumber: unitPlotNumber || 'Unit 101',
+    userRole: 'owner',
+    membershipStatus: 'VERIFIED_OWNER',
+    duesStatus: 'PAID',
+    duesAmountUsd: Number(duesAmountUsd) || 200,
+    duePeriod: 'August 2026',
+    gateContactPhone: gateContactPhone || '+1 (555) 000-GATE',
+    securityDutyOfficer: securityDutyOfficer || 'Officer Vance',
+    bylawsText: bylawsText || '1. Quiet hours 10:00 PM - 7:00 AM.\n2. Guest passes required at gate.',
+    customRules: Array.isArray(customRules) ? customRules : ['Speed Limit: 15 MPH'],
+    gateOperatingHours: gateOperatingHours || '24/7 Gate Guard',
+    autoBarrierLiftDelaySec: 4,
+    emergencyHotline: emergencyHotline || '+1 (555) 911-GATE',
+    amenityPoolHours: amenityPoolHours || '6:00 AM - 9:00 PM',
+    quietHoursText: quietHoursText || '10:00 PM - 7:00 AM',
+    accentColor: '#006D5B',
+    createdAt: new Date().toISOString(),
+  };
+
+  estateCommunities.push(newEstate);
+  persistStorageToDisk();
+
+  res.status(201).json({ estate: newEstate });
+});
+
+// 4. Update Gated Community Custom Settings & Bylaws (Board Admin)
+app.patch("/api/estates/:id/settings", (req, res) => {
+  const { id } = req.params;
+  const estate = estateCommunities.find((e) => e.id === id);
+  if (!estate) {
+    return res.status(404).json({ error: "Gated Community not found." });
+  }
+
+  const {
+    estateName,
+    phaseSector,
+    duesAmountUsd,
+    gateContactPhone,
+    securityDutyOfficer,
+    bylawsText,
+    customRules,
+    gateOperatingHours,
+    autoBarrierLiftDelaySec,
+    emergencyHotline,
+    amenityPoolHours,
+    quietHoursText,
+    customAnnouncement,
+    bankAccountDetails,
+  } = req.body;
+
+  if (estateName) estate.estateName = estateName;
+  if (phaseSector) estate.phaseSector = phaseSector;
+  if (duesAmountUsd !== undefined) estate.duesAmountUsd = Number(duesAmountUsd);
+  if (gateContactPhone) estate.gateContactPhone = gateContactPhone;
+  if (securityDutyOfficer) estate.securityDutyOfficer = securityDutyOfficer;
+  if (bylawsText !== undefined) estate.bylawsText = bylawsText;
+  if (Array.isArray(customRules)) estate.customRules = customRules;
+  if (gateOperatingHours) estate.gateOperatingHours = gateOperatingHours;
+  if (autoBarrierLiftDelaySec !== undefined) estate.autoBarrierLiftDelaySec = Number(autoBarrierLiftDelaySec);
+  if (emergencyHotline) estate.emergencyHotline = emergencyHotline;
+  if (amenityPoolHours) estate.amenityPoolHours = amenityPoolHours;
+  if (quietHoursText) estate.quietHoursText = quietHoursText;
+  if (customAnnouncement !== undefined) estate.customAnnouncement = customAnnouncement;
+  if (bankAccountDetails !== undefined) estate.bankAccountDetails = bankAccountDetails;
+
+  persistStorageToDisk();
+  res.json({ estate });
+});
+
+// 5. Update Visitor Pass Status (Check-In / Check-Out)
+app.patch("/api/estates/:id/visitor-passes/:passId/status", (req, res) => {
+  const { id, passId } = req.params;
+  const { status } = req.body; // 'CHECKED_IN' | 'CHECKED_OUT' | 'EXPIRED'
+
+  const passes = estateVisitorPassesMap[id] || [];
+  const pass = passes.find((p) => p.id === passId);
+
+  if (pass) {
+    pass.status = status;
+    if (status === 'CHECKED_IN') {
+      pass.checkInTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (status === 'CHECKED_OUT') {
+      pass.checkOutTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+  }
+
+  persistStorageToDisk();
+  res.json({ pass, passes });
+});
+
 // 15. Community Wall of Fame & Gratitude Feed
 app.get("/api/gratitude-feed", (req, res) => {
   // Get all resolved issues sorted by resolved date
@@ -1688,7 +1835,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*all', (req, res) => {
+    app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

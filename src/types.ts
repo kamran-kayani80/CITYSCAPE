@@ -238,6 +238,17 @@ export interface EstateContext {
   duePeriod: string;
   gateContactPhone: string;
   securityDutyOfficer: string;
+  // Custom Backend Settings Per Gated Community
+  bylawsText?: string;
+  customRules?: string[];
+  gateOperatingHours?: string;
+  autoBarrierLiftDelaySec?: number;
+  emergencyHotline?: string;
+  amenityPoolHours?: string;
+  quietHoursText?: string;
+  accentColor?: string;
+  bankAccountDetails?: string;
+  customAnnouncement?: string;
 }
 
 export interface EstateAsset {
@@ -259,9 +270,11 @@ export interface VisitorPass {
   entryPurpose: string;
   validDate: string;
   passCode: string;
-  status: 'APPROVED' | 'CHECKED_IN' | 'EXPIRED';
+  status: 'APPROVED' | 'CHECKED_IN' | 'CHECKED_OUT' | 'EXPIRED';
   gateNumber: string;
   createdAt: string;
+  checkInTime?: string;
+  checkOutTime?: string;
 }
 
 export interface EstateMaintenanceBill {

@@ -31,6 +31,8 @@ import { AiForensicModal } from './AiForensicModal';
 import { ReportMapDirections } from './ReportMapDirections';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
+import { ShareModal } from './ShareModal';
+import { getShareableUrl, ShareDataPayload } from '../lib/shareUtils';
 
 interface ReportDetailModalProps {
   report: Report | null;
@@ -57,6 +59,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [showResolvedPhoto, setShowResolvedPhoto] = useState(false);
   const [isForensicsOpen, setIsForensicsOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const { userCoords } = useUserLocation();
 
   if (!report) return null;
@@ -91,32 +94,37 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
     }
   };
 
+  const sharePayload: ShareDataPayload = {
+    type: 'report',
+    title: report.title,
+    text: report.description || `Civic infrastructure report filed in ${report.addressText}`,
+    url: getShareableUrl('report', report.id),
+    idOrTag: report.id,
+    address: report.addressText,
+    category: catConf.label,
+  };
+
   const handleCopyLink = () => {
-    const url = `${window.location.origin}${window.location.pathname}?reportId=${report.id}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(sharePayload.url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const shareText = `Check out this civic infrastructure report on CITYSCAPE: "${report.title}" at ${report.addressText}`;
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
-  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-
   return (
-    <AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto"
+    >
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto"
+        initial={{ opacity: 0, scale: 0.95, y: 48 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 36 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 28, mass: 0.9 }}
+        className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col"
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 12 }}
-          transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-          className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col"
-        >
         {/* Header bar */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
           <div className="flex items-center space-x-2">
@@ -142,38 +150,15 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               <span>Export PDF</span>
             </button>
 
-            {/* Prominent Copy Link Button */}
+            {/* Standard Share Button */}
             <button
-              onClick={handleCopyLink}
-              title="Copy direct shareable link for this issue"
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold transition-all cursor-pointer border ${
-                copiedLink
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-2xs'
-                  : 'bg-white/90 text-[#1A1A1A] border-white hover:bg-white shadow-2xs'
-              }`}
+              onClick={() => setIsShareModalOpen(true)}
+              title="Share report with neighbors or social media"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold bg-[#008080] text-[#CCFF00] hover:bg-[#006666] transition-all cursor-pointer shadow-2xs min-h-[36px]"
             >
-              {copiedLink ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-white" />
-                  <span>Link Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5 text-[#008080]" />
-                  <span>Copy Link</span>
-                </>
-              )}
+              <Share2 className="w-3.5 h-3.5 text-[#CCFF00]" />
+              <span>Share Report</span>
             </button>
-
-            <a
-              href={twitterUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="p-2 text-slate-500 hover:text-[#008080] dark:text-slate-400 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800 transition-colors"
-              title="Share on X"
-            >
-              <Share2 className="w-4 h-4" />
-            </a>
 
             <button
               onClick={onClose}
@@ -349,26 +334,13 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                   </button>
                 )}
 
-                {/* Copy Link Button */}
+                {/* Share Button */}
                 <button
-                  onClick={handleCopyLink}
-                  className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer border ${
-                    copiedLink
-                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-2xs'
-                      : 'btn-soft-tactile'
-                  }`}
+                  onClick={() => setIsShareModalOpen(true)}
+                  className="flex items-center space-x-1.5 px-3.5 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer border btn-soft-tactile min-h-[44px]"
                 >
-                  {copiedLink ? (
-                    <>
-                      <Check className="w-4 h-4 text-white" />
-                      <span>Link Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 text-[#008080]" />
-                      <span>Copy Link</span>
-                    </>
-                  )}
+                  <Share2 className="w-4 h-4 text-[#008080]" />
+                  <span>Share Issue</span>
                 </button>
 
                 {/* Endorse Button */}
@@ -486,7 +458,12 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           onClose={() => setIsForensicsOpen(false)}
           report={report}
         />
+
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          data={sharePayload}
+        />
       </motion.div>
-    </AnimatePresence>
   );
 };

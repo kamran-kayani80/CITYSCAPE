@@ -96,6 +96,9 @@ export function readFileAsBase64(file: File, maxDimension = 1200, quality = 0.82
 
 // Reverse geocode via OpenStreetMap Nominatim API
 export async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  if (isNaN(lat) || isNaN(lng) || !isFinite(lat) || !isFinite(lng)) {
+    return 'San Francisco, CA';
+  }
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,

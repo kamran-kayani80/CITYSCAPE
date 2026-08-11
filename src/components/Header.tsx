@@ -220,6 +220,7 @@ export const Header: React.FC<HeaderProps> = ({
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
+              id="hoa-gated-estate-tab-btn"
               onClick={() => setActiveView('estate')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'estate'

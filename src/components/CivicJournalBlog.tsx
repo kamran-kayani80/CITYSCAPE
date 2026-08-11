@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { ShareModal } from './ShareModal';
+import { getShareableUrl, ShareDataPayload } from '../lib/shareUtils';
 import {
   BookOpen,
   Sparkles,
@@ -138,6 +140,8 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareData, setShareData] = useState<ShareDataPayload | null>(null);
 
   // Pitch Form State
   const [pitchTitle, setPitchTitle] = useState('');
@@ -512,12 +516,19 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('Article link copied to clipboard!');
+                  setShareData({
+                    type: 'article',
+                    title: selectedPost.title,
+                    text: `${selectedPost.authorName} (${selectedPost.authorTitle}): ${selectedPost.excerpt}`,
+                    url: getShareableUrl('article', selectedPost.id),
+                    idOrTag: selectedPost.id,
+                    category: selectedPost.category,
+                  });
+                  setIsShareModalOpen(true);
                 }}
-                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold flex items-center space-x-1.5 cursor-pointer"
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold flex items-center space-x-1.5 cursor-pointer hover:bg-slate-200"
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-4 h-4 text-[#008080]" />
                 <span>Share Story</span>
               </button>
             </div>
@@ -666,6 +677,12 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
           </div>
         </div>
       )}
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        data={shareData}
+      />
     </div>
   );
 };

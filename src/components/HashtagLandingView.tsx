@@ -25,6 +25,8 @@ import { formatTimeAgo } from '../lib/utils';
 import { CATEGORY_CONFIG, STATUS_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
+import { ShareModal } from './ShareModal';
+import { getShareableUrl, ShareDataPayload } from '../lib/shareUtils';
 
 interface HashtagLandingViewProps {
   tag: string;
@@ -56,6 +58,7 @@ export const HashtagLandingView: React.FC<HashtagLandingViewProps> = ({
   });
 
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const { userCoords } = useUserLocation();
 
   const normalizedTag = tag.toLowerCase().replace(/^#/, '');
@@ -93,11 +96,17 @@ export const HashtagLandingView: React.FC<HashtagLandingViewProps> = ({
     }
   };
 
+  const sharePayload: ShareDataPayload = {
+    type: 'hashtag',
+    title: `Civic Hashtag Topic: #${normalizedTag}`,
+    text: `Explore community reports, discussions, and updates tagged with #${normalizedTag} on Cityscape.`,
+    url: getShareableUrl('hashtag', normalizedTag),
+    idOrTag: normalizedTag,
+    category: 'Community Hashtag',
+  };
+
   const handleShareTag = () => {
-    const url = `${window.location.origin}/#hashtag-${normalizedTag}`;
-    navigator.clipboard.writeText(url);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
+    setIsShareModalOpen(true);
   };
 
   return (
@@ -395,6 +404,12 @@ export const HashtagLandingView: React.FC<HashtagLandingViewProps> = ({
         )}
         </div>
       )}
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        data={sharePayload}
+      />
     </div>
   );
 };

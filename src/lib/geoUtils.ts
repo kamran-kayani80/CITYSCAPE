@@ -15,6 +15,9 @@ export interface WardInfo {
  * Calculates the great-circle distance between two points in kilometers using the Haversine formula.
  */
 export function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2) || !isFinite(lat1) || !isFinite(lon1) || !isFinite(lat2) || !isFinite(lon2)) {
+    return 0;
+  }
   const R = 6371; // Earth's radius in kilometers
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -25,13 +28,17 @@ export function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lo
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  const dist = R * c;
+  return isNaN(dist) ? 0 : dist;
 }
 
 /**
  * Formats a distance into a human-readable tag (e.g. "250m away", "1.2 km away").
  */
 export function formatDistanceTag(distanceKm: number): string {
+  if (isNaN(distanceKm) || !isFinite(distanceKm)) {
+    return 'Nearby';
+  }
   if (distanceKm < 0.1) {
     return '<100m away';
   }

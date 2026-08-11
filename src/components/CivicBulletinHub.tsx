@@ -16,6 +16,8 @@ import {
 import { CivicAnnouncement } from '../types';
 import { MOCK_ANNOUNCEMENTS } from '../lib/constants';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { ShareModal } from './ShareModal';
+import { getShareableUrl, ShareDataPayload } from '../lib/shareUtils';
 
 export const CivicBulletinHub: React.FC = () => {
   const { speakText } = useAccessibility();
@@ -24,6 +26,8 @@ export const CivicBulletinHub: React.FC = () => {
   const [selectedPriority, setSelectedPriority] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [shareData, setShareData] = useState<ShareDataPayload | null>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const filteredAnnouncements = announcements.filter((item) => {
     if (selectedCategory !== 'ALL' && item.category !== selectedCategory) return false;
@@ -203,12 +207,16 @@ export const CivicBulletinHub: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({ title: item.title, text: item.description });
-                      } else {
-                        navigator.clipboard.writeText(`${item.title}: ${item.description}`);
-                        alert('Bulletin link copied to clipboard!');
-                      }
+                      setShareData({
+                        type: 'bulletin',
+                        title: item.title,
+                        text: `${item.department} Notice: ${item.description}`,
+                        url: getShareableUrl('bulletin', item.id),
+                        idOrTag: item.id,
+                        address: item.wardZone ? `Ward/Zone: ${item.wardZone}` : undefined,
+                        category: item.department,
+                      });
+                      setIsShareModalOpen(true);
                     }}
                     className="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 cursor-pointer min-h-[38px] flex items-center space-x-1"
                   >
@@ -221,6 +229,12 @@ export const CivicBulletinHub: React.FC = () => {
           })
         )}
       </div>
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        data={shareData}
+      />
     </div>
   );
 };

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { ShareModal } from './ShareModal';
+import { getShareableUrl, ShareDataPayload } from '../lib/shareUtils';
 import {
   Calendar,
   MapPin,
@@ -126,6 +128,8 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isHireAdModalOpen, setIsHireAdModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareData, setShareData] = useState<ShareDataPayload | null>(null);
 
   // Hire Event Ad Form State
   const [adTitle, setAdTitle] = useState('');
@@ -344,6 +348,25 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                   </div>
 
                   <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => {
+                        setShareData({
+                          type: 'event',
+                          title: evt.title,
+                          text: `${evt.organizerName}: ${evt.description}`,
+                          url: getShareableUrl('event', evt.id),
+                          idOrTag: evt.id,
+                          address: evt.location,
+                          category: evt.category,
+                        });
+                        setIsShareModalOpen(true);
+                      }}
+                      className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all cursor-pointer"
+                      title="Share Event"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                    </button>
+
                     {evt.externalLink && (
                       <a
                         href={evt.externalLink}
@@ -462,16 +485,37 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                 <p className="text-[9px] font-semibold text-slate-400">{evt.organizerType}</p>
               </div>
 
-              <button
-                onClick={() => handleToggleRsvp(evt.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                  evt.userHasRsvped
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-[#008080] hover:bg-[#006666] text-[#CCFF00] shadow-xs'
-                }`}
-              >
-                {evt.userHasRsvped ? '✓ Going' : 'RSVP'}
-              </button>
+              <div className="flex items-center space-x-1.5">
+                <button
+                  onClick={() => {
+                    setShareData({
+                      type: 'event',
+                      title: evt.title,
+                      text: `${evt.organizerName}: ${evt.description}`,
+                      url: getShareableUrl('event', evt.id),
+                      idOrTag: evt.id,
+                      address: evt.location,
+                      category: evt.category,
+                    });
+                    setIsShareModalOpen(true);
+                  }}
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-[#008080] dark:hover:text-[#CCFF00] rounded-xl transition-all cursor-pointer"
+                  title="Share Event"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  onClick={() => handleToggleRsvp(evt.id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    evt.userHasRsvped
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-[#008080] hover:bg-[#006666] text-[#CCFF00] shadow-xs'
+                  }`}
+                >
+                  {evt.userHasRsvped ? '✓ Going' : 'RSVP'}
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -700,6 +744,12 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
           </div>
         </div>
       )}
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        data={shareData}
+      />
     </div>
   );
 };

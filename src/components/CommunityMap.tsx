@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { Locate, RotateCcw, MapPin, Sparkles, Navigation, Map as MapIcon, Globe, Flame, Layers } from 'lucide-react';
+import { Locate, RotateCcw, MapPin, Sparkles, Navigation, Map as MapIcon, Globe, Flame, Layers, Sliders, CircleDot, Filter, X, UserCheck, User } from 'lucide-react';
 import { Report, ReportStatus } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG } from '../lib/constants';
 import { formatTimeAgo } from '../lib/utils';
@@ -13,11 +13,28 @@ function isValidLatLng(lat: any, lng: any): boolean {
   return !isNaN(nLat) && !isNaN(nLng) && isFinite(nLat) && isFinite(nLng) && Math.abs(nLat) <= 90 && Math.abs(nLng) <= 180;
 }
 
+function getHaversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 interface CommunityMapProps {
   reports: Report[];
   selectedReportId?: string | null;
   onSelectReport: (report: Report) => void;
   onUpvoteReport: (reportId: string, e: React.MouseEvent) => void;
+  currentUserName?: string;
+  currentUserEmail?: string;
+  currentUserId?: string;
   // Pin location selection mode for new reports
   isPinningLocation?: boolean;
   pinnedLocation?: { lat: number; lng: number } | null;
@@ -29,6 +46,9 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
   selectedReportId,
   onSelectReport,
   onUpvoteReport,
+  currentUserName,
+  currentUserEmail,
+  currentUserId,
   isPinningLocation = false,
   pinnedLocation,
   onPinLocationChange,
@@ -40,11 +60,94 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
   const heatmapLayerRef = useRef<L.LayerGroup | null>(null);
   const pinMarkerRef = useRef<L.Marker | null>(null);
   const userLocMarkerRef = useRef<L.Marker | null>(null);
+  const radiusCircleRef = useRef<L.Circle | null>(null);
 
   const [mapMode, setMapMode] = useState<MapLayerMode>('street');
   const [isLocating, setIsLocating] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
   const [isGeoTagged, setIsGeoTagged] = useState(false);
+
+  // Range Slider Distance Filter States
+  const [isRadiusFilterActive, setIsRadiusFilterActive] = useState<boolean>(false);
+  const [radiusKm, setRadiusKm] = useState<number>(5);
+  const [isRadiusPanelOpen, setIsRadiusPanelOpen] = useState<boolean>(false);
+
+  // My Reports Toggle Filter State
+  const [isMyReportsOnly, setIsMyReportsOnly] = useState<boolean>(false);
+
+  // Function to determine if a report belongs to the current user
+  const checkIsUserReport = React.useCallback(
+    (report: Report): boolean => {
+      // 1. Check local storage created reports
+      try {
+        const savedLocal: Report[] = JSON.parse(localStorage.getItem('cityscape_user_created_reports') || '[]');
+        if (
+          savedLocal.some(
+            (r: any) => r.id === report.id || (r.title === report.title && r.createdAt === report.createdAt)
+          )
+        ) {
+          return true;
+        }
+      } catch (err) {}
+
+      // 2. Check userId, email, or name matching
+      if (currentUserId && report.userId === currentUserId) return true;
+      if (currentUserEmail && report.userEmail && report.userEmail.toLowerCase() === currentUserEmail.toLowerCase())
+        return true;
+      if (currentUserName && report.userName && report.userName.toLowerCase() === currentUserName.toLowerCase())
+        return true;
+
+      return false;
+    },
+    [currentUserId, currentUserEmail, currentUserName]
+  );
+
+  const myReportsCount = React.useMemo(() => {
+    return reports.filter(checkIsUserReport).length;
+  }, [reports, checkIsUserReport]);
+
+  // Reference location for distance calculations (User GPS location or San Francisco default center)
+  const centerLat = userLocation?.lat ?? 37.7749;
+  const centerLng = userLocation?.lng ?? -122.4194;
+
+  // Filter reports visible within the selected distance radius
+  const visibleReports = React.useMemo(() => {
+    if (!isRadiusFilterActive) return reports;
+    return reports.filter((report) => {
+      const rLat = Number(report.latitude);
+      const rLng = Number(report.longitude);
+      if (!isValidLatLng(rLat, rLng)) return false;
+      const dist = getHaversineDistanceKm(centerLat, centerLng, rLat, rLng);
+      return dist <= radiusKm;
+    });
+  }, [reports, isRadiusFilterActive, radiusKm, centerLat, centerLng]);
+
+  // Radius visual circle overlay on Leaflet Map
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (isRadiusFilterActive && radiusKm > 0) {
+      if (radiusCircleRef.current && map.hasLayer(radiusCircleRef.current)) {
+        radiusCircleRef.current.setLatLng([centerLat, centerLng]);
+        radiusCircleRef.current.setRadius(radiusKm * 1000);
+      } else {
+        radiusCircleRef.current = L.circle([centerLat, centerLng], {
+          radius: radiusKm * 1000,
+          color: '#006D5B',
+          weight: 2.5,
+          dashArray: '6, 6',
+          fillColor: '#006D5B',
+          fillOpacity: 0.12,
+        }).addTo(map);
+      }
+    } else {
+      if (radiusCircleRef.current && map.hasLayer(radiusCircleRef.current)) {
+        map.removeLayer(radiusCircleRef.current);
+      }
+      radiusCircleRef.current = null;
+    }
+  }, [isRadiusFilterActive, radiusKm, centerLat, centerLng]);
 
   // Initialize Leaflet Map instance & Auto Geo-Tag
   useEffect(() => {
@@ -187,10 +290,14 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     heatLayer.clearLayers();
 
     if (mapMode === 'heatmap') {
-      reports.forEach((report) => {
+      visibleReports.forEach((report) => {
         const lat = Number(report.latitude);
         const lng = Number(report.longitude);
-        if (isNaN(lat) || isNaN(lng)) return;
+        if (!isValidLatLng(lat, lng)) return;
+
+        const isMyReport = checkIsUserReport(report);
+        const isDimmed = isMyReportsOnly && !isMyReport;
+        const opacityMult = isDimmed ? 0.15 : 1.0;
 
         const upvotes = typeof report.upvotesCount === 'number' && !isNaN(report.upvotesCount)
           ? report.upvotesCount
@@ -204,7 +311,9 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
         if (isNaN(totalRadius) || totalRadius <= 0) return;
 
-        const color = report.status === 'RESOLVED'
+        const color = isMyReport
+          ? '#2DD4BF'
+          : report.status === 'RESOLVED'
           ? '#10b981'
           : report.severity === 'CRITICAL'
           ? '#ff2a5f'
@@ -217,7 +326,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           radius: totalRadius,
           stroke: false,
           fillColor: color,
-          fillOpacity: 0.3,
+          fillOpacity: 0.3 * opacityMult,
         });
 
         // Mid-intensity core
@@ -225,7 +334,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           radius: totalRadius * 0.45,
           stroke: false,
           fillColor: color,
-          fillOpacity: 0.6,
+          fillOpacity: 0.6 * opacityMult,
         });
 
         // Hotspot center point
@@ -234,7 +343,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           color: '#ffffff',
           weight: 1.5,
           fillColor: '#ffffff',
-          fillOpacity: 0.9,
+          fillOpacity: 0.9 * opacityMult,
         });
 
         heatCircle.addTo(heatLayer);
@@ -242,9 +351,9 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
         coreCircle.addTo(heatLayer);
       });
     }
-  }, [reports, mapMode]);
+  }, [visibleReports, mapMode, isMyReportsOnly, checkIsUserReport]);
 
-  // Update report markers whenever reports array or selected report changes
+  // Update report markers whenever visibleReports array or selected report changes
   useEffect(() => {
     const map = mapInstanceRef.current;
     const layer = markersLayerRef.current;
@@ -254,7 +363,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
     if (isPinningLocation) return; // Hide report pins if actively picking pin location
 
-    reports.forEach((report) => {
+    visibleReports.forEach((report) => {
       const lat = Number(report.latitude);
       const lng = Number(report.longitude);
       if (!isValidLatLng(lat, lng)) return;
@@ -262,17 +371,39 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
       const statusConf = STATUS_CONFIG[report.status] || STATUS_CONFIG.OPEN;
       const isSelected = report.id === selectedReportId;
       const isEmergency = report.category === 'EMERGENCY';
+      const isMyReport = checkIsUserReport(report);
+      const isDimmed = isMyReportsOnly && !isMyReport;
+
+      const opacityClass = isDimmed ? 'opacity-25 grayscale scale-90' : 'opacity-100 scale-100';
+      const zIndexClass = isSelected
+        ? 'scale-125 z-50'
+        : isMyReport && isMyReportsOnly
+        ? 'scale-110 z-40'
+        : 'hover:scale-110';
 
       // Custom HTML Pin Marker with status color and pin tail
       const iconHtml = `
-        <div class="relative group cursor-pointer ${isSelected ? 'scale-125 z-50' : 'hover:scale-110'} transition-all duration-200">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white shadow-lg border-2 ${isEmergency ? 'border-yellow-300 bg-red-600 ring-4 ring-red-500/50 animate-pulse' : 'border-white'}" style="${isEmergency ? '' : `background-color: ${statusConf.pinHex}`}">
+        <div class="relative group cursor-pointer ${zIndexClass} ${opacityClass} animate-marker-pop transition-all duration-300">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white shadow-lg border-2 ${
+            isEmergency
+              ? 'border-yellow-300 bg-red-600 ring-4 ring-red-500/50 animate-pulse'
+              : isMyReport
+              ? 'border-[#CCFF00] bg-[#006D5B] ring-4 ring-[#006D5B]/60'
+              : 'border-white'
+          }" style="${isEmergency || isMyReport ? '' : `background-color: ${statusConf.pinHex}`}">
             ${
               isEmergency
                 ? `<svg class="w-4 h-4 text-yellow-300 fill-current animate-bounce" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`
+                : isMyReport
+                ? `<svg class="w-4 h-4 text-[#CCFF00] fill-current" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`
                 : `<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`
             }
           </div>
+          ${
+            isMyReport
+              ? `<div class="absolute -top-1.5 -right-1.5 bg-[#CCFF00] text-[#0A2540] text-[8px] font-black px-1.5 py-0.2 rounded-full border border-[#0A2540] shadow-md flex items-center gap-0.5"><span>MY</span></div>`
+              : ''
+          }
           ${
             isEmergency
               ? `<div class="absolute -inset-2 rounded-full bg-red-600/40 animate-ping"></div>`
@@ -298,7 +429,12 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
       const popupHtml = `
         <div class="w-64 p-3.5 space-y-2.5 bg-[#f4faf9] text-[#1A1A1A] font-sans">
           ${
-            isEmergency
+            isMyReport
+              ? `<div class="px-2.5 py-1 bg-[#006D5B] text-[#CCFF00] font-black rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-between shadow-xs">
+                  <span>👤 YOUR CIVIC CONTRIBUTION</span>
+                  <span>MY ISSUE</span>
+                </div>`
+              : isEmergency
               ? `<div class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center justify-between shadow-xs">
                   <span>🚨 EMERGENCY ALERT</span>
                   <span>PRIORITY 1</span>
@@ -360,12 +496,12 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
     // If report is selected, pan map to its coordinates
     if (selectedReportId) {
-      const selected = reports.find((r) => r.id === selectedReportId);
+      const selected = visibleReports.find((r) => r.id === selectedReportId);
       if (selected && isValidLatLng(selected.latitude, selected.longitude)) {
         map.flyTo([Number(selected.latitude), Number(selected.longitude)], 15, { duration: 0.8 });
       }
     }
-  }, [reports, selectedReportId, isPinningLocation]);
+  }, [visibleReports, selectedReportId, isPinningLocation, isMyReportsOnly, checkIsUserReport]);
 
   // Handle active pinning location marker for new reports modal
   useEffect(() => {
@@ -543,6 +679,128 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
             <Flame className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
             <span className="hidden sm:inline">Heat Map</span>
           </button>
+
+          <div className="h-4 border-r border-slate-300 dark:border-slate-700 mx-1"></div>
+
+          <button
+            id="my-reports-toggle-btn"
+            onClick={() => setIsMyReportsOnly(!isMyReportsOnly)}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer ${
+              isMyReportsOnly
+                ? 'bg-[#CCFF00] text-[#0A2540] shadow-md ring-2 ring-[#006D5B]'
+                : 'text-slate-700 dark:text-slate-300 hover:text-[#008080]'
+            }`}
+            title="Toggle My Reports filter (Dims all other civic reports on map)"
+          >
+            <UserCheck className="w-3.5 h-3.5 text-[#006D5B]" />
+            <span>My Reports {myReportsCount > 0 ? `(${myReportsCount})` : ''}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Active My Reports Filter Banner Overlay */}
+      {isMyReportsOnly && !isPinningLocation && (
+        <div className="absolute top-16 right-4 sm:right-auto sm:left-80 z-20 bg-[#0A2540] text-white p-3 rounded-2xl shadow-xl border-2 border-[#006D5B] flex items-center gap-3 font-['Montserrat'] animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="p-2 bg-[#006D5B] rounded-xl text-[#CCFF00] shrink-0">
+            <UserCheck className="w-4 h-4" />
+          </div>
+          <div className="pr-1">
+            <div className="text-xs font-black text-[#CCFF00] uppercase tracking-wider flex items-center gap-1.5">
+              <span>MY REPORTS FILTER ACTIVE</span>
+            </div>
+            <p className="text-[10px] text-slate-300 font-medium">
+              {myReportsCount > 0
+                ? `Highlighting your ${myReportsCount} report${myReportsCount > 1 ? 's' : ''} (other issues dimmed)`
+                : 'No reports created yet — submit an issue to track your impact'}
+            </p>
+          </div>
+          <button
+            onClick={() => setIsMyReportsOnly(false)}
+            className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-all cursor-pointer"
+            title="Reset My Reports Filter"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Range Slider Distance Filter Overlay (Top Left below mode toggle) */}
+      {!isPinningLocation && (
+        <div className="absolute top-16 left-4 z-20 font-['Montserrat']">
+          <div className="bg-[#0A2540]/95 text-white backdrop-blur-md rounded-2xl shadow-xl border-2 border-[#006D5B] p-3.5 w-64 sm:w-72 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CircleDot className="w-4 h-4 text-[#CCFF00] animate-pulse shrink-0" />
+                <span className="text-xs font-black uppercase tracking-wider text-white">Distance Radius</span>
+              </div>
+              <button
+                onClick={() => {
+                  const nextState = !isRadiusFilterActive;
+                  setIsRadiusFilterActive(nextState);
+                  if (nextState && !userLocation) {
+                    handleLocateUser();
+                  }
+                }}
+                className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase cursor-pointer transition-all ${
+                  isRadiusFilterActive
+                    ? 'bg-[#CCFF00] text-[#0A2540] shadow-xs'
+                    : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
+                }`}
+              >
+                {isRadiusFilterActive ? 'Filter ON' : 'All Reports'}
+              </button>
+            </div>
+
+            {isRadiusFilterActive && (
+              <div className="space-y-2 pt-1 border-t border-slate-700/80">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-300 font-extrabold text-[11px]">Max Distance:</span>
+                  <span className="font-mono font-black text-[#CCFF00] text-sm">
+                    {radiusKm} km <span className="text-[10px] font-medium text-slate-400">({(radiusKm * 0.621371).toFixed(1)} mi)</span>
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="0.5"
+                  max="25"
+                  step="0.5"
+                  value={radiusKm}
+                  onChange={(e) => setRadiusKm(Number(e.target.value))}
+                  className="w-full accent-[#CCFF00] h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                />
+
+                {/* Quick Presets */}
+                <div className="flex items-center justify-between gap-1 text-[10px] font-bold pt-0.5">
+                  {[1, 3, 5, 10, 20].map((preset) => (
+                    <button
+                      key={preset}
+                      onClick={() => setRadiusKm(preset)}
+                      className={`px-2 py-1 rounded-lg cursor-pointer transition-all ${
+                        radiusKm === preset
+                          ? 'bg-[#006D5B] text-[#CCFF00] font-black'
+                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      }`}
+                    >
+                      {preset}km
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] text-teal-300 font-extrabold pt-1 border-t border-slate-800">
+                  <span>Showing {visibleReports.length} of {reports.length} reports</span>
+                  {!userLocation && (
+                    <button
+                      onClick={handleLocateUser}
+                      className="text-[#CCFF00] underline font-bold cursor-pointer hover:text-white"
+                    >
+                      Use GPS Center
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -606,6 +864,10 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
                   <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0 shadow-xs"></div>
                   <span>Resolved / Fixed</span>
                 </div>
+                <div className="flex items-center gap-2.5 text-[#006D5B] dark:text-[#CCFF00] font-black border-t border-slate-200 dark:border-slate-800 pt-1.5 mt-1">
+                  <div className="w-3 h-3 rounded-full bg-[#006D5B] border-2 border-[#CCFF00] shrink-0 shadow-xs"></div>
+                  <span>My Reports (Highlighted)</span>
+                </div>
               </div>
             </div>
           )}
@@ -614,14 +876,18 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           <div className="absolute bottom-6 right-6 z-20 bg-[#0A2540] p-4 flex items-center gap-5 border-2 border-[#006D5B] rounded-2xl shadow-xl">
             <div className="text-center">
               <div className="text-2xl font-['Montserrat'] font-black text-white font-mono">
-                {reports.filter((r) => r.status === 'RESOLVED').length}
+                {visibleReports.filter((r) => r.status === 'RESOLVED').length}
               </div>
               <div className="text-[9px] uppercase tracking-wider text-emerald-400 font-black">Fixed</div>
             </div>
             <div className="w-px h-8 bg-white/20"></div>
             <div className="text-center">
-              <div className="text-2xl font-['Montserrat'] font-black text-[#CCFF00] font-mono">{reports.length}</div>
-              <div className="text-[9px] uppercase tracking-wider text-teal-200 font-black">Total Mapped</div>
+              <div className="text-2xl font-['Montserrat'] font-black text-[#CCFF00] font-mono">
+                {isMyReportsOnly ? myReportsCount : visibleReports.length}
+              </div>
+              <div className="text-[9px] uppercase tracking-wider text-teal-200 font-black">
+                {isMyReportsOnly ? 'My Reports' : isRadiusFilterActive ? 'In Radius' : 'Total Mapped'}
+              </div>
             </div>
           </div>
         </>

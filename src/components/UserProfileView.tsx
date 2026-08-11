@@ -71,7 +71,7 @@ const SUGGESTED_USERNAMES = [
   'ward4_sentinel',
   'civic_leader_sf',
   'eco_neighborhood',
-  'kaamika_civic',
+  'resident_civic',
 ];
 
 export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport, onProfileUpdate }) => {
@@ -590,7 +590,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
                       <input
                         type="text"
                         required
-                        placeholder="kaamika_yani"
+                        placeholder="resident_username"
                         value={editUsername}
                         onChange={(e) => setEditUsername(e.target.value.replace(/\s+/g, '_'))}
                         className="w-full pl-8 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-[#008080] rounded-xl outline-none font-mono font-bold text-slate-900 dark:text-white min-h-[44px]"

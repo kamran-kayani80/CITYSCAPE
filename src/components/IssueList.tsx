@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ThumbsUp, MapPin, MessageSquare, Clock, ArrowUpRight, ShieldCheck, CheckCircle2, Siren, AlertOctagon, ShieldAlert, Navigation, Locate } from 'lucide-react';
+import { ThumbsUp, MapPin, MessageSquare, Clock, ArrowUpRight, ShieldCheck, CheckCircle2, Siren, AlertOctagon, ShieldAlert, Navigation, Locate, WifiOff } from 'lucide-react';
 import { Report } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 import { CategoryIcon } from './CategoryIcon';
@@ -124,6 +124,19 @@ export const IssueList: React.FC<IssueListProps> = ({
                 </div>
                 <span className="bg-red-950/80 text-red-100 px-2 py-0.5 rounded font-mono text-[9px] font-extrabold border border-red-400/50">
                   CRITICAL
+                </span>
+              </div>
+            )}
+
+            {/* Offline Queued Badge for Underground Created Reports */}
+            {(report.id.startsWith('off_') || (report as any).isOfflineQueued) && (
+              <div className="mb-2 px-2.5 py-1 bg-[#0A2540] text-[#CCFF00] border border-[#008080] rounded-xl text-[10px] font-mono font-bold flex items-center justify-between shadow-xs">
+                <div className="flex items-center space-x-1.5">
+                  <WifiOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>📡 OFFLINE QUEUED: SUB-SURFACE SYNC READY</span>
+                </div>
+                <span className="text-[9px] bg-[#008080] text-[#CCFF00] px-1.5 py-0.5 rounded font-black">
+                  AUTO-SYNC
                 </span>
               </div>
             )}

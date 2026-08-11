@@ -17,8 +17,8 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(Boolean(currentUserProfile?.isGoogleConnected));
   const [showAccountModal, setShowAccountModal] = useState(false);
-  const [customEmail, setCustomEmail] = useState('kaamikayani@gmail.com');
-  const [customName, setCustomName] = useState('Kaamika Yani');
+  const [customEmail, setCustomEmail] = useState('');
+  const [customName, setCustomName] = useState('');
 
   useEffect(() => {
     setIsConnected(Boolean(currentUserProfile?.isGoogleConnected));
@@ -240,57 +240,95 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Select a Google account to authorize instant access to CITYSCAPE:
+              Enter your email address to sign in or connect your Google account:
             </p>
 
-            <div className="space-y-2.5">
-              <button
-                onClick={() => connectAccountDirectly('kaamikayani@gmail.com', 'Kaamika Yani')}
-                className="w-full flex items-center space-x-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-[#008080] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
-                  alt="Kaamika"
-                  className="w-9 h-9 rounded-full object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold text-slate-900 dark:text-white truncate">Kaamika Yani</div>
-                  <div className="text-[11px] text-slate-500 font-mono truncate">kaamikayani@gmail.com</div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (customEmail.trim()) {
+                  connectAccountDirectly(
+                    customEmail.trim(),
+                    customName.trim() || customEmail.trim().split('@')[0]
+                  );
+                }
+              }}
+              className="space-y-3 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700"
+            >
+              <div>
+                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  Email Address <span className="text-amber-600">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="email"
+                    required
+                    value={customEmail}
+                    onChange={(e) => setCustomEmail(e.target.value)}
+                    placeholder="your.email@example.com"
+                    className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#008080] focus:outline-none"
+                  />
                 </div>
-                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-              </button>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  Full Name (Optional)
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                    placeholder="e.g. Jane Doe"
+                    className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#008080] focus:outline-none"
+                  />
+                </div>
+              </div>
 
               <button
-                onClick={() => connectAccountDirectly('alex.m@sfgov.org', 'Alex Morgan (Civic Lead)')}
-                className="w-full flex items-center space-x-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-[#008080] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
+                type="submit"
+                disabled={!customEmail.trim() || isLoading}
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] font-bold text-xs rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
               >
-                <div className="w-9 h-9 rounded-full bg-[#008080] text-[#CCFF00] font-bold flex items-center justify-center text-xs shrink-0">
-                  AM
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold text-slate-900 dark:text-white truncate">Alex Morgan</div>
-                  <div className="text-[11px] text-slate-500 font-mono truncate">alex.m@sfgov.org</div>
-                </div>
-                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                <ShieldCheck className="w-4 h-4" />
+                <span>{isLoading ? 'Signing in...' : 'Sign In with Email'}</span>
               </button>
-            </div>
+            </form>
 
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <span className="text-[11px] font-bold text-slate-500 block">Or enter custom Google email:</span>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  value={customEmail}
-                  onChange={(e) => setCustomEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"
-                />
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <span className="text-[11px] font-bold text-slate-500 block">Or select a demo profile:</span>
+              <div className="space-y-2">
                 <button
-                  onClick={() => connectAccountDirectly(customEmail.trim(), customName.trim() || 'Civic Member')}
-                  disabled={!customEmail.trim()}
-                  className="px-4 py-2 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] text-xs font-bold rounded-xl disabled:opacity-50 cursor-pointer"
+                  type="button"
+                  onClick={() => connectAccountDirectly('resident@cityscape.org', 'Civic Resident')}
+                  className="w-full flex items-center space-x-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-[#008080] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
                 >
-                  Connect
+                  <div className="w-8 h-8 rounded-full bg-teal-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
+                    CR
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white truncate">Civic Resident</div>
+                    <div className="text-[11px] text-slate-500 font-mono truncate">resident@cityscape.org</div>
+                  </div>
+                  <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => connectAccountDirectly('alex.m@sfgov.org', 'Alex Morgan (Civic Lead)')}
+                  className="w-full flex items-center space-x-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-[#008080] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
+                >
+                  <div className="w-8 h-8 rounded-full bg-[#0A2540] text-[#CCFF00] font-bold flex items-center justify-center text-xs shrink-0">
+                    AM
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white truncate">Alex Morgan (Civic Lead)</div>
+                    <div className="text-[11px] text-slate-500 font-mono truncate">alex.m@sfgov.org</div>
+                  </div>
+                  <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                 </button>
               </div>
             </div>

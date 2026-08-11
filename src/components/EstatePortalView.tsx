@@ -50,6 +50,7 @@ import {
   EstateScope
 } from '../types';
 import {
+  PRESET_GATED_COMMUNITIES,
   INITIAL_ESTATE_CONTEXT,
   INITIAL_ESTATE_ASSETS,
   INITIAL_VISITOR_PASSES,
@@ -72,6 +73,12 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [selectedPlanId, setSelectedPlanId] = useState<'standard' | 'premier' | 'enterprise'>('premier');
 
+  // Multi-Community State & Sync
+  const [allCommunities, setAllCommunities] = useState<EstateContext[]>(PRESET_GATED_COMMUNITIES);
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const [selectedVisitorPass, setSelectedVisitorPass] = useState<VisitorPass | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   // Onboarding Form State
   const [onboardingEstateName, setOnboardingEstateName] = useState('Royal Palms Gated Community');
   const [onboardingPlot, setOnboardingPlot] = useState('Villa 142');
@@ -90,6 +97,117 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
   const [estateContext, setEstateContext] = useState<EstateContext>(INITIAL_ESTATE_CONTEXT);
   const [activePortalRole, setActivePortalRole] = useState<'resident' | 'admin' | 'technician'>('resident');
   const [selectedScope, setSelectedScope] = useState<EstateScope>('INSIDE_ESTATE');
+
+  // Customizer Edit Form State
+  const [editBylaws, setEditBylaws] = useState(estateContext.bylawsText || '');
+  const [editGatePhone, setEditGatePhone] = useState(estateContext.gateContactPhone || '');
+  const [editOfficerName, setEditOfficerName] = useState(estateContext.securityDutyOfficer || '');
+  const [editDuesAmount, setEditDuesAmount] = useState(estateContext.duesAmountUsd || 250);
+  const [editGateHours, setEditGateHours] = useState(estateContext.gateOperatingHours || '24/7 Gate Guard');
+  const [editEmergencyPhone, setEditEmergencyPhone] = useState(estateContext.emergencyHotline || '+1 (555) 911-GATE');
+  const [editPoolHours, setEditPoolHours] = useState(estateContext.amenityPoolHours || '6:00 AM - 9:00 PM');
+  const [editQuietHours, setEditQuietHours] = useState(estateContext.quietHoursText || '10:00 PM - 7:00 AM');
+  const [editBankDetails, setEditBankDetails] = useState(estateContext.bankAccountDetails || '');
+  const [editAnnouncement, setEditAnnouncement] = useState(estateContext.customAnnouncement || '');
+  const [isSavingCustomizer, setIsSavingCustomizer] = useState(false);
+
+  // Helper toast notification
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  // Fetch all communities from server on mount
+  React.useEffect(() => {
+    fetch('/api/estates')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.estates) && data.estates.length > 0) {
+          setAllCommunities(data.estates);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Switch active gated community
+  const handleSelectCommunity = (commId: string) => {
+    if (commId === 'NEW_ONBOARDING') {
+      setWorkflowStep('checkout');
+      return;
+    }
+    const found = allCommunities.find(c => c.id === commId);
+    if (found) {
+      setEstateContext(found);
+      setEditBylaws(found.bylawsText || '');
+      setEditGatePhone(found.gateContactPhone || '');
+      setEditOfficerName(found.securityDutyOfficer || '');
+      setEditDuesAmount(found.duesAmountUsd || 250);
+      setEditGateHours(found.gateOperatingHours || '24/7 Gate Guard');
+      setEditEmergencyPhone(found.emergencyHotline || '+1 (555) 911-GATE');
+      setEditPoolHours(found.amenityPoolHours || '6:00 AM - 9:00 PM');
+      setEditQuietHours(found.quietHoursText || '10:00 PM - 7:00 AM');
+      setEditBankDetails(found.bankAccountDetails || '');
+      setEditAnnouncement(found.customAnnouncement || '');
+      showToast(`Switched active community to ${found.estateName}`);
+    }
+  };
+
+  // Save customized bylaws and parameters per gated community
+  const handleSaveCommunityCustomizer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingCustomizer(true);
+    try {
+      const payload = {
+        bylawsText: editBylaws,
+        gateContactPhone: editGatePhone,
+        securityDutyOfficer: editOfficerName,
+        duesAmountUsd: editDuesAmount,
+        gateOperatingHours: editGateHours,
+        emergencyHotline: editEmergencyPhone,
+        amenityPoolHours: editPoolHours,
+        quietHoursText: editQuietHours,
+        bankAccountDetails: editBankDetails,
+        customAnnouncement: editAnnouncement,
+      };
+
+      const res = await fetch(`/api/estates/${estateContext.id}/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.estate) {
+          setEstateContext(data.estate);
+          setAllCommunities(prev => prev.map(c => c.id === data.estate.id ? data.estate : c));
+        }
+      } else {
+        setEstateContext(prev => ({ ...prev, ...payload }));
+        setAllCommunities(prev => prev.map(c => c.id === estateContext.id ? { ...c, ...payload } : c));
+      }
+      showToast(`✅ Custom settings and bylaws saved for ${estateContext.estateName}!`);
+      setIsCustomizerOpen(false);
+    } catch (err) {
+      setEstateContext(prev => ({
+        ...prev,
+        bylawsText: editBylaws,
+        gateContactPhone: editGatePhone,
+        securityDutyOfficer: editOfficerName,
+        duesAmountUsd: editDuesAmount,
+        gateOperatingHours: editGateHours,
+        emergencyHotline: editEmergencyPhone,
+        amenityPoolHours: editPoolHours,
+        quietHoursText: editQuietHours,
+        bankAccountDetails: editBankDetails,
+        customAnnouncement: editAnnouncement,
+      }));
+      showToast(`✅ Custom settings updated for ${estateContext.estateName}!`);
+      setIsCustomizerOpen(false);
+    } finally {
+      setIsSavingCustomizer(false);
+    }
+  };
   
   // Modals & Panels
   const [isWorkOrderModalOpen, setIsWorkOrderModalOpen] = useState(false);
@@ -247,13 +365,6 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
     showToast(`🚨 SECURITY GUARD DISPATCHED! ${guardOfficerName} en route to ${estateContext.unitPlotNumber}. ETA: 2m 15s.`);
   };
 
-  // Notification Toast
-  const [toast, setToast] = useState<string | null>(null);
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 5000);
-  };
-
   // Onboarding Checkout Handler
   const handleCompleteSubscriptionCheckout = (e: React.FormEvent) => {
     e.preventDefault();
@@ -370,7 +481,7 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
       
       {/* Toast Banner */}
       <AnimatePresence>
-        {toast && (
+        {toastMessage && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -378,7 +489,7 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
             className="fixed top-20 right-4 z-50 max-w-md bg-[#0A2540] text-[#CCFF00] p-4 rounded-2xl shadow-xl border-2 border-[#006D5B] flex items-center gap-3 font-bold text-sm"
           >
             <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
-            <span>{toast}</span>
+            <span>{toastMessage}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -973,6 +1084,230 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+
+            {/* TOAST NOTIFICATION FLOATER */}
+            <AnimatePresence>
+              {toastMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-[#006D5B] text-[#CCFF00] font-black text-xs sm:text-sm p-4 rounded-2xl border-2 border-[#CCFF00]/40 shadow-xl flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 animate-spin" />
+                    <span>{toastMessage}</span>
+                  </div>
+                  <button onClick={() => setToastMessage(null)} className="p-1 hover:text-white cursor-pointer">
+                    <X className="w-4 h-4" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* =========================================================================
+                MULTI-TENANT GATED COMMUNITY BACKEND ENGINE & CUSTOMIZER HEADER
+               ========================================================================= */}
+            <div className="bg-[#0A2540] text-white p-5 rounded-3xl border-2 border-slate-700 shadow-xl space-y-4 font-['Montserrat']">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 bg-[#006D5B] text-[#CCFF00] rounded-2xl font-black shrink-0 shadow-md">
+                    <Building2 className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-[#2DD4BF] uppercase block">
+                      MULTITENANT GATED COMMUNITY ENGINE
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                      {estateContext.estateName}
+                    </h2>
+                    <p className="text-xs text-slate-300">
+                      {estateContext.phaseSector} • {estateContext.gateOperatingHours || '24/7 Gate Guard'} • Dues: ${estateContext.duesAmountUsd}/mo
+                    </p>
+                  </div>
+                </div>
+
+                {/* Community Selector & Customizer Trigger */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="relative">
+                    <select
+                      value={estateContext.id}
+                      onChange={(e) => handleSelectCommunity(e.target.value)}
+                      className="bg-slate-900 text-white font-extrabold text-xs px-3.5 py-3 rounded-2xl border-2 border-teal-500/60 outline-none focus:ring-2 focus:ring-[#CCFF00] min-h-[48px] cursor-pointer"
+                    >
+                      {allCommunities.map((comm) => (
+                        <option key={comm.id} value={comm.id}>
+                          🏡 {comm.estateName}
+                        </option>
+                      ))}
+                      <option value="NEW_ONBOARDING">+ Onboard / Register New Gated Community</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => setIsCustomizerOpen(!isCustomizerOpen)}
+                    className="px-4 py-3 bg-[#B45309] hover:bg-amber-600 text-white font-black text-xs rounded-2xl shadow-md transition-all flex items-center gap-1.5 min-h-[48px] cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#CCFF00]" />
+                    <span>{isCustomizerOpen ? 'Close Settings' : 'Customize Estate Bylaws & Rules'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Custom Announcement Broadcast If Present */}
+              {estateContext.customAnnouncement && (
+                <div className="bg-amber-500/20 border-l-4 border-[#CCFF00] p-3 rounded-r-xl text-xs font-bold text-amber-200 flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-[#CCFF00] shrink-0 animate-bounce" />
+                  <span>{estateContext.customAnnouncement}</span>
+                </div>
+              )}
+
+              {/* LIVE EDITABLE CUSTOMIZER PANEL */}
+              <AnimatePresence>
+                {isCustomizerOpen && (
+                  <motion.form
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    onSubmit={handleSaveCommunityCustomizer}
+                    className="pt-4 border-t border-slate-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-bold"
+                  >
+                    <div className="col-span-full bg-slate-900/90 p-3 rounded-xl border border-teal-500/40 text-[#2DD4BF] font-black uppercase text-[11px] flex items-center justify-between">
+                      <span>Backend Customization Studio — {estateContext.estateName}</span>
+                      <span className="text-white text-[10px] font-mono">ID: {estateContext.id}</span>
+                    </div>
+
+                    {/* Bylaws & Rules Text Area */}
+                    <div className="col-span-full md:col-span-2 space-y-1.5">
+                      <label className="text-slate-200 font-extrabold block">
+                        Custom Bylaws & Community Code of Conduct:
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={editBylaws}
+                        onChange={(e) => setEditBylaws(e.target.value)}
+                        placeholder="Enter custom bylaws..."
+                        className="w-full bg-slate-900 text-white p-3 rounded-xl border border-slate-700 focus:border-teal-400 font-mono text-xs outline-none"
+                      />
+                    </div>
+
+                    {/* Gate Hotline & Duty Officer */}
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-slate-200 font-extrabold block mb-1">
+                          Gate Hotline Phone Number:
+                        </label>
+                        <input
+                          type="text"
+                          value={editGatePhone}
+                          onChange={(e) => setEditGatePhone(e.target.value)}
+                          className="w-full bg-slate-900 text-white p-2.5 rounded-xl border border-slate-700 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-slate-200 font-extrabold block mb-1">
+                          Chief Security Duty Officer:
+                        </label>
+                        <input
+                          type="text"
+                          value={editOfficerName}
+                          onChange={(e) => setEditOfficerName(e.target.value)}
+                          className="w-full bg-slate-900 text-white p-2.5 rounded-xl border border-slate-700 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Dues Amount & Gate Hours */}
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-slate-200 font-extrabold block mb-1">
+                          Monthly HOA Maintenance Dues ($):
+                        </label>
+                        <input
+                          type="number"
+                          value={editDuesAmount}
+                          onChange={(e) => setEditDuesAmount(Number(e.target.value))}
+                          className="w-full bg-slate-900 text-white p-2.5 rounded-xl border border-slate-700 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-slate-200 font-extrabold block mb-1">
+                          Gate Clearance Hours:
+                        </label>
+                        <input
+                          type="text"
+                          value={editGateHours}
+                          onChange={(e) => setEditGateHours(e.target.value)}
+                          className="w-full bg-slate-900 text-white p-2.5 rounded-xl border border-slate-700 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Emergency Hotline & Amenity Hours */}
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-slate-200 font-extrabold block mb-1">
+                          Emergency Patrol Phone:
+                        </label>
+                        <input
+                          type="text"
+                          value={editEmergencyPhone}
+                          onChange={(e) => setEditEmergencyPhone(e.target.value)}
+                          className="w-full bg-slate-900 text-white p-2.5 rounded-xl border border-slate-700 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-slate-200 font-extrabold block mb-1">
+                          Quiet Hours Schedule:
+                        </label>
+                        <input
+                          type="text"
+                          value={editQuietHours}
+                          onChange={(e) => setEditQuietHours(e.target.value)}
+                          className="w-full bg-slate-900 text-white p-2.5 rounded-xl border border-slate-700 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Broadcast Announcement */}
+                    <div className="col-span-full md:col-span-2 space-y-1.5">
+                      <label className="text-slate-200 font-extrabold block">
+                        Broadcast Estate Announcement Banner (Live to All Residents):
+                      </label>
+                      <input
+                        type="text"
+                        value={editAnnouncement}
+                        onChange={(e) => setEditAnnouncement(e.target.value)}
+                        placeholder="e.g., Water pressure maintenance scheduled today at 3:00 PM."
+                        className="w-full bg-slate-900 text-white p-2.5 rounded-xl border border-slate-700 outline-none"
+                      />
+                    </div>
+
+                    {/* Submit Save Button */}
+                    <div className="col-span-full flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomizerOpen(false)}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSavingCustomizer}
+                        className="px-6 py-2.5 bg-[#006D5B] hover:bg-teal-600 text-[#CCFF00] font-black rounded-xl shadow-md cursor-pointer flex items-center gap-2 min-h-[44px]"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-[#CCFF00]" />
+                        <span>{isSavingCustomizer ? 'Saving Settings...' : 'Save & Deploy Settings'}</span>
+                      </button>
+                    </div>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* ACTIVE SUBSCRIPTION STATUS BANNER */}
             <div className="bg-gradient-to-r from-[#0A2540] to-[#006D5B] text-white p-4 rounded-2xl border-2 border-slate-800 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">

@@ -261,7 +261,39 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: #f5f4fd;
 }
 
-/* Custom Marker Pin Animation */
+/* Custom Marker Pin Animation & Filter Transitions */
+.custom-map-pin {
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: transform, opacity;
+}
+
+@keyframes markerPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(12px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.12) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-marker-pop {
+  animation: markerPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.leaflet-marker-pane .leaflet-marker-icon {
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.leaflet-interactive {
+  transition: r 0.35s cubic-bezier(0.16, 1, 0.3, 1), radius 0.35s cubic-bezier(0.16, 1, 0.3, 1), fill-opacity 0.35s ease, stroke-opacity 0.35s ease, opacity 0.35s ease !important;
+}
+
 .custom-pin-drop {
   animation: pinBounce 0.4s ease-out;
 }
