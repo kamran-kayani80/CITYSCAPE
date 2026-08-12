@@ -272,7 +272,7 @@ export const IssueList: React.FC<IssueListProps> = ({
             onChange={(e) => handleQueryChange(e.target.value)}
             onFocus={() => setIsSuggestionsOpen(true)}
             placeholder="Search categories (pothole, water), wards, streets..."
-            className="w-full pl-10 pr-9 py-2.5 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 focus:border-[#006D5B] dark:focus:border-[#CCFF00] rounded-2xl text-xs font-bold text-[#111827] dark:text-white outline-none shadow-xs transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 min-h-[48px]"
+            className="w-full pl-10 pr-9 py-2.5 ui-kit-input text-xs font-bold outline-none shadow-xs transition-all placeholder:text-slate-400 min-h-[48px]"
           />
 
           {query && (
@@ -365,40 +365,40 @@ export const IssueList: React.FC<IssueListProps> = ({
             <button
               key={key}
               onClick={() => handleSelectCategoryChip(key)}
-              className={`px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1.5 border min-h-[36px] ${
+              className={`px-3.5 py-1.5 text-[11px] uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1.5 border min-h-[36px] ${
                 isActive
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] border-[#006D5B] shadow-xs'
-                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'ui-kit-chip-active'
+                  : 'ui-kit-chip-default'
               }`}
             >
               <span>{config.label}</span>
-              {isActive && <Check className="w-3 h-3 text-[#CCFF00]" />}
+              {isActive && <Check className="w-3 h-3 text-[#063B2F]" />}
             </button>
           );
         })}
       </div>
 
       {/* Sidebar header */}
-      <div className="p-3.5 soft-card flex items-center justify-between shadow-sm">
-        <span className="text-xs font-black uppercase tracking-widest text-[#242242] dark:text-slate-200">
+      <div className="p-3.5 clay-card-lvl2 flex items-center justify-between shadow-sm">
+        <span className="text-xs font-black uppercase tracking-widest text-[#2C2518] dark:text-slate-200">
           Nearby Reports ({displayedReports.length})
         </span>
 
         {userCoords ? (
-          <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full font-extrabold border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shadow-2xs">
-            <Navigation className="w-3 h-3 text-emerald-600 dark:text-emerald-400 fill-current" />
+          <span className="text-[10px] font-mono text-[#063B2F] bg-[#A3E8D5] px-2.5 py-1 rounded-full font-extrabold border border-[#7CD6B8] flex items-center gap-1 shadow-2xs">
+            <Navigation className="w-3 h-3 text-[#063B2F] fill-current" />
             <span>GPS ACTIVE</span>
           </span>
         ) : isLocating ? (
-          <span className="text-[10px] font-mono text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-full font-extrabold border border-indigo-200 animate-pulse">
+          <span className="text-[10px] font-mono text-[#5C2718] bg-[#F5D0C0] px-2.5 py-1 rounded-full font-extrabold border border-[#E5B3A3] animate-pulse">
             LOCATING GPS...
           </span>
         ) : (
           <button
             onClick={requestLocation}
-            className="text-[10px] font-mono text-indigo-700 bg-indigo-100/90 hover:bg-indigo-200 px-2.5 py-0.5 rounded-full font-extrabold border border-indigo-200 flex items-center gap-1 transition-all cursor-pointer"
+            className="text-[10px] font-mono text-[#063B2F] bg-[#A3D5E0] hover:bg-[#8ACCD8] px-2.5 py-1 rounded-full font-extrabold border border-[#7BC3CF] flex items-center gap-1 transition-all cursor-pointer"
           >
-            <Locate className="w-3 h-3 text-indigo-600" />
+            <Locate className="w-3 h-3 text-[#093C47]" />
             <span>ENABLE DISTANCE</span>
           </button>
         )}
@@ -451,12 +451,12 @@ export const IssueList: React.FC<IssueListProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.22, delay: Math.min(idx * 0.04, 0.3), ease: [0.16, 1, 0.3, 1] }}
             onClick={() => onSelectReport(report)}
-            className={`group relative soft-card soft-card-hover p-4 transition-all duration-200 cursor-pointer font-['Montserrat'] ${
+            className={`group relative clay-card-lvl2 p-5 transition-all duration-200 cursor-pointer font-['Montserrat'] ${
               isEmergency
-                ? 'border-2 border-red-500 bg-red-50/50 dark:bg-red-950/30 shadow-red-100/60 shadow-md'
+                ? 'border-2 border-red-400 bg-red-50/70 dark:bg-red-950/30 shadow-red-100/60 shadow-md'
                 : isSelected
-                ? 'ring-2 ring-[#008080] bg-white dark:bg-slate-900 shadow-lg border-[#008080]'
-                : 'hover:border-[#008080]'
+                ? 'ring-3 ring-[#7CD6B8] bg-[#F7F3EB] dark:bg-slate-900 shadow-xl border-[#7CD6B8]'
+                : 'hover:border-[#7CD6B8]'
             }`}
           >
             {/* High-Contrast Visual Alert Badge for Emergency Reports */}

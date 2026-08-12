@@ -135,41 +135,41 @@ export const CivicBulletinHub: React.FC = () => {
   return (
     <div className="space-y-6 font-['Montserrat']">
       {/* Header Banner */}
-      <div className="bg-[#0A2540] text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border-2 border-[#006D5B]">
-        <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-[#006D5B]/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-[#0A2540] text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border-2 border-[#006D5B]">
+        <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-[#006D5B]/20 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center space-x-2 flex-wrap gap-1.5">
-              <span className="px-3 py-1 bg-[#CCFF00] text-[#0A2540] font-black text-xs uppercase tracking-wider rounded-lg flex items-center gap-1">
-                <Globe className="w-3.5 h-3.5" />
+              <span className="px-3 py-1 bg-[#006D5B] text-white font-black text-xs uppercase tracking-wider rounded-lg flex items-center gap-1 shadow-xs border border-[#006D5B]">
+                <Globe className="w-3.5 h-3.5 text-amber-300" />
                 Live City Intelligence
               </span>
-              <span className="text-xs font-extrabold text-[#CCFF00] bg-[#006D5B] px-2.5 py-1 rounded-md border border-[#CCFF00]/30 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" />
+              <span className="text-xs font-extrabold text-amber-300 bg-[#06182B] px-2.5 py-1 rounded-md border border-amber-500/30 flex items-center gap-1 shadow-xs">
+                <Clock className="w-3.5 h-3.5 text-emerald-400" />
                 Twice-Daily Auto Extraction
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-['Montserrat'] font-black text-white">
-              Civic Infrastructure Bulletins & News — {cityName}
+              Civic Infrastructure Bulletins & News — <span className="text-amber-400">{cityName}</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-200/90 max-w-2xl">
+            <p className="text-xs sm:text-sm text-black max-w-2xl font-bold leading-relaxed bg-white/95 p-3 rounded-xl border border-slate-200 shadow-xs">
               Real-time, authentic city news extracted twice daily from official municipal portals, city councils, public works, WASAs, and verified news websites.
             </p>
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
-            <div className="p-4 bg-[#006D5B] border border-[#CCFF00]/40 rounded-2xl text-center min-w-[120px]">
-              <span className="block text-3xl font-black text-[#CCFF00]">{liveBulletins.length}</span>
-              <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">Extracted News</span>
+            <div className="p-4 bg-[#06182B]/80 border border-slate-700 rounded-2xl text-center min-w-[120px] shadow-xs backdrop-blur-md">
+              <span className="block text-3xl font-black text-amber-400">{liveBulletins.length}</span>
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-wider">Extracted News</span>
             </div>
           </div>
         </div>
 
         {/* City Selector Bar */}
-        <div className="relative z-10 mt-6 pt-4 border-t border-[#006D5B]/60 space-y-3">
+        <div className="relative z-10 mt-6 pt-4 border-t border-slate-700/80 space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
-            <span className="text-[#CCFF00] font-bold flex items-center gap-1">
-              <MapPin className="w-4 h-4 text-[#CCFF00]" />
+            <span className="text-amber-300 font-black flex items-center gap-1">
+              <MapPin className="w-4 h-4 text-amber-400" />
               Select Geotagged City for News Extraction:
             </span>
           </div>
@@ -181,8 +181,8 @@ export const CivicBulletinHub: React.FC = () => {
                 onClick={() => handleCitySelect(c)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shrink-0 border min-h-[36px] ${
                   cityName.toLowerCase() === c.toLowerCase()
-                    ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] shadow-sm font-black'
-                    : 'bg-[#07192c] hover:bg-[#006D5B] text-slate-200 border-[#006D5B]'
+                    ? 'bg-[#006D5B] text-white border-[#006D5B] shadow-xs font-black'
+                    : 'bg-slate-100 hover:bg-slate-200 text-black border-slate-300'
                 }`}
               >
                 📍 {c}
@@ -196,11 +196,11 @@ export const CivicBulletinHub: React.FC = () => {
                 placeholder="Other City Name..."
                 value={customCityInput}
                 onChange={(e) => setCustomCityInput(e.target.value)}
-                className="px-3 py-1.5 bg-[#07192c] border border-[#006D5B] text-white rounded-xl text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#CCFF00] min-h-[36px] w-36 placeholder:text-slate-400"
+                className="px-3 py-1.5 bg-slate-100 border border-slate-300 text-black rounded-xl text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#006D5B] min-h-[36px] w-36 placeholder:text-slate-500"
               />
               <button
                 type="submit"
-                className="px-3 py-1.5 bg-[#006D5B] text-[#CCFF00] font-black rounded-xl text-xs hover:bg-[#008080] min-h-[36px] cursor-pointer"
+                className="px-3 py-1.5 bg-[#006D5B] text-white font-black rounded-xl text-xs hover:bg-[#004d40] min-h-[36px] cursor-pointer shadow-xs"
               >
                 Extract
               </button>
@@ -241,7 +241,7 @@ export const CivicBulletinHub: React.FC = () => {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="soft-card p-4 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
+      <div className="ui-kit-card-lvl2 p-4 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
         {/* Search Bar */}
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -250,7 +250,7 @@ export const CivicBulletinHub: React.FC = () => {
             placeholder={`Search ${cityName} advisories, roadworks, or sources...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-extrabold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-[#008080] outline-none min-h-[44px]"
+            className="w-full pl-10 pr-4 py-2.5 ui-kit-input text-xs font-bold text-slate-800 outline-none min-h-[44px]"
           />
         </div>
 
@@ -267,10 +267,10 @@ export const CivicBulletinHub: React.FC = () => {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-2 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer min-h-[40px] ${
+              className={`px-3.5 py-2 text-xs shrink-0 transition-all cursor-pointer min-h-[40px] ${
                 selectedCategory === cat.id
-                  ? 'bg-[#008080] text-white shadow-xs font-black'
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100'
+                  ? 'ui-kit-chip-active'
+                  : 'ui-kit-chip-default'
               }`}
             >
               {cat.label}

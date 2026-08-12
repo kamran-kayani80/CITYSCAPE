@@ -303,17 +303,17 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
 
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
                   {profile.fullName}
                 </h1>
-                <span className="text-xs font-mono font-extrabold text-[#CCFF00] bg-white/10 px-2.5 py-1 rounded-xl border border-white/20">
+                <span className="text-xs font-mono font-extrabold text-[#006D5B] bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-300">
                   @{profile.username}
                 </span>
 
                 {/* Edit Profile & Upload Picture Button */}
                 <button
                   onClick={handleOpenEditModal}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white rounded-xl text-xs font-black transition-all cursor-pointer border border-white/30 shadow-xs"
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#006D5B] hover:bg-[#004d40] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs"
                   title="Upload picture as avatar and change username"
                 >
                   <Edit3 className="w-3.5 h-3.5 text-amber-300" />
@@ -323,33 +323,33 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
 
               {/* Title Selector Dropdown */}
               <div className="flex items-center gap-2 pt-0.5">
-                <span className="text-xs text-indigo-200/70 font-semibold">Active Title:</span>
+                <span className="text-xs text-slate-700 font-bold">Active Title:</span>
                 <select
                   value={selectedTitle}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  className="bg-indigo-900/80 border border-indigo-400/40 text-indigo-100 font-extrabold text-xs px-3 py-1 rounded-xl outline-none cursor-pointer focus:ring-2 focus:ring-indigo-400"
+                  className="bg-slate-100 border border-slate-300 text-black font-extrabold text-xs px-3 py-1 rounded-xl outline-none cursor-pointer focus:ring-2 focus:ring-[#006D5B]"
                 >
                   {profile.unlockedTitles.map((t) => (
-                    <option key={t} value={t} className="bg-slate-900 text-white">
+                    <option key={t} value={t} className="bg-white text-black">
                       🎖️ {t}
                     </option>
                   ))}
                 </select>
                 {titleSuccessMsg && (
-                  <span className="text-[10px] text-emerald-400 font-bold animate-pulse">
+                  <span className="text-[10px] text-emerald-600 font-black animate-pulse">
                     Updated!
                   </span>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs text-indigo-200/80 font-medium">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-800 font-bold">
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+                  <MapPin className="w-3.5 h-3.5 text-[#006D5B]" />
                   <span>{profile.neighborhoodName}</span>
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-indigo-300" />
+                  <Calendar className="w-3.5 h-3.5 text-[#006D5B]" />
                   <span>Member since {profile.joinedDate}</span>
                 </span>
               </div>

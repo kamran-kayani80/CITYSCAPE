@@ -21,6 +21,7 @@ import {
   INITIAL_VERIFICATIONS,
   INITIAL_ADOPTED_ZONES,
 } from "./src/data/seedData";
+import { PRESET_GATED_COMMUNITIES } from "./src/data/estateData";
 import {
   Report,
   Comment,
@@ -46,6 +47,9 @@ let userProfile: UserProfile = { ...DEFAULT_USER_PROFILE };
 let userBadges = { ...USER_BADGES };
 let verifications: IssueVerification[] = [...INITIAL_VERIFICATIONS];
 let adoptedZones: AdoptedZone[] = [...INITIAL_ADOPTED_ZONES];
+let estateCommunities: any[] = [...PRESET_GATED_COMMUNITIES];
+let estateVisitorPassesMap: Record<string, any[]> = {};
+let estateUnitsMap: Record<string, any[]> = {};
 
 // Initialize Firebase Firestore for persistent Cloud DB storage
 let firestoreDb: any = null;
@@ -1281,13 +1285,6 @@ app.post("/api/zones/:id/adopt", (req, res) => {
 // ==========================================
 // GATED COMMUNITY & HOA CUSTOMIZATION API ROUTES
 // ==========================================
-
-import { PRESET_GATED_COMMUNITIES } from "./src/data/estateData";
-
-// In-memory data store for Gated Communities
-let estateCommunities: any[] = [...PRESET_GATED_COMMUNITIES];
-let estateVisitorPassesMap: Record<string, any[]> = {};
-let estateUnitsMap: Record<string, any[]> = {};
 
 // 1. Get all registered Gated Communities
 app.get("/api/estates", (req, res) => {

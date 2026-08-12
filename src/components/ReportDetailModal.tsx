@@ -231,42 +231,41 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6">
           {/* Emergency High Contrast Alert Banner */}
           {report.category === 'EMERGENCY' ? (
-            <div className="p-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-2xl shadow-lg border border-red-400 flex items-center justify-between">
+            <div className="p-3.5 bg-white text-black rounded-2xl shadow-lg border-2 border-red-600 flex items-center justify-between">
               <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                  <Siren className="w-5 h-5 text-yellow-300 animate-bounce" />
+                <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 border border-red-300">
+                  <Siren className="w-5 h-5 text-red-600 animate-bounce" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-widest text-white">Emergency Hazard Alert</h4>
-                  <p className="text-[11px] text-red-100 font-medium">Critical public safety / infrastructure risk reported.</p>
+                  <h4 className="text-xs font-black uppercase tracking-widest text-red-700">Emergency Hazard Alert</h4>
+                  <p className="text-[11px] text-slate-800 font-bold">Critical public safety / infrastructure risk reported.</p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 bg-red-950/80 text-yellow-300 rounded-xl text-[10px] font-mono font-black border border-red-400/60">
+              <span className="px-2.5 py-1 bg-red-600 text-white rounded-xl text-[10px] font-mono font-black border border-red-700">
                 PRIORITY 1
               </span>
             </div>
           ) : isHighSeverity ? (
-            <div className="p-3.5 bg-gradient-to-r from-red-600/90 via-red-600 to-rose-700 text-white rounded-2xl shadow-lg border-2 border-red-400 flex items-center justify-between gap-3 animate-pulse font-['Montserrat']">
+            <div className="p-3.5 bg-white text-black rounded-2xl shadow-lg border-2 border-red-600 flex items-center justify-between gap-3 font-['Montserrat']">
               <div className="flex items-center space-x-3">
                 <div className="relative flex items-center justify-center shrink-0">
-                  <span className="absolute inline-flex h-8 w-8 rounded-full bg-white/40 animate-ping" />
-                  <div className="relative w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30">
-                    <ShieldAlert className="w-5 h-5 text-white" />
+                  <div className="relative w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 border border-red-300">
+                    <ShieldAlert className="w-5 h-5 text-red-600" />
                   </div>
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-white">Civic Urgent Risk</h4>
-                    <span className="px-2 py-0.5 bg-white text-red-700 text-[10px] font-black uppercase rounded-md shadow-2xs">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-red-700">Civic Urgent Risk</h4>
+                    <span className="px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-black uppercase rounded-md border border-red-300">
                       {sevConf.label}
                     </span>
                   </div>
-                  <p className="text-[11px] text-red-100 font-medium leading-tight mt-0.5">
+                  <p className="text-[11px] text-slate-800 font-bold leading-tight mt-0.5">
                     High-severity infrastructure hazard flagged for immediate municipal inspection & priority dispatch.
                   </p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 bg-red-950/80 text-red-200 rounded-xl text-[10px] font-mono font-black border border-red-400/60 shrink-0">
+              <span className="px-2.5 py-1 bg-red-600 text-white rounded-xl text-[10px] font-mono font-black border border-red-700 shrink-0">
                 HIGH PRIORITY
               </span>
             </div>
@@ -443,21 +442,21 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           </div>
 
           {/* DEDICATED DEEP-LINK & SOCIAL MEDIA SHARING BAR */}
-          <div className="p-4 bg-gradient-to-r from-[#0A2540] via-[#0A2540]/95 to-[#006D5B] text-white rounded-2xl border-2 border-[#006D5B] shadow-lg space-y-3 font-['Montserrat']">
+          <div className="p-4 bg-white text-black rounded-2xl border-2 border-[#006D5B] shadow-lg space-y-3 font-['Montserrat']">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-xl bg-[#006D5B] text-[#CCFF00] flex items-center justify-center shrink-0 border border-[#CCFF00]/30">
+                <div className="w-8 h-8 rounded-xl bg-[#006D5B] text-white flex items-center justify-center shrink-0 border border-[#006D5B]">
                   <Link2 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-white">Share Deep Link & Spread the Word</h4>
-                  <p className="text-[11px] text-slate-300">Direct report link for neighbors, ward reps, or social media</p>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-black">Share Deep Link & Spread the Word</h4>
+                  <p className="text-[11px] text-slate-700 font-bold">Direct report link for neighbors, ward reps, or social media</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setIsShareModalOpen(true)}
-                className="px-3 py-1.5 bg-[#CCFF00] hover:bg-lime-400 text-[#0A2540] text-xs font-black rounded-xl transition-all cursor-pointer shadow-xs shrink-0 flex items-center space-x-1 min-h-[36px]"
+                className="px-3 py-1.5 bg-[#006D5B] hover:bg-[#004d40] text-white text-xs font-black rounded-xl transition-all cursor-pointer shadow-xs shrink-0 flex items-center space-x-1 min-h-[36px]"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 <span>All Share Options</span>
@@ -471,7 +470,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                   type="text"
                   readOnly
                   value={sharePayload.url}
-                  className="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-200 focus:outline-none pr-8"
+                  className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs font-mono font-bold text-black focus:outline-none pr-8"
                 />
               </div>
 

@@ -253,10 +253,10 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12">
       {/* Top Banner Header */}
-      <div className="p-6 sm:p-8 bg-gradient-to-br from-slate-900 via-[#004d4d] to-slate-900 text-white rounded-3xl shadow-xl border border-[#008080]/60 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 font-['Montserrat']">
+      <div className="p-6 sm:p-8 bg-[#0A2540] text-white rounded-3xl shadow-2xl border-2 border-[#006D5B] relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 font-['Montserrat']">
         <div className="space-y-2 max-w-2xl relative z-10">
           <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+            <span className="px-3 py-1 bg-[#006D5B] text-white rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-xs border border-[#006D5B]">
               <Megaphone className="w-3 h-3 text-amber-300" />
               LOCAL EVENT HUB & BUSINESS MARKETPLACE
             </span>
@@ -264,21 +264,21 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
           <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-white">
             Community Events & Local Business Ads
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <p className="text-xs sm:text-sm text-black leading-relaxed font-bold bg-white/95 p-3 rounded-xl border border-slate-200 shadow-xs">
             Discover neighborhood cleanups, farmers markets, and local merchant specials. Local businesses can hire featured ad space to promote community events!
           </p>
         </div>
 
         <button
           onClick={() => setIsHireAdModalOpen(true)}
-          className="relative z-10 px-5 py-3.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-400/20 transition-all cursor-pointer shrink-0 flex items-center space-x-2"
+          className="relative z-10 px-5 py-3.5 bg-[#B45309] hover:bg-amber-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer shrink-0 flex items-center space-x-2 border border-amber-500/30"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>Post Event / Hire Ad Space</span>
         </button>
 
         {/* Background Ambient Light */}
-        <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* SPONSORED EVENT AD SHOWCASE CAROUSEL */}
@@ -287,43 +287,43 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-              <h2 className="text-sm font-heading font-black uppercase tracking-wider text-[#1c1a3b] dark:text-white">
+              <h2 className="text-sm font-heading font-black uppercase tracking-wider text-black">
                 Featured Sponsored Events & Local Merchant Ads
               </h2>
             </div>
-            <span className="text-xs font-bold text-slate-400">Promoted by Local Businesses</span>
+            <span className="text-xs font-black text-slate-700">Promoted by Local Businesses</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {sponsoredEvents.map((evt) => (
               <div
                 key={evt.id}
-                className="relative rounded-3xl p-5 bg-gradient-to-br from-[#003333] via-[#004d4d] to-slate-900 text-white shadow-xl border-2 border-amber-400/80 space-y-4 overflow-hidden"
+                className="relative rounded-3xl p-5 bg-white text-black shadow-xl border-2 border-amber-500 space-y-4 overflow-hidden"
               >
                 {/* Sponsor Ribbon */}
                 <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
-                    <Sparkles className="w-3 h-3 text-slate-950" />
+                  <span className="px-3 py-1 bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                    <Sparkles className="w-3 h-3 text-white" />
                     {evt.sponsorBadgeText || 'SPONSORED EVENT'}
                   </span>
 
-                  <span className="text-xs font-bold text-amber-300 bg-amber-400/20 px-2.5 py-0.5 rounded-full border border-amber-400/30">
+                  <span className="text-xs font-black text-[#B45309] bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
                     {evt.price}
                   </span>
                 </div>
 
                 {/* Event Image & Info */}
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                  <div className="sm:col-span-5 h-36 rounded-2xl overflow-hidden bg-slate-800">
+                  <div className="sm:col-span-5 h-36 rounded-2xl overflow-hidden bg-slate-100">
                     <img src={evt.imageUrl} alt={evt.title} className="w-full h-full object-cover" />
                   </div>
 
                   <div className="sm:col-span-7 space-y-2">
-                    <h3 className="font-heading font-black text-base text-white leading-snug line-clamp-2">
+                    <h3 className="font-heading font-black text-base text-black leading-snug line-clamp-2">
                       {evt.title}
                     </h3>
 
-                    <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-slate-800 line-clamp-2 leading-relaxed font-medium">
                       {evt.description}
                     </p>
 
@@ -398,16 +398,16 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
       )}
 
       {/* FILTER & SEARCH ROW */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-white dark:bg-slate-900 rounded-3xl shadow-md border border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 ui-kit-card-lvl2">
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[38px] ${
                 selectedCategory === cat
-                  ? 'bg-[#008080] text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
+                  ? 'ui-kit-chip-active'
+                  : 'ui-kit-chip-default'
               }`}
             >
               {cat === 'ALL' ? 'All Community Events' : cat}
@@ -416,13 +416,13 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
         </div>
 
         <div className="relative shrink-0 sm:w-64">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search events & venues..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#008080]"
+            className="w-full pl-9 pr-4 py-2.5 ui-kit-input text-xs font-bold focus:outline-none min-h-[42px]"
           />
         </div>
       </div>

@@ -597,7 +597,7 @@ export default function App() {
   return (
     <AccessibilityProvider>
       <SEOHead activeView={activeView} selectedReport={selectedReport} reportsCount={reports.length} />
-      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0f172a] text-[#111827] dark:text-[#F8FAFC] flex flex-col font-['Montserrat'] antialiased selection:bg-[#006D5B] selection:text-[#CCFF00]">
+      <div className="min-h-screen bg-[#F3F0E8] dark:bg-[#0f172a] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col font-['Montserrat'] antialiased selection:bg-[#7CD6B8] selection:text-[#063B2F]">
         {/* Sticky WCAG AAA Accessibility Toolbar */}
         <AccessibilityToolbar />
 

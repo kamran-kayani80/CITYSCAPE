@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
     (filter.severity && filter.severity !== 'ALL' ? 1 : 0);
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-md border-b-2 border-[#008080] shadow-sm transition-all font-['Montserrat']">
+    <header className="sticky top-0 z-30 bg-[#F7F3EB]/95 dark:bg-[#1C1917]/95 backdrop-blur-md border-b-2 border-[#E4DACB] shadow-sm transition-all font-['Montserrat']">
       {/* Top Bar: Brand, Search, User Actions & Primary CTA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 py-2">
@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2 sm:gap-2.5 shrink-0 cursor-pointer group py-1 transition-transform hover:scale-[1.01]"
           >
             <CityscapeLogo size="md" showTagline={false} />
-            <span className="hidden sm:inline-flex items-center px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md bg-[#006D5B] text-[#CCFF00] border border-[#CCFF00]/40 shadow-xs">
+            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#A3E8D5] text-[#063B2F] border border-[#7CD6B8] shadow-xs">
               Official
             </span>
           </div>
@@ -91,12 +91,12 @@ export const Header: React.FC<HeaderProps> = ({
                   placeholder="Search location or hazard..."
                   value={filter.searchQuery || ''}
                   onChange={(e) => setFilter((prev) => ({ ...prev, searchQuery: e.target.value }))}
-                  className="w-full pl-9 pr-8 py-2 bg-slate-100 dark:bg-slate-800 focus:bg-white border-2 border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-[#111827] dark:text-white outline-none transition-all placeholder-slate-500 focus:ring-2 focus:ring-[#006D5B] min-h-[44px]"
+                  className="w-full pl-9 pr-8 py-2.5 ui-kit-input text-xs font-bold outline-none transition-all placeholder-slate-400 min-h-[44px]"
                 />
                 {filter.searchQuery && (
                   <button
                     onClick={() => setFilter((prev) => ({ ...prev, searchQuery: '' }))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#006D5B]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#006D5B]"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -158,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onOpenReportModal}
-              className="btn-primary-designer pro-button flex items-center space-x-1.5 py-2 px-3.5 rounded-xl text-xs cursor-pointer shadow-md"
+              className="ui-kit-btn-primary flex items-center space-x-1.5 py-2.5 px-5 text-xs cursor-pointer min-h-[44px]"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span>Report</span>
@@ -168,7 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Line 2: Dedicated Navigation Tabs Bar (Desktop / Large Screens) */}
-      <div className="hidden lg:block bg-[#F8FAFC] dark:bg-slate-900 border-t-2 border-slate-300 dark:border-slate-800 py-2 px-4">
+      <div className="hidden lg:block bg-[#EFE9DD] dark:bg-slate-900 border-t-2 border-[#E4DACB] py-2 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           {/* Main View Tabs (Short & Brief Labels) */}
           <nav className="flex items-center gap-1.5 text-xs font-['Montserrat'] font-extrabold overflow-x-auto no-scrollbar py-0.5">

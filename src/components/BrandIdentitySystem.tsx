@@ -197,10 +197,11 @@ const LEXICON_MATRIX = [
 ];
 
 export const BrandIdentitySystem: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'poster' | 'pages' | 'colors' | 'typography' | 'imagery' | 'logo' | 'voice'>('pages');
+  const [activeTab, setActiveTab] = useState<'clay' | 'poster' | 'pages' | 'colors' | 'typography' | 'imagery' | 'logo' | 'voice'>('clay');
   const [activePageNum, setActivePageNum] = useState<number>(11);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [logoVariant, setLogoVariant] = useState<'full' | 'dark' | 'mono' | 'outline'>('full');
+  const [dialValue, setDialValue] = useState<number>(75);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -270,6 +271,18 @@ export const BrandIdentitySystem: React.FC = () => {
       <div className="sticky top-16 z-20 bg-white dark:bg-[#1A1A1A] border-b-2 border-slate-300 dark:border-slate-800 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-3 text-xs font-bold">
+            <button
+              onClick={() => setActiveTab('clay')}
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-full transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
+                activeTab === 'clay'
+                  ? 'bg-gradient-to-r from-[#8EE0C5] to-[#F5D0C0] text-[#063B2F] shadow-lg font-black border-2 border-[#7CD6B8]'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <Sparkles className="w-4 h-4 text-[#063B2F]" />
+              <span>Soft Clay Design Kit</span>
+            </button>
+
             <button
               onClick={() => setActiveTab('pages')}
               className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
@@ -359,6 +372,284 @@ export const BrandIdentitySystem: React.FC = () => {
 
       {/* Main Tab Content Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-10">
+
+        {/* ========================================================= */}
+        {/* TAB 0: SOFT SCULPTURAL CLAYMORPHIC DESIGN KIT */}
+        {/* ========================================================= */}
+        {activeTab === 'clay' && (
+          <div className="space-y-10 animate-fadeIn">
+            {/* Design Kit Overview Banner */}
+            <div className="clay-surface-cream p-8 sm:p-12 relative overflow-hidden border-2 border-[#E4DACB]">
+              <div className="max-w-3xl space-y-4 relative z-10">
+                <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#A3E8D5] text-[#063B2F] font-black text-xs border border-[#7CD6B8]">
+                  <Sparkles className="w-4 h-4 text-[#063B2F]" />
+                  <span>Soft Sculptural Claymorphic UI System</span>
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-black font-['Montserrat'] text-[#2C2518]">
+                  Organic Clay & Pastel UI Design Kit
+                </h2>
+                <p className="text-sm sm:text-base text-[#524633] font-medium leading-relaxed">
+                  Inspired by soft tactile clay sculptures, biophilic organic curves, and soothing pastel tones. Features dual-directional ambient drop shadows, soft top-left light highlights, concentric ring dials, inset debossed wells, and smooth pill controls.
+                </p>
+              </div>
+
+              {/* Decorative Clay Rings Background */}
+              <div className="absolute -right-10 -bottom-10 opacity-20 pointer-events-none hidden sm:block">
+                <div className="w-80 h-80 rounded-full border-[18px] border-[#A3D5E0] flex items-center justify-center">
+                  <div className="w-56 h-56 rounded-full border-[14px] border-[#F5D0C0] flex items-center justify-center">
+                    <div className="w-32 h-32 rounded-full bg-[#A3E8D5]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Clay Color Palette Swatches */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-black font-['Montserrat'] text-[#0F172A] dark:text-white flex items-center space-x-2">
+                <Palette className="w-5 h-5 text-[#006D5B]" />
+                <span>Tactile Pastel Color Palette</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Soft Mint */}
+                <div className="clay-surface-mint p-6 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#063B2F] bg-white/60 px-2.5 py-1 rounded-full">
+                      Primary Mint
+                    </span>
+                    <button
+                      onClick={() => handleCopy('#A3E8D5', 'Soft Mint')}
+                      className="p-1.5 bg-white/40 hover:bg-white/80 rounded-full text-[#063B2F] transition-all cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <h4 className="text-2xl font-black font-['Montserrat']">Soft Mint</h4>
+                  <p className="text-xs font-mono font-bold">#A3E8D5 • 7.4:1 WCAG AAA</p>
+                  <p className="text-xs opacity-90 leading-relaxed font-medium">
+                    Primary action surfaces, active toggle states, and soft community highlights.
+                  </p>
+                </div>
+
+                {/* Warm Pastel Peach */}
+                <div className="clay-surface-peach p-6 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#5C2718] bg-white/60 px-2.5 py-1 rounded-full">
+                      Warm Clay
+                    </span>
+                    <button
+                      onClick={() => handleCopy('#F5D0C0', 'Pastel Peach')}
+                      className="p-1.5 bg-white/40 hover:bg-white/80 rounded-full text-[#5C2718] transition-all cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <h4 className="text-2xl font-black font-['Montserrat']">Pastel Peach</h4>
+                  <p className="text-xs font-mono font-bold">#F5D0C0 • Warm Accent</p>
+                  <p className="text-xs opacity-90 leading-relaxed font-medium">
+                    Tactile secondary buttons, badge indicators, and warm organic card overlays.
+                  </p>
+                </div>
+
+                {/* Powder Sky Blue */}
+                <div className="clay-surface-blue p-6 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#093C47] bg-white/60 px-2.5 py-1 rounded-full">
+                      Sky Powder
+                    </span>
+                    <button
+                      onClick={() => handleCopy('#A3D5E0', 'Powder Sky')}
+                      className="p-1.5 bg-white/40 hover:bg-white/80 rounded-full text-[#093C47] transition-all cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <h4 className="text-2xl font-black font-['Montserrat']">Powder Sky</h4>
+                  <p className="text-xs font-mono font-bold">#A3D5E0 • Calm Surface</p>
+                  <p className="text-xs opacity-90 leading-relaxed font-medium">
+                    Rotatable ring dials, environmental cards, and peaceful status indicators.
+                  </p>
+                </div>
+
+                {/* Soft Cream Alabaster */}
+                <div className="clay-surface-cream p-6 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#2C2518] bg-white/60 px-2.5 py-1 rounded-full">
+                      Warm Alabaster
+                    </span>
+                    <button
+                      onClick={() => handleCopy('#F7F3EB', 'Soft Cream')}
+                      className="p-1.5 bg-white/40 hover:bg-white/80 rounded-full text-[#2C2518] transition-all cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <h4 className="text-2xl font-black font-['Montserrat']">Soft Cream</h4>
+                  <p className="text-xs font-mono font-bold">#F7F3EB • Neutral Surface</p>
+                  <p className="text-xs opacity-90 leading-relaxed font-medium">
+                    Gently tinted background canvas for glare-free readability across all screens.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive Clay Widgets & Dials Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Concentric Dial & Knob Widget */}
+              <div className="clay-card-lvl3 p-8 space-y-6 flex flex-col items-center justify-center text-center">
+                <div className="space-y-1">
+                  <span className="text-xs font-mono font-extrabold text-[#006D5B] uppercase tracking-wider">
+                    Tactile Concentric Ring Control
+                  </span>
+                  <h4 className="text-xl font-black font-['Montserrat'] text-[#0F172A] dark:text-white">
+                    Interactive Clay Dial
+                  </h4>
+                </div>
+
+                {/* Layered Concentric Rings */}
+                <div className="relative w-48 h-48 flex items-center justify-center my-2">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#A3D5E0] to-[#73BCCB] shadow-xl p-4 flex items-center justify-center">
+                    <div className="w-36 h-36 rounded-full bg-[#F7F3EB] shadow-inner p-3 flex items-center justify-center">
+                      <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#F5D0C0] to-[#E8B29C] shadow-md flex items-center justify-center">
+                        <div
+                          className="w-20 h-20 clay-dial-ring cursor-pointer transition-transform duration-200"
+                          style={{ transform: `rotate(${dialValue * 3.6}deg)` }}
+                          onClick={() => setDialValue((prev) => (prev >= 100 ? 10 : prev + 15))}
+                        >
+                          <div className="w-4 h-4 rounded-full bg-[#063B2F] shadow-sm -mt-10" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 w-full max-w-xs">
+                  <div className="flex justify-between text-xs font-extrabold font-mono text-slate-600">
+                    <span>MIN: 0%</span>
+                    <span className="text-[#006D5B] font-black">{dialValue}% LEVEL</span>
+                    <span>MAX: 100%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={dialValue}
+                    onChange={(e) => setDialValue(Number(e.target.value))}
+                    className="w-full accent-[#006D5B] cursor-pointer"
+                  />
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Tap dial or drag slider to simulate rotatable tactile hardware controls.
+                  </p>
+                </div>
+              </div>
+
+              {/* Raised 3D Pill Controls & Debossed Inputs */}
+              <div className="clay-card-lvl3 p-8 space-y-6">
+                <div className="space-y-1">
+                  <span className="text-xs font-mono font-extrabold text-[#006D5B] uppercase tracking-wider">
+                    3D Tactile Form & Action Controls
+                  </span>
+                  <h4 className="text-xl font-black font-['Montserrat'] text-[#0F172A] dark:text-white">
+                    Buttons, Debossed Inputs & Chips
+                  </h4>
+                </div>
+
+                {/* Soft Action Buttons */}
+                <div className="space-y-3">
+                  <label className="text-xs font-extrabold text-slate-600 uppercase font-mono">
+                    Raised 3D Pill Buttons
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    <button className="clay-btn-primary px-6 py-3 text-xs font-black cursor-pointer flex items-center space-x-2">
+                      <Sparkles className="w-4 h-4" />
+                      <span>Primary Mint Action</span>
+                    </button>
+                    <button className="clay-surface-peach px-6 py-3 text-xs font-black cursor-pointer flex items-center space-x-2 shadow-md hover:scale-105 transition-all">
+                      <Heart className="w-4 h-4 text-[#5C2718]" />
+                      <span>Peach Community</span>
+                    </button>
+                    <button className="clay-surface-blue px-6 py-3 text-xs font-black cursor-pointer flex items-center space-x-2 shadow-md hover:scale-105 transition-all">
+                      <Compass className="w-4 h-4 text-[#093C47]" />
+                      <span>Sky Explorer</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Inset Debossed Input */}
+                <div className="space-y-2">
+                  <label className="text-xs font-extrabold text-slate-600 uppercase font-mono">
+                    Debossed Soft Clay Input
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Search community reports or ward assets..."
+                    className="w-full px-5 py-3.5 clay-input text-xs font-bold text-[#0F172A] outline-none"
+                  />
+                </div>
+
+                {/* Clay Pill Chips */}
+                <div className="space-y-2">
+                  <label className="text-xs font-extrabold text-slate-600 uppercase font-mono">
+                    Rounded Soft Badges & Chips
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="clay-surface-mint px-3.5 py-1.5 text-xs font-extrabold">
+                      ✓ Active Status
+                    </span>
+                    <span className="clay-surface-peach px-3.5 py-1.5 text-xs font-extrabold">
+                      ★ Featured Priority
+                    </span>
+                    <span className="clay-surface-blue px-3.5 py-1.5 text-xs font-extrabold">
+                      ● Public Works
+                    </span>
+                    <span className="clay-surface-cream px-3.5 py-1.5 text-xs font-extrabold border border-[#E4DACB]">
+                      Ward 4 WardRep
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 5 Levels of Claymorphic Elevation */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-black font-['Montserrat'] text-[#0F172A] dark:text-white flex items-center space-x-2">
+                <Layers className="w-5 h-5 text-[#006D5B]" />
+                <span>5-Level Sculptural Clay Elevation Architecture</span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="clay-card-lvl1 p-5 space-y-2 text-center">
+                  <span className="text-[10px] font-mono font-extrabold text-slate-500 uppercase">LEVEL 1</span>
+                  <h4 className="font-extrabold text-xs text-[#0F172A]">Subtle Surface</h4>
+                  <p className="text-[11px] text-slate-500 leading-snug">Base card for secondary list items.</p>
+                </div>
+
+                <div className="clay-card-lvl2 p-5 space-y-2 text-center">
+                  <span className="text-[10px] font-mono font-extrabold text-slate-500 uppercase">LEVEL 2</span>
+                  <h4 className="font-extrabold text-xs text-[#0F172A]">Standard Clay</h4>
+                  <p className="text-[11px] text-slate-500 leading-snug">Default card for neighborhood feeds.</p>
+                </div>
+
+                <div className="clay-card-lvl3 p-5 space-y-2 text-center">
+                  <span className="text-[10px] font-mono font-extrabold text-[#006D5B] uppercase">LEVEL 3</span>
+                  <h4 className="font-extrabold text-xs text-[#0F172A]">Raised Tactile</h4>
+                  <p className="text-[11px] text-slate-500 leading-snug">Interactive cards & search panels.</p>
+                </div>
+
+                <div className="clay-card-lvl4 p-5 space-y-2 text-center">
+                  <span className="text-[10px] font-mono font-extrabold text-amber-600 uppercase">LEVEL 4</span>
+                  <h4 className="font-extrabold text-xs text-[#0F172A]">Deep Sculpted</h4>
+                  <p className="text-[11px] text-slate-500 leading-snug">Featured bulletin cards & modals.</p>
+                </div>
+
+                <div className="clay-card-lvl5 p-5 space-y-2 text-center">
+                  <span className="text-[10px] font-mono font-extrabold text-emerald-700 uppercase">LEVEL 5</span>
+                  <h4 className="font-extrabold text-xs text-[#0F172A]">Floating Clay</h4>
+                  <p className="text-[11px] text-slate-500 leading-snug">Overlay dialogs & high priority alerts.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ========================================================= */}
         {/* TAB 1: PAGE-BY-PAGE BRAND MANUAL VIEWER (PAGES 11 TO 16) */}

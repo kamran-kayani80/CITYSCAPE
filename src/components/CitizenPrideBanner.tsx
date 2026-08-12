@@ -513,13 +513,13 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
       <motion.div
         layout
         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-        className={`relative w-full min-h-[180px] sm:min-h-[230px] rounded-3xl p-5 sm:p-8 overflow-hidden flex flex-col justify-between bg-gradient-to-br ${activeCity.gradientStyle} text-white border-2 border-[#006D5B] shadow-2xl transition-all duration-500`}
+        className="relative w-full min-h-[180px] sm:min-h-[230px] rounded-3xl p-5 sm:p-8 overflow-hidden flex flex-col justify-between clay-card-lvl3 bg-[#F7F3EB] text-[#2C2518] border-2 border-[#E4DACB] shadow-xl transition-all duration-500"
       >
-        {/* Designer Background Mesh Texture & Lighting Effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(204,255,0,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(180,83,9,0.2),transparent_50%)] pointer-events-none z-0" />
-        
+        {/* Subtle Organic Clay Gradient & Glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(163,232,213,0.35),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(245,208,192,0.35),transparent_50%)] pointer-events-none z-0" />
+
         {/* Civic Arch Decorative Pattern Overlay */}
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-[radial-gradient(circle_at_0_50%,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none z-0" />
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-[radial-gradient(circle_at_0_50%,rgba(255,255,255,0.4),transparent_70%)] pointer-events-none z-0" />
 
         {/* Dynamic Watermark Monument Artwork Illustration */}
         <div className="absolute right-0 bottom-0 top-0 w-full sm:w-2/3 pointer-events-none z-0 overflow-hidden flex items-end justify-end opacity-40 hover:opacity-60 transition-opacity">
@@ -541,18 +541,18 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
           {/* Left Civic Badges */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-[#006D5B] text-[#CCFF00] shadow-md border border-[#CCFF00]/40 font-['Montserrat']">
-              <Building2 className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#A3E8D5] text-[#063B2F] border border-[#7CD6B8] shadow-xs font-['Montserrat']">
+              <Building2 className="w-3.5 h-3.5 text-[#063B2F] shrink-0" />
               <span>{activeCity.wardName}</span>
             </div>
 
-            <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-[#0A2540]/80 text-[#CCFF00] border border-[#CCFF00]/40 font-['Montserrat'] backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse" />
+            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black bg-[#F5D0C0] text-[#5C2718] border border-[#E5B3A3] font-['Montserrat'] shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-[#5C2718] animate-pulse" />
               <span>{activeCity.demonym} JURISDICTION</span>
             </div>
 
-            <div className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-black/30 backdrop-blur-md text-slate-100 border border-white/20 font-['Montserrat']">
-              <Compass className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+            <div className="hidden lg:inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#A3D5E0] text-[#093C47] border border-[#7BC3CF] font-['Montserrat'] shadow-xs">
+              <Compass className="w-3.5 h-3.5 text-[#093C47] shrink-0" />
               <span>{activeCity.landmarksName}</span>
             </div>
           </div>
@@ -564,12 +564,12 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
               onClick={handleDetectGeotagLocation}
               disabled={isGeotagging}
               title="Auto-detect current city via GPS"
-              className="flex items-center space-x-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-md px-3 py-2 rounded-xl text-xs font-extrabold text-white border border-white/20 shadow-md hover:border-[#CCFF00] transition-all cursor-pointer min-h-[44px] disabled:opacity-50 font-['Montserrat']"
+              className="flex items-center space-x-1.5 bg-[#06182B]/80 hover:bg-[#06182B] px-3 py-2 rounded-xl text-xs font-black text-white border border-slate-700 shadow-xs hover:border-[#006D5B] transition-all cursor-pointer min-h-[44px] disabled:opacity-50 font-['Montserrat'] backdrop-blur-md"
             >
               {isGeotagging ? (
-                <Loader2 className="w-4 h-4 text-[#CCFF00] animate-spin" />
+                <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
               ) : (
-                <Locate className="w-4 h-4 text-[#CCFF00]" />
+                <Locate className="w-4 h-4 text-amber-400" />
               )}
               <span className="hidden sm:inline">{isGeotagging ? 'Geotagging...' : 'Auto-GPS'}</span>
             </button>
@@ -580,9 +580,9 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 aria-expanded={isDropdownOpen}
                 aria-label="Change current city location"
-                className="flex items-center space-x-2 bg-black/40 hover:bg-black/60 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs font-extrabold text-white border border-white/20 shadow-md hover:border-[#CCFF00] transition-all cursor-pointer min-h-[44px] font-['Montserrat']"
+                className="flex items-center space-x-2 bg-[#06182B]/80 hover:bg-[#06182B] px-3.5 py-2 rounded-xl text-xs font-black text-white border border-slate-700 shadow-xs hover:border-[#006D5B] transition-all cursor-pointer min-h-[44px] font-['Montserrat'] backdrop-blur-md"
               >
-                <MapPin className="w-4 h-4 text-[#CCFF00]" />
+                <MapPin className="w-4 h-4 text-amber-400" />
                 <span>{activeCity.cityName}</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -596,28 +596,28 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
                     exit={{ opacity: 0, y: 6, scale: 0.96 }}
                     className="absolute right-0 mt-2 w-64 bg-[#0A2540] rounded-2xl shadow-2xl border-2 border-[#006D5B] p-2 z-50 text-white font-['Montserrat']"
                   >
-                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                    <div className="px-3 py-1.5 text-[11px] font-black text-amber-300 uppercase tracking-wider flex items-center justify-between border-b border-slate-700/60 pb-2">
                       <span>Select City</span>
-                      <span className="text-[10px] text-[#CCFF00] font-extrabold">WCAG AAA</span>
+                      <span className="text-[10px] text-emerald-400 font-black">WCAG AAA</span>
                     </div>
-                    <div className="space-y-1 mt-1 max-h-60 overflow-y-auto">
+                    <div className="space-y-1 mt-1.5 max-h-60 overflow-y-auto">
                       {CITIES.map((city) => (
                         <button
                           key={city.id}
                           onClick={() => handleSelectCity(city)}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer min-h-[44px] ${
                             city.id === activeCity.id
-                              ? 'bg-[#006D5B] text-white border border-[#CCFF00]/40'
-                              : 'hover:bg-slate-800/80 text-slate-200'
+                              ? 'bg-[#006D5B] text-white border border-[#006D5B]'
+                              : 'hover:bg-slate-800 text-slate-200'
                           }`}
                         >
                           <div className="flex flex-col">
                             <span>{city.cityName}</span>
-                            <span className={`text-[10px] ${city.id === activeCity.id ? 'text-[#CCFF00]' : 'text-slate-400'}`}>
+                            <span className={`text-[10px] ${city.id === activeCity.id ? 'text-amber-200' : 'text-slate-400'}`}>
                               {city.demonym} • {city.wardName}
                             </span>
                           </div>
-                          {city.id === activeCity.id && <Check className="w-4 h-4 text-[#CCFF00]" />}
+                          {city.id === activeCity.id && <Check className="w-4 h-4 text-amber-300" />}
                         </button>
                       ))}
                     </div>
@@ -639,33 +639,32 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-3"
             >
-              <h1 className="font-['Montserrat'] font-black tracking-tight text-2xl sm:text-4xl lg:text-5xl leading-none">
-                <span className="text-white drop-shadow-md">I AM A PROUD </span>
-                <span className="inline-block text-[#CCFF00] drop-shadow-[0_4px_12px_rgba(204,255,0,0.3)] underline decoration-[#B45309] decoration-4 underline-offset-8">
+              <h1 className="font-['Montserrat'] font-black tracking-tight text-2xl sm:text-4xl lg:text-5xl leading-none text-[#2C2518]">
+                <span>I AM A PROUD </span>
+                <span className="inline-block text-[#063B2F] bg-[#A3E8D5] px-3 py-1 rounded-2xl border-2 border-[#7CD6B8]">
                   {activeCity.demonym}
                 </span>
               </h1>
               
-              <div className="flex items-center space-x-2 text-xs sm:text-sm md:text-base font-extrabold tracking-wide text-slate-100 font-['Montserrat']">
-                <Sparkles className="w-4 h-4 shrink-0 text-[#CCFF00] animate-pulse" />
-                <span className="italic">"{activeCity.inspirationalSlogan}"</span>
-              </div>
+              <p className="flex items-center space-x-2 text-xs sm:text-sm md:text-base font-black tracking-wide text-black bg-white/95 px-3 py-1.5 rounded-xl border border-slate-200 inline-flex shadow-xs font-['Montserrat']">
+                <Sparkles className="w-4 h-4 shrink-0 text-[#B45309]" />
+                <span className="italic text-black font-black">"{activeCity.inspirationalSlogan}"</span>
+              </p>
 
               {/* Glassmorphic Cultural Heritage Card */}
               <div className="flex flex-wrap items-center gap-2.5 pt-1 font-['Montserrat']">
-                <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-black/40 backdrop-blur-md border border-white/20 text-slate-100 shadow-inner">
-                  <History className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+                <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-[#06182B]/80 border border-slate-700 text-slate-100 shadow-xs backdrop-blur-md">
+                  <History className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span><strong>Cultural Heritage:</strong> {activeCity.culturalHeritage}</span>
                 </div>
-                <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-black/40 backdrop-blur-md border border-white/20 text-slate-100 shadow-inner">
-                  <Landmark className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+                <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-[#06182B]/80 border border-slate-700 text-slate-100 shadow-xs backdrop-blur-md">
+                  <Landmark className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span><strong>Heritage Monuments:</strong> {activeCity.culturalLandmarks}</span>
                 </div>
               </div>
             </motion.div>
           </AnimatePresence>
         </div>
-
       </motion.div>
     </motion.section>
   );
