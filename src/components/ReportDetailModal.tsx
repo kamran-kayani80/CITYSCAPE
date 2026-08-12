@@ -274,31 +274,31 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
           {/* Main Title & Category */}
           <div>
-            <div className="flex items-center space-x-2 text-xs text-[#008080] dark:text-[#CCFF00] font-bold mb-1">
+            <div className="flex items-center space-x-2 text-xs text-[#006D5B] dark:text-[#CCFF00] font-extrabold mb-1">
               <CategoryIcon category={report.category} className="w-4 h-4" />
               <span>{catConf.label}</span>
               <span>•</span>
-              <span className="text-slate-400 font-normal">Report ID: {report.id}</span>
+              <span className="text-slate-600 dark:text-slate-300 font-mono font-bold">Report ID: #{report.id}</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-heading font-black text-[#1c1a3b] dark:text-white leading-tight">
+            <h1 className="text-xl sm:text-2xl font-heading font-black text-[#0A2540] dark:text-white leading-tight">
               {report.title}
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center space-x-1.5 flex-wrap">
-              <span className="flex items-center space-x-1">
-                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <p className="text-xs text-[#111827] dark:text-slate-200 mt-1.5 flex items-center space-x-1.5 flex-wrap font-extrabold">
+              <span className="flex items-center space-x-1 text-[#0A2540] dark:text-slate-100">
+                <MapPin className="w-4 h-4 text-[#006D5B] dark:text-[#CCFF00] shrink-0" />
                 <span>{report.addressText}</span>
               </span>
               {distanceTag && (
                 <>
                   <span>•</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#008080]/10 dark:bg-[#008080]/20 text-[#008080] dark:text-[#CCFF00] border border-[#008080]/30 flex items-center gap-1 shadow-2xs">
-                    <Navigation className="w-2.5 h-2.5 text-[#008080] dark:text-[#CCFF00]" />
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#006D5B] text-white dark:bg-[#006D5B] dark:text-[#CCFF00] border border-[#006D5B] flex items-center gap-1 shadow-2xs">
+                    <Navigation className="w-2.5 h-2.5 text-[#CCFF00]" />
                     <span>{distanceTag}</span>
                   </span>
                 </>
               )}
               <span>•</span>
-              <span>Reported {formatTimeAgo(report.createdAt)}</span>
+              <span className="text-slate-700 dark:text-slate-300">Reported {formatTimeAgo(report.createdAt)}</span>
             </p>
           </div>
 
@@ -396,14 +396,14 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           <ReportMapDirections report={report} variant="full" />
 
           {/* Description & Endorse Button */}
-          <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
-            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-3 shadow-xs">
+            <p className="text-sm text-[#111827] dark:text-slate-100 font-semibold leading-relaxed whitespace-pre-line">
               {report.description || 'No additional details provided by resident.'}
             </p>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-200/60 dark:border-slate-700">
-              <div className="text-xs text-slate-500">
-                Filed by <strong>{report.userName}</strong> ({report.isGuest ? 'Guest Resident' : 'Verified Citizen'})
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+              <div className="text-xs text-[#0A2540] dark:text-slate-200 font-bold">
+                Filed by <strong className="text-[#006D5B] dark:text-[#CCFF00] font-black">{report.userName}</strong> ({report.isGuest ? 'Guest Resident' : 'Verified Citizen'})
               </div>
 
               <div className="flex items-center gap-2">

@@ -107,8 +107,8 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
   }, [reports, checkIsUserReport]);
 
   // Reference location for distance calculations (User GPS location or San Francisco default center)
-  const centerLat = userLocation?.lat ?? 37.7749;
-  const centerLng = userLocation?.lng ?? -122.4194;
+  const centerLat = userLocation && isValidLatLng(userLocation.lat, userLocation.lng) ? Number(userLocation.lat) : 37.7749;
+  const centerLng = userLocation && isValidLatLng(userLocation.lat, userLocation.lng) ? Number(userLocation.lng) : -122.4194;
 
   // Filter reports visible within the selected distance radius
   const visibleReports = React.useMemo(() => {
@@ -127,7 +127,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    if (isRadiusFilterActive && radiusKm > 0) {
+    if (isRadiusFilterActive && radiusKm > 0 && isValidLatLng(centerLat, centerLng)) {
       if (radiusCircleRef.current && map.hasLayer(radiusCircleRef.current)) {
         radiusCircleRef.current.setLatLng([centerLat, centerLng]);
         radiusCircleRef.current.setRadius(radiusKm * 1000);

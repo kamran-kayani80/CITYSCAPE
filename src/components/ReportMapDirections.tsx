@@ -71,8 +71,10 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
   const [copiedCoords, setCopiedCoords] = useState(false);
   const { userCoords } = useUserLocation();
 
-  const lat = report.latitude;
-  const lng = report.longitude;
+  const rawLat = Number(report.latitude);
+  const rawLng = Number(report.longitude);
+  const lat = !isNaN(rawLat) && isFinite(rawLat) ? rawLat : 33.5970;
+  const lng = !isNaN(rawLng) && isFinite(rawLng) ? rawLng : 73.0449;
 
   // Calculate Distance & Travel Estimates
   let distanceKm: number | null = null;
@@ -80,7 +82,7 @@ export const ReportMapDirections: React.FC<ReportMapDirectionsProps> = ({
   let driveMinutes: number | null = null;
   let walkMinutes: number | null = null;
 
-  if (userCoords && lat && lng) {
+  if (userCoords && !isNaN(userCoords.latitude) && !isNaN(userCoords.longitude)) {
     distanceKm = calculateDistanceKm(userCoords.latitude, userCoords.longitude, lat, lng);
     distanceFormatted = formatDistanceTag(distanceKm);
     

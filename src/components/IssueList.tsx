@@ -501,49 +501,49 @@ export const IssueList: React.FC<IssueListProps> = ({
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span
-                  className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-white shadow-xs border border-black/20"
+                  className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-white shadow-xs border border-black/30"
                   style={{ backgroundColor: statusConf.pinHex }}
                 >
                   {statusConf.label}
                 </span>
 
                 {distanceTag && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#0A2540] text-white dark:bg-[#006D5B] dark:text-[#CCFF00] border border-[#006D5B] flex items-center gap-1 shadow-2xs">
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#0A2540] text-white dark:bg-[#006D5B] dark:text-[#CCFF00] border border-[#006D5B] flex items-center gap-1 shadow-2xs">
                     <Navigation className="w-2.5 h-2.5 text-[#CCFF00]" />
                     <span>{distanceTag}</span>
                   </span>
                 )}
               </div>
 
-              <span className="text-xs text-[#006D5B] dark:text-[#CCFF00] font-mono font-black">#{report.id}</span>
+              <span className="text-xs text-[#006D5B] dark:text-[#CCFF00] font-mono font-black px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">#{report.id}</span>
             </div>
 
             <div className="flex gap-3 my-2.5">
               <img
                 src={report.imageUrls[0]}
                 alt={report.title}
-                className="w-18 h-18 rounded-2xl object-cover shrink-0 bg-slate-100 border-2 border-slate-300 dark:border-slate-700 shadow-xs group-hover:scale-102 transition-transform duration-300"
+                className="w-20 h-20 rounded-2xl object-cover shrink-0 bg-slate-100 border-2 border-slate-300 dark:border-slate-700 shadow-xs group-hover:scale-102 transition-transform duration-300"
               />
               <div className="min-w-0 flex-1">
-                <h3 className="font-['Montserrat'] font-black text-[#111827] dark:text-white text-base sm:text-lg line-clamp-1 group-hover:text-[#006D5B] dark:group-hover:text-[#CCFF00] transition-colors">
+                <h3 className="font-['Montserrat'] font-black text-[#0A2540] dark:text-white text-base sm:text-lg line-clamp-1 group-hover:text-[#006D5B] dark:group-hover:text-[#CCFF00] transition-colors">
                   {report.title}
                 </h3>
-                <p className="text-xs text-slate-800 dark:text-slate-200 line-clamp-2 mt-0.5 leading-snug font-semibold">
+                <p className="text-xs text-[#111827] dark:text-slate-100 line-clamp-2 mt-1 leading-relaxed font-bold">
                   {report.description}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t-2 border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-1.5 text-xs text-slate-900 dark:text-slate-100 font-bold truncate max-w-[180px]">
-                <MapPin className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00] shrink-0" />
+            <div className="flex items-center justify-between pt-3 border-t-2 border-slate-200 dark:border-slate-800 gap-2 flex-wrap sm:flex-nowrap">
+              <div className="flex items-center gap-1.5 text-xs text-[#0A2540] dark:text-slate-100 font-extrabold truncate max-w-[220px]">
+                <MapPin className="w-4 h-4 text-[#006D5B] dark:text-[#CCFF00] shrink-0" />
                 <span className="truncate">{report.addressText}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <ReportMapDirections report={report} variant="button-only" />
 
-                <span className={`px-2.5 py-0.5 text-[10px] rounded-full font-black uppercase ${sevConf.colorClass}`}>
+                <span className={`px-2.5 py-1 text-[10px] rounded-full font-black uppercase tracking-wider border shadow-2xs ${sevConf.colorClass}`}>
                   {sevConf.label}
                 </span>
 
@@ -554,11 +554,11 @@ export const IssueList: React.FC<IssueListProps> = ({
                   className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black transition-all cursor-pointer min-h-[48px] min-w-[48px] justify-center ${
                     report.userHasUpvoted
                       ? 'bg-[#B45309] text-white shadow-md border-2 border-amber-300'
-                      : 'bg-slate-100 dark:bg-slate-800 text-[#111827] dark:text-white border-2 border-slate-300 dark:border-slate-600 hover:bg-[#0A2540] hover:text-white'
+                      : 'bg-slate-100 dark:bg-slate-800 text-[#0A2540] dark:text-white border-2 border-slate-300 dark:border-slate-600 hover:bg-[#0A2540] hover:text-white hover:border-[#0A2540]'
                   }`}
                 >
-                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current text-white' : ''}`} />
-                  <span>{report.upvotesCount}</span>
+                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current text-white' : 'text-[#0A2540] dark:text-white'}`} />
+                  <span className="font-extrabold">{report.upvotesCount}</span>
                 </motion.button>
               </div>
             </div>

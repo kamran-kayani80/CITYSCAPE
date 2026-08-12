@@ -108,35 +108,35 @@ export const CommunityGratitudeFeed: React.FC<GratitudeFeedProps> = ({
                   className="soft-card p-5 space-y-4 hover:shadow-md transition-all"
                 >
                   {/* Top Bar: Reporter & Status */}
-                  <div className="flex items-center justify-between pb-3 border-b border-white/60">
+                  <div className="flex items-center justify-between pb-3 border-b-2 border-slate-200 dark:border-slate-700">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-2xl icon-tile-indigo flex items-center justify-center font-black text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-2xl icon-tile-indigo flex items-center justify-center font-black text-sm shrink-0 border border-[#006D5B]">
                         {report.userName.charAt(0)}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-black text-[#1c1a3b] dark:text-white">{report.userName}</span>
-                          <span className="text-[10px] px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full font-bold">
+                          <span className="text-xs font-black text-[#0A2540] dark:text-white">{report.userName}</span>
+                          <span className="text-[10px] px-2 py-0.5 bg-[#006D5B]/10 text-[#006D5B] dark:bg-[#006D5B]/30 dark:text-[#CCFF00] rounded-full font-black border border-[#006D5B]/30">
                             Original Reporter
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-500 font-medium">
+                        <span className="text-[11px] text-slate-700 dark:text-slate-300 font-bold">
                           Reported on {new Date(report.createdAt).toLocaleDateString()} • {report.addressText}
                         </span>
                       </div>
                     </div>
 
-                    <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-[10px] uppercase tracking-wider rounded-full shadow-xs">
+                    <span className="px-3 py-1 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-black text-[10px] uppercase tracking-wider rounded-full shadow-xs border border-emerald-400">
                       RESOLVED & VERIFIED
                     </span>
                   </div>
 
                   {/* Issue Info */}
                   <div>
-                    <h3 className="text-base font-extrabold text-[#1c1a3b] dark:text-white mb-1">
+                    <h3 className="text-base font-black text-[#0A2540] dark:text-white mb-1">
                       {report.title}
                     </h3>
-                    <p className="text-xs text-slate-600 line-clamp-2 font-medium">
+                    <p className="text-xs text-[#111827] dark:text-slate-100 line-clamp-2 font-semibold leading-relaxed">
                       {report.description}
                     </p>
                   </div>

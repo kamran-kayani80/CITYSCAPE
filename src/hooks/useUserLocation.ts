@@ -12,11 +12,15 @@ export function useUserLocation() {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserCoords({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        });
-        setHasPermission(true);
+        const lat = Number(pos.coords.latitude);
+        const lng = Number(pos.coords.longitude);
+        if (!isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+          setUserCoords({
+            latitude: lat,
+            longitude: lng,
+          });
+          setHasPermission(true);
+        }
         setIsLocating(false);
       },
       (err) => {

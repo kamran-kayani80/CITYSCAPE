@@ -13,12 +13,12 @@ import {
 } from 'lucide-react';
 import { useAccessibility, FontScale } from '../context/AccessibilityContext';
 
-const MUNICIPAL_BULLETINS = [
-  '🚧 Public Works crew repair active on 4th Street for water pipe main.',
-  '🌳 Ward 2 Community Park cleanup & greening drive this Saturday at 9 AM.',
-  '⚡ Streetlight maintenance completed across Elm Street & 8th Avenue.',
-  '📢 Town Hall Civic Forum on Neighborhood Improvement scheduled for Thursday at 6 PM.',
-  '💧 Seasonal municipal water conservation advisory active across all wards.',
+const DEFAULT_BULLETINS = [
+  '🚧 Rawalpindi Public Works: Main Arterial Resurfacing & Pipe Laying Active.',
+  '🌳 Ward 2 Community Park cleanup & greening drive scheduled this Saturday.',
+  '⚡ Streetlight solar LED maintenance completed across primary avenues.',
+  '📢 City Council Civic Infrastructure Town Hall scheduled for Thursday.',
+  '💧 Water & Sanitation Agency (WASA) pressure balance & filtration advisory active.',
 ];
 
 export const AccessibilityToolbar: React.FC = () => {
@@ -35,8 +35,49 @@ export const AccessibilityToolbar: React.FC = () => {
 
   const [isOpenGuide, setIsOpenGuide] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [bulletins, setBulletins] = useState<string[]>(DEFAULT_BULLETINS);
   const [bulletinIndex, setBulletinIndex] = useState(0);
   const [isTapePlaying, setIsTapePlaying] = useState(true);
+  const [currentCity, setCurrentCity] = useState<string>('Rawalpindi');
+  const [isRefreshingNews, setIsRefreshingNews] = useState(false);
+
+  // Fetch live city bulletins from server
+  const fetchLiveNews = async (city: string, force = false) => {
+    setIsRefreshingNews(true);
+    try {
+      const res = await fetch(`/api/bulletins/live?city=${encodeURIComponent(city)}${force ? '&forceRefresh=true' : ''}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.bulletins) && data.bulletins.length > 0) {
+          const headlines = data.bulletins.map((b: any) => `${b.title} — (${b.department || b.sourceName})`);
+          setBulletins(headlines);
+          if (data.cityName) setCurrentCity(data.cityName);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed fetching ticker bulletins:", e);
+    } finally {
+      setIsRefreshingNews(false);
+    }
+  };
+
+  useEffect(() => {
+    const savedCity = localStorage.getItem('cityscape_user_city') || 'Rawalpindi';
+    setCurrentCity(savedCity);
+    fetchLiveNews(savedCity);
+
+    // Listen for city changes from other components
+    const handleCityChange = (e: CustomEvent) => {
+      if (e.detail && e.detail.city) {
+        setCurrentCity(e.detail.city);
+        fetchLiveNews(e.detail.city);
+      }
+    };
+    window.addEventListener('cityscape_city_changed' as any, handleCityChange);
+    return () => {
+      window.removeEventListener('cityscape_city_changed' as any, handleCityChange);
+    };
+  }, []);
 
   // Auto-collapse / slide up bar when scrolling down for maximum screen visibility, slide down when at top
   useEffect(() => {
@@ -59,14 +100,14 @@ export const AccessibilityToolbar: React.FC = () => {
 
   // News Bulletin Ticker Tape Rotation
   useEffect(() => {
-    if (!isTapePlaying) return;
+    if (!isTapePlaying || bulletins.length === 0) return;
 
     const interval = setInterval(() => {
-      setBulletinIndex((prev) => (prev + 1) % MUNICIPAL_BULLETINS.length);
-    }, 5000);
+      setBulletinIndex((prev) => (prev + 1) % bulletins.length);
+    }, 5500);
 
     return () => clearInterval(interval);
-  }, [isTapePlaying]);
+  }, [isTapePlaying, bulletins]);
 
   const handleReadScreenAloud = () => {
     if (speechEnabled) {
@@ -123,28 +164,38 @@ export const AccessibilityToolbar: React.FC = () => {
               )}
             </button>
 
+            {/* Manual Ground Search Refresh Button */}
+            <button
+              onClick={() => fetchLiveNews(currentCity, true)}
+              disabled={isRefreshingNews}
+              className="p-1.5 bg-[#07192c] hover:bg-[#006D5B] text-[#CCFF00] rounded-md transition-colors border border-[#006D5B] shrink-0 cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
+              title="Refresh City Infrastructure News via Gemini Grounded Search"
+            >
+              <Sparkles className={`w-3.5 h-3.5 text-[#CCFF00] ${isRefreshingNews ? 'animate-spin' : ''}`} />
+            </button>
+
             {/* Scrolling / Animated News Tape Content */}
             <div className="flex-1 overflow-hidden relative h-6 flex items-center text-xs text-slate-100 font-medium">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={bulletinIndex}
+                  key={`${currentCity}-${bulletinIndex}`}
                   initial={{ y: 16, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -16, opacity: 0 }}
                   transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="whitespace-nowrap truncate text-[11px] sm:text-xs font-semibold text-slate-100 flex items-center gap-1"
+                  className="whitespace-nowrap truncate text-[11px] sm:text-xs font-semibold text-slate-100 flex items-center gap-1.5"
                 >
-                  <span className="text-[#CCFF00] font-black text-[10px] uppercase font-mono">
-                    [{bulletinIndex + 1}/{MUNICIPAL_BULLETINS.length}]
+                  <span className="text-[#CCFF00] font-black text-[10px] uppercase font-mono bg-[#006D5B]/40 px-1.5 py-0.5 rounded">
+                    📍 {currentCity} [{bulletins.length > 0 ? bulletinIndex + 1 : 0}/{bulletins.length}]
                   </span>
-                  <span className="truncate">{MUNICIPAL_BULLETINS[bulletinIndex]}</span>
+                  <span className="truncate">{bulletins[bulletinIndex] || 'Loading city infrastructure news...'}</span>
                 </motion.div>
               </AnimatePresence>
             </div>
 
             {/* Next Bulletin Quick Skip */}
             <button
-              onClick={() => setBulletinIndex((prev) => (prev + 1) % MUNICIPAL_BULLETINS.length)}
+              onClick={() => setBulletinIndex((prev) => (prev + 1) % (bulletins.length || 1))}
               className="p-1 text-slate-300 hover:text-white shrink-0 cursor-pointer hidden md:block"
               title="Next Bulletin"
             >
