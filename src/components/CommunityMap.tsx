@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
+import L from '../lib/leafletSafetyPatch';
 import { Locate, RotateCcw, MapPin, Sparkles, Navigation, Map as MapIcon, Globe, Flame, Layers, Sliders, CircleDot, Filter, X, UserCheck, User } from 'lucide-react';
 import { Report, ReportStatus } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG } from '../lib/constants';
@@ -64,6 +64,14 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
   const pinMarkerRef = useRef<L.Marker | null>(null);
   const userLocMarkerRef = useRef<L.Marker | null>(null);
   const radiusCircleRef = useRef<L.Circle | null>(null);
+
+  const isPinningLocationRef = useRef(isPinningLocation);
+  const onPinLocationChangeRef = useRef(onPinLocationChange);
+
+  useEffect(() => {
+    isPinningLocationRef.current = isPinningLocation;
+    onPinLocationChangeRef.current = onPinLocationChange;
+  }, [isPinningLocation, onPinLocationChange]);
 
   const [mapMode, setMapMode] = useState<MapLayerMode>('street');
   const [isLocating, setIsLocating] = useState(false);
@@ -187,8 +195,13 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
     // Global map click handler when in location picking mode
     map.on('click', (e: L.LeafletMouseEvent) => {
-      if (isPinningLocation && onPinLocationChange && e.latlng && isValidLatLng(e.latlng.lat, e.latlng.lng)) {
-        onPinLocationChange(e.latlng.lat, e.latlng.lng);
+      if (
+        isPinningLocationRef.current &&
+        onPinLocationChangeRef.current &&
+        e.latlng &&
+        isValidLatLng(e.latlng.lat, e.latlng.lng)
+      ) {
+        onPinLocationChangeRef.current(e.latlng.lat, e.latlng.lng);
       }
     });
 
@@ -554,11 +567,11 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
           marker.on('dragend', (e) => {
             const newPos = e.target.getLatLng();
-            if (newPos && onPinLocationChange && isValidLatLng(newPos.lat, newPos.lng)) {
+            if (newPos && onPinLocationChangeRef.current && isValidLatLng(newPos.lat, newPos.lng)) {
               const nLat = Number(newPos.lat);
               const nLng = Number(newPos.lng);
               if (isValidLatLng(nLat, nLng)) {
-                onPinLocationChange(nLat, nLng);
+                onPinLocationChangeRef.current(nLat, nLng);
               }
             }
           });

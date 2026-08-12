@@ -204,16 +204,29 @@ export default function App() {
 
     setReports(fetchedReports);
 
-    // Deep link support: auto-select report if URL parameter or hash is present
+    // Deep link support: auto-select report, bulletin, event, tag, or article if URL parameter or hash is present
     const urlParams = new URLSearchParams(window.location.search);
     const hash = window.location.hash;
     const deepLinkId = urlParams.get('reportId') || (hash.startsWith('#report-') ? hash.replace('#report-', '') : null);
+    const bulletinParam = urlParams.get('bulletinId');
+    const eventParam = urlParams.get('eventId');
+    const tagParam = urlParams.get('tag');
+    const articleParam = urlParams.get('articleId');
 
     if (deepLinkId) {
       const match = fetchedReports.find((r: Report) => r.id === deepLinkId);
       if (match) {
         handleSelectReport(match);
       }
+    } else if (bulletinParam) {
+      setActiveView('bulletin');
+    } else if (eventParam) {
+      setActiveView('events');
+    } else if (tagParam) {
+      setFilter(tagParam.startsWith('#') ? tagParam : `#${tagParam}`);
+      setActiveView('map');
+    } else if (articleParam) {
+      setActiveView('blog');
     }
 
     setIsLoading(false);
