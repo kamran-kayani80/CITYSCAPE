@@ -374,3 +374,163 @@ export function downloadReportPDF(report: Report) {
   }
 }
 
+/**
+ * Downloads an official Physical Infrastructure Signage / Flyer PDF designed to be printed
+ * and posted on physical infrastructure (e.g., potholes, street lights, broken benches).
+ */
+export async function downloadInfrastructureSignagePDF(
+  report: Report,
+  shareUrl: string,
+  headline: string = 'OFFICIAL CIVIC NOTICE: INFRASTRUCTURE HAZARD REPORTED',
+  signageType: 'flyer' | 'caution' | 'tag' = 'flyer'
+) {
+  try {
+    const doc = new jsPDF();
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(shareUrl)}`;
+
+    let qrDataUrl: string | null = null;
+    try {
+      qrDataUrl = await new Promise<string>((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth || 400;
+          canvas.height = img.naturalHeight || 400;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+          } else {
+            reject(new Error('Canvas ctx error'));
+          }
+        };
+        img.onerror = (e) => reject(e);
+        img.src = qrCodeUrl;
+      });
+    } catch (e) {
+      console.warn('Could not load QR image as data URL for PDF, falling back', e);
+    }
+
+    if (signageType === 'caution') {
+      doc.setFillColor(180, 83, 9); // Caution Amber
+    } else {
+      doc.setFillColor(46, 42, 38); // Charcoal Navy
+    }
+    doc.rect(0, 0, 210, 48, 'F');
+
+    // Vector Brand Mark
+    drawCityscapeHeaderLogo(doc, 14, 12);
+
+    // Header Text
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.text('CITYSCAPE', 56, 22);
+
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(251, 214, 200); // Soft Beige
+    doc.text('PHYSICAL INFRASTRUCTURE CIVIC NOTICE', 56, 30);
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(227, 221, 211);
+    doc.text(`Report Ref ID: #${report.id.slice(-8)} • ${report.addressText || 'District Ward Boundary'}`, 56, 37);
+
+    // Headline Banner Box
+    doc.setFillColor(245, 239, 230); // Linen Surface
+    doc.setDrawColor(227, 221, 211);
+    doc.roundedRect(15, 54, 180, 24, 3, 3, 'FD');
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(46, 42, 38);
+    doc.text(headline.toUpperCase(), 20, 69);
+
+    // Main Report Title
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(143, 158, 135); // Sage Green
+    const splitTitle = doc.splitTextToSize(report.title, 180);
+    doc.text(splitTitle, 15, 88);
+
+    let nextY = 88 + splitTitle.length * 8;
+
+    // QR Code Placement Box
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(143, 158, 135);
+    doc.setLineWidth(1.5);
+    const qrBoxX = 65;
+    const qrBoxY = nextY;
+    const qrSize = 80;
+    doc.roundedRect(qrBoxX, qrBoxY, qrSize, qrSize, 4, 4, 'FD');
+
+    if (qrDataUrl) {
+      doc.addImage(qrDataUrl, 'PNG', qrBoxX + 5, qrBoxY + 5, qrSize - 10, qrSize - 10);
+    } else {
+      doc.setFontSize(10);
+      doc.setTextColor(46, 42, 38);
+      doc.text('SCAN QR CODE', qrBoxX + 18, qrBoxY + 40);
+    }
+
+    nextY = qrBoxY + qrSize + 12;
+
+    // Action Instructions Banner
+    doc.setFillColor(143, 158, 135); // Sage Green
+    doc.roundedRect(15, nextY, 180, 14, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SCAN QR CODE WITH SMARTPHONE CAMERA TO:', 20, nextY + 9.5);
+
+    nextY += 20;
+
+    // 3 Action Steps
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(46, 42, 38);
+
+    doc.text('1. INSTANTLY VIEW REPORT DETAILS & PHOTOS', 20, nextY);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(99, 93, 85);
+    doc.text('Inspect full resident observations and ground verification status.', 25, nextY + 6);
+
+    nextY += 16;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(46, 42, 38);
+    doc.text('2. ENDORSE / UPVOTE TO ELEVATE MUNICIPAL PRIORITY', 20, nextY);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(99, 93, 85);
+    doc.text('Show local public works crews that multiple neighbors are affected.', 25, nextY + 6);
+
+    nextY += 16;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(46, 42, 38);
+    doc.text('3. RECEIVE REAL-TIME DISPATCH & RESOLUTION NOTIFICATIONS', 20, nextY);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(99, 93, 85);
+    doc.text('Track repair progress as City Teams update resolution photos.', 25, nextY + 6);
+
+    // Footer Box
+    doc.setFillColor(245, 239, 230);
+    doc.setDrawColor(227, 221, 211);
+    doc.roundedRect(15, 252, 180, 32, 3, 3, 'FD');
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(46, 42, 38);
+    doc.text(`CITYSCAPE CIVIC NETWORK • REPORT #${report.id.slice(-6)}`, 20, 262);
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(99, 93, 85);
+    doc.text(`Direct Deep Link: ${shareUrl}`, 20, 269);
+    doc.text('Official Civic Infrastructure Tag • Printed by local neighborhood resident.', 20, 275);
+
+    doc.save(`Infrastructure-QR-Sign-${report.id.slice(0, 8)}.pdf`);
+  } catch (err) {
+    console.error('PDF Signage Generation Error:', err);
+  }
+}
+

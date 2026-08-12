@@ -135,41 +135,41 @@ export const CivicBulletinHub: React.FC = () => {
   return (
     <div className="space-y-6 font-['Montserrat']">
       {/* Header Banner */}
-      <div className="bg-[#0A2540] text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border-2 border-[#006D5B]">
-        <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-[#006D5B]/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-[#051F20] text-[#DAF1DE] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border-2 border-[#235347]">
+        <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-[#235347]/30 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2 flex-wrap gap-1.5">
-              <span className="px-3 py-1 bg-[#006D5B] text-white font-black text-xs uppercase tracking-wider rounded-lg flex items-center gap-1 shadow-xs border border-[#006D5B]">
-                <Globe className="w-3.5 h-3.5 text-amber-300" />
+          <div className="space-y-2 text-left flex-1 min-w-0">
+            <div className="flex items-center space-x-2 flex-wrap gap-1.5 text-left">
+              <span className="px-3 py-1 bg-[#163832] text-[#DAF1DE] font-black text-xs uppercase tracking-wider rounded-lg flex items-center gap-1 shadow-xs border border-[#8EB69B]/50">
+                <Globe className="w-3.5 h-3.5 text-[#8EB69B]" />
                 Live City Intelligence
               </span>
-              <span className="text-xs font-extrabold text-amber-300 bg-[#06182B] px-2.5 py-1 rounded-md border border-amber-500/30 flex items-center gap-1 shadow-xs">
-                <Clock className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-xs font-extrabold text-[#DAF1DE] bg-[#0B2B26] px-2.5 py-1 rounded-md border border-[#235347] flex items-center gap-1 shadow-xs">
+                <Clock className="w-3.5 h-3.5 text-[#8EB69B]" />
                 Twice-Daily Auto Extraction
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-['Montserrat'] font-black text-white">
-              Civic Infrastructure Bulletins & News — <span className="text-amber-400">{cityName}</span>
+            <h1 className="text-2xl sm:text-3xl font-['Montserrat'] font-black text-[#DAF1DE] text-left leading-tight tracking-tight">
+              Civic Infrastructure Bulletins & News — <span className="text-[#8EB69B] underline decoration-[#235347]">{cityName}</span>
             </h1>
-            <p className="text-xs sm:text-sm text-black max-w-2xl font-bold leading-relaxed bg-white/95 p-3 rounded-xl border border-slate-200 shadow-xs">
+            <p className="text-xs sm:text-sm text-[#DAF1DE] max-w-2xl font-bold leading-relaxed bg-[#0B2B26]/90 p-3 rounded-xl border border-[#235347] shadow-xs text-left">
               Real-time, authentic city news extracted twice daily from official municipal portals, city councils, public works, WASAs, and verified news websites.
             </p>
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
-            <div className="p-4 bg-[#06182B]/80 border border-slate-700 rounded-2xl text-center min-w-[120px] shadow-xs backdrop-blur-md">
-              <span className="block text-3xl font-black text-amber-400">{liveBulletins.length}</span>
-              <span className="text-[10px] font-black text-slate-300 uppercase tracking-wider">Extracted News</span>
+            <div className="p-4 bg-[#0B2B26] border border-[#235347] rounded-2xl text-center min-w-[120px] shadow-md backdrop-blur-md">
+              <span className="block text-3xl font-black text-[#DAF1DE]">{liveBulletins.length}</span>
+              <span className="text-[10px] font-black text-[#8EB69B] uppercase tracking-wider">Extracted News</span>
             </div>
           </div>
         </div>
 
         {/* City Selector Bar */}
-        <div className="relative z-10 mt-6 pt-4 border-t border-slate-700/80 space-y-3">
+        <div className="relative z-10 mt-6 pt-4 border-t border-[#235347] space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
-            <span className="text-amber-300 font-black flex items-center gap-1">
-              <MapPin className="w-4 h-4 text-amber-400" />
+            <span className="text-[#DAF1DE] font-black flex items-center gap-1">
+              <MapPin className="w-4 h-4 text-[#8EB69B]" />
               Select Geotagged City for News Extraction:
             </span>
           </div>
@@ -181,8 +181,8 @@ export const CivicBulletinHub: React.FC = () => {
                 onClick={() => handleCitySelect(c)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shrink-0 border min-h-[36px] ${
                   cityName.toLowerCase() === c.toLowerCase()
-                    ? 'bg-[#006D5B] text-white border-[#006D5B] shadow-xs font-black'
-                    : 'bg-slate-100 hover:bg-slate-200 text-black border-slate-300'
+                    ? 'bg-[#235347] text-[#DAF1DE] border-[#8EB69B] shadow-md font-black'
+                    : 'bg-[#051F20] hover:bg-[#163832] text-[#DAF1DE] border-[#235347]'
                 }`}
               >
                 📍 {c}
@@ -196,11 +196,11 @@ export const CivicBulletinHub: React.FC = () => {
                 placeholder="Other City Name..."
                 value={customCityInput}
                 onChange={(e) => setCustomCityInput(e.target.value)}
-                className="px-3 py-1.5 bg-slate-100 border border-slate-300 text-black rounded-xl text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#006D5B] min-h-[36px] w-36 placeholder:text-slate-500"
+                className="px-3 py-1.5 bg-[#051F20] border border-[#235347] text-[#DAF1DE] rounded-xl text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#8EB69B] min-h-[36px] w-36 placeholder:text-[#8EB69B]/60"
               />
               <button
                 type="submit"
-                className="px-3 py-1.5 bg-[#006D5B] text-white font-black rounded-xl text-xs hover:bg-[#004d40] min-h-[36px] cursor-pointer shadow-xs"
+                className="px-3 py-1.5 bg-[#235347] text-[#DAF1DE] border border-[#8EB69B] font-black rounded-xl text-xs hover:bg-[#163832] min-h-[36px] cursor-pointer shadow-xs"
               >
                 Extract
               </button>
@@ -210,22 +210,22 @@ export const CivicBulletinHub: React.FC = () => {
       </div>
 
       {/* Twice-Daily Auto-Refresh Status Card */}
-      <div className="soft-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-2 border-[#006D5B]/30 bg-emerald-50/50 dark:bg-slate-900/80">
+      <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border-2 border-[#235347] bg-[#0B2B26] text-[#DAF1DE] shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-xs font-black uppercase text-[#006D5B] dark:text-[#CCFF00]">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-[#8EB69B] animate-ping" />
+            <span className="text-xs font-black uppercase text-[#DAF1DE]">
               Twice-Daily Extraction Engine Active
             </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#051F20] text-[#8EB69B] border border-[#235347] font-bold">
               {fromCache ? 'Latest Cached Cycle' : 'Live Ground Search Refreshed'}
             </span>
           </div>
-          <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-            <strong>Last Refreshed:</strong> {refreshedAt ? new Date(refreshedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + new Date(refreshedAt).toLocaleDateString() + ')' : 'Just Now'} • <strong>Next Auto-Refresh:</strong> {nextRefreshAt ? new Date(nextRefreshAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'In 12 Hours'}
+          <p className="text-xs text-[#DAF1DE]/90 font-medium">
+            <strong className="text-[#8EB69B]">Last Refreshed:</strong> {refreshedAt ? new Date(refreshedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + new Date(refreshedAt).toLocaleDateString() + ')' : 'Just Now'} • <strong className="text-[#8EB69B]">Next Auto-Refresh:</strong> {nextRefreshAt ? new Date(nextRefreshAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'In 12 Hours'}
           </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#008080]" />
+          <p className="text-[11px] text-[#8EB69B] flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#8EB69B]" />
             Scans official council portals, WASA water notices, transit authorities & verified local news outlets.
           </p>
         </div>
@@ -233,24 +233,24 @@ export const CivicBulletinHub: React.FC = () => {
         <button
           onClick={() => fetchCityBulletins(cityName, true)}
           disabled={isRefreshing}
-          className="px-4 py-2.5 bg-[#006D5B] hover:bg-[#004d40] text-white font-extrabold text-xs rounded-2xl shadow-sm transition-all cursor-pointer min-h-[44px] flex items-center justify-center space-x-2 shrink-0 border border-[#CCFF00]/40 disabled:opacity-60"
+          className="px-4 py-2.5 bg-[#163832] hover:bg-[#235347] text-[#DAF1DE] font-extrabold text-xs rounded-2xl shadow-sm transition-all cursor-pointer min-h-[44px] flex items-center justify-center space-x-2 shrink-0 border border-[#8EB69B] disabled:opacity-60"
         >
-          <Sparkles className={`w-4 h-4 text-[#CCFF00] ${isRefreshing ? 'animate-spin' : ''}`} />
+          <Sparkles className={`w-4 h-4 text-[#8EB69B] ${isRefreshing ? 'animate-spin' : ''}`} />
           <span>{isRefreshing ? 'Extracting Ground News...' : '⚡ Refresh News Now (Gemini Ground Search)'}</span>
         </button>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="ui-kit-card-lvl2 p-4 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
+      <div className="p-4 rounded-3xl border-2 border-[#235347] bg-[#0B2B26] text-[#DAF1DE] shadow-xl space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
         {/* Search Bar */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#8EB69B] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder={`Search ${cityName} advisories, roadworks, or sources...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 ui-kit-input text-xs font-bold text-slate-800 outline-none min-h-[44px]"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#051F20] border border-[#235347] rounded-xl text-xs font-bold text-[#DAF1DE] outline-none min-h-[44px] placeholder:text-[#8EB69B]/60 focus:border-[#8EB69B]"
           />
         </div>
 
@@ -267,10 +267,10 @@ export const CivicBulletinHub: React.FC = () => {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 py-2 text-xs shrink-0 transition-all cursor-pointer min-h-[40px] ${
+              className={`px-3.5 py-2 text-xs font-black rounded-xl shrink-0 transition-all cursor-pointer min-h-[40px] border ${
                 selectedCategory === cat.id
-                  ? 'ui-kit-chip-active'
-                  : 'ui-kit-chip-default'
+                  ? 'bg-[#8EB69B] text-[#051F20] border-[#DAF1DE] shadow-md'
+                  : 'bg-[#163832] text-[#DAF1DE] hover:bg-[#235347] border-[#235347]'
               }`}
             >
               {cat.label}
@@ -282,20 +282,20 @@ export const CivicBulletinHub: React.FC = () => {
       {/* Bulletins Feed List */}
       <div className="space-y-4">
         {isLoading ? (
-          <div className="soft-card p-12 text-center space-y-3">
-            <RefreshCw className="w-8 h-8 text-[#008080] animate-spin mx-auto" />
-            <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-200">
+          <div className="bg-[#0B2B26] border-2 border-[#235347] rounded-3xl p-12 text-center space-y-3 text-[#DAF1DE]">
+            <RefreshCw className="w-8 h-8 text-[#8EB69B] animate-spin mx-auto" />
+            <h3 className="text-base font-extrabold text-[#DAF1DE]">
               Extracting City Infrastructure Bulletins for {cityName}...
             </h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <p className="text-xs text-[#8EB69B] max-w-sm mx-auto">
               Querying municipal government information departments, city councils, and local authentic press via grounded search.
             </p>
           </div>
         ) : filteredBulletins.length === 0 ? (
-          <div className="soft-card p-12 text-center space-y-3">
-            <Megaphone className="w-10 h-10 text-slate-400 mx-auto" />
-            <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-200">No Bulletins Match Filter</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+          <div className="bg-[#0B2B26] border-2 border-[#235347] rounded-3xl p-12 text-center space-y-3 text-[#DAF1DE]">
+            <Megaphone className="w-10 h-10 text-[#8EB69B] mx-auto" />
+            <h3 className="text-base font-extrabold text-[#DAF1DE]">No Bulletins Match Filter</h3>
+            <p className="text-xs text-[#8EB69B] max-w-sm mx-auto">
               No municipal advisories found for "{searchQuery}" in {cityName}. Try clearing the search query or tapping "Refresh News Now".
             </p>
           </div>
@@ -307,24 +307,24 @@ export const CivicBulletinHub: React.FC = () => {
             return (
               <div
                 key={item.id}
-                className={`rounded-3xl border transition-all ${
+                className={`rounded-3xl border-2 transition-all p-5 sm:p-6 space-y-3.5 shadow-xl ${
                   isCritical
-                    ? 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-400 dark:border-rose-800 shadow-md ring-1 ring-rose-300'
+                    ? 'bulletin-card-critical'
                     : isUrgent
-                    ? 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 shadow-xs'
-                    : 'soft-card'
-                } p-5 sm:p-6 space-y-3.5`}
+                    ? 'bulletin-card-urgent'
+                    : 'bulletin-card-dark'
+                }`}
               >
                 {/* Header row */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start space-x-3">
+                <div className="flex items-start justify-between gap-3 text-left">
+                  <div className="flex items-start space-x-3 flex-1 min-w-0 text-left">
                     <div
                       className={`p-3 rounded-2xl shrink-0 font-black ${
                         isCritical
                           ? 'bg-rose-600 text-white shadow-xs'
                           : isUrgent
                           ? 'bg-amber-500 text-white shadow-xs'
-                          : 'bg-[#008080] text-white'
+                          : 'bg-[#163832] text-[#DAF1DE] border border-[#8EB69B]'
                       }`}
                     >
                       {isCritical ? (
@@ -336,23 +336,23 @@ export const CivicBulletinHub: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2 flex-wrap gap-1.5">
-                        <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-[#0A2540] text-white">
+                    <div className="space-y-1 flex-1 min-w-0 text-left">
+                      <div className="flex items-center space-x-2 flex-wrap gap-1.5 text-left">
+                        <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-[#051F20] text-[#DAF1DE] border border-[#235347]">
                           🏛️ {item.department}
                         </span>
                         {item.wardZone && (
-                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-[#008080]/10 text-[#008080] dark:bg-[#008080]/20 dark:text-[#CCFF00]">
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-[#163832] text-[#8EB69B] border border-[#235347]">
                             📍 {item.wardZone}
                           </span>
                         )}
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#235347] text-[#DAF1DE] border border-[#8EB69B] flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-[#8EB69B]" />
                           {item.verifiedBy || 'Verified Source'}
                         </span>
                       </div>
 
-                      <h3 className="text-base sm:text-lg font-['Montserrat'] font-black text-slate-900 dark:text-white pt-1">
+                      <h3 className="text-base sm:text-xl font-['Montserrat'] font-black text-[#DAF1DE] pt-1 leading-snug text-left tracking-tight">
                         {item.title}
                       </h3>
                     </div>
@@ -360,24 +360,24 @@ export const CivicBulletinHub: React.FC = () => {
 
                   <button
                     onClick={() => speakText(`${item.title}. Published by ${item.department}. ${item.description}`)}
-                    className="p-2.5 bg-[#008080]/10 dark:bg-[#008080]/20 hover:bg-[#008080]/20 text-[#008080] dark:text-[#CCFF00] rounded-xl transition-all cursor-pointer min-h-[42px] min-w-[42px] flex items-center justify-center shrink-0"
+                    className="p-2.5 bg-[#163832] hover:bg-[#235347] text-[#DAF1DE] border border-[#8EB69B] rounded-xl transition-all cursor-pointer min-h-[42px] min-w-[42px] flex items-center justify-center shrink-0"
                     title="Read bulletin aloud"
                   >
-                    <Volume2 className="w-4.5 h-4.5 text-[#008080] dark:text-[#CCFF00]" />
+                    <Volume2 className="w-4.5 h-4.5 text-[#DAF1DE]" />
                   </button>
                 </div>
 
                 {/* Description Body */}
-                <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#DAF1DE]/95 font-medium leading-relaxed">
                   {item.description}
                 </p>
 
                 {/* Source & Actions Footer Bar */}
-                <div className="flex items-center justify-between text-xs pt-3 border-t border-slate-200/60 dark:border-slate-800 flex-wrap gap-2">
-                  <div className="flex items-center space-x-2 text-[11px] text-slate-600 dark:text-slate-400 font-semibold">
-                    <Globe className="w-3.5 h-3.5 text-[#008080]" />
-                    <span>Source: <strong>{item.sourceName}</strong></span>
-                    <span className="text-slate-400">•</span>
+                <div className="flex items-center justify-between text-xs pt-3 border-t border-[#235347] flex-wrap gap-2">
+                  <div className="flex items-center space-x-2 text-[11px] text-[#8EB69B] font-semibold">
+                    <Globe className="w-3.5 h-3.5 text-[#8EB69B]" />
+                    <span>Source: <strong className="text-[#DAF1DE]">{item.sourceName}</strong></span>
+                    <span className="text-[#235347]">•</span>
                     <span>{item.publishedAt}</span>
                   </div>
 
@@ -387,9 +387,9 @@ export const CivicBulletinHub: React.FC = () => {
                         href={item.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-[#008080]/10 text-[#008080] dark:bg-[#008080]/20 dark:text-[#CCFF00] rounded-xl text-xs font-extrabold hover:bg-[#008080]/20 cursor-pointer min-h-[38px] flex items-center space-x-1"
+                        className="px-3 py-1.5 bg-[#163832] text-[#DAF1DE] border border-[#8EB69B] rounded-xl text-xs font-extrabold hover:bg-[#235347] cursor-pointer min-h-[38px] flex items-center space-x-1"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <ExternalLink className="w-3.5 h-3.5 text-[#8EB69B]" />
                         <span>Official Source</span>
                       </a>
                     )}
@@ -407,9 +407,9 @@ export const CivicBulletinHub: React.FC = () => {
                         });
                         setIsShareModalOpen(true);
                       }}
-                      className="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 cursor-pointer min-h-[38px] flex items-center space-x-1"
+                      className="px-3 py-1.5 bg-[#163832] text-[#DAF1DE] border border-[#8EB69B] rounded-xl text-xs font-bold hover:bg-[#235347] cursor-pointer min-h-[38px] flex items-center space-x-1"
                     >
-                      <Share2 className="w-3.5 h-3.5 text-[#008080]" />
+                      <Share2 className="w-3.5 h-3.5 text-[#8EB69B]" />
                       <span>Share Advisory</span>
                     </button>
                   </div>

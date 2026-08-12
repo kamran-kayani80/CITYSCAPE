@@ -439,7 +439,7 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
 
   const applyDetectedCity = (cityName: string, _lat: number, _lon: number) => {
     localStorage.setItem('cityscape_user_city', cityName);
-    if (_lat && _lon) {
+    if (_lat !== undefined && _lon !== undefined && !isNaN(_lat) && !isNaN(_lon) && isFinite(_lat) && isFinite(_lon)) {
       localStorage.setItem('cityscape_user_lat', _lat.toString());
       localStorage.setItem('cityscape_user_lng', _lon.toString());
     }
@@ -513,7 +513,7 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
       <motion.div
         layout
         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-        className="relative w-full min-h-[180px] sm:min-h-[230px] rounded-3xl p-5 sm:p-8 overflow-hidden flex flex-col justify-between clay-card-lvl3 bg-[#F7F3EB] text-[#2C2518] border-2 border-[#E4DACB] shadow-xl transition-all duration-500"
+        className="relative w-full min-h-[180px] sm:min-h-[230px] rounded-3xl p-5 sm:p-8 overflow-hidden flex flex-col justify-between clay-card-lvl3 bg-[#DAF1DE] dark:bg-[#0B2B26] text-[#051F20] dark:text-[#DAF1DE] border-2 border-[#8EB69B] dark:border-[#235347] shadow-xl transition-all duration-500"
       >
         {/* Subtle Organic Clay Gradient & Glow */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(163,232,213,0.35),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(245,208,192,0.35),transparent_50%)] pointer-events-none z-0" />
@@ -541,18 +541,18 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
           {/* Left Civic Badges */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#A3E8D5] text-[#063B2F] border border-[#7CD6B8] shadow-xs font-['Montserrat']">
-              <Building2 className="w-3.5 h-3.5 text-[#063B2F] shrink-0" />
+            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#8F9E87] text-[#FFFFFF] border border-[#7E8D76] shadow-xs font-['Montserrat']">
+              <Building2 className="w-3.5 h-3.5 text-white shrink-0" />
               <span>{activeCity.wardName}</span>
             </div>
 
-            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black bg-[#F5D0C0] text-[#5C2718] border border-[#E5B3A3] font-['Montserrat'] shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-[#5C2718] animate-pulse" />
+            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black bg-[#FBD6C8] text-[#2E2A26] border border-[#E3B4A2] font-['Montserrat'] shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-[#2E2A26] animate-pulse" />
               <span>{activeCity.demonym} JURISDICTION</span>
             </div>
 
-            <div className="hidden lg:inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#A3D5E0] text-[#093C47] border border-[#7BC3CF] font-['Montserrat'] shadow-xs">
-              <Compass className="w-3.5 h-3.5 text-[#093C47] shrink-0" />
+            <div className="hidden lg:inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#E3DDD3] text-[#2E2A26] border border-[#CBD5E1] font-['Montserrat'] shadow-xs">
+              <Compass className="w-3.5 h-3.5 text-[#2E2A26] shrink-0" />
               <span>{activeCity.landmarksName}</span>
             </div>
           </div>
@@ -564,12 +564,12 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
               onClick={handleDetectGeotagLocation}
               disabled={isGeotagging}
               title="Auto-detect current city via GPS"
-              className="flex items-center space-x-1.5 bg-[#06182B]/80 hover:bg-[#06182B] px-3 py-2 rounded-xl text-xs font-black text-white border border-slate-700 shadow-xs hover:border-[#006D5B] transition-all cursor-pointer min-h-[44px] disabled:opacity-50 font-['Montserrat'] backdrop-blur-md"
+              className="flex items-center space-x-1.5 bg-[#2E2A26] hover:bg-[#635D55] px-3 py-2 rounded-xl text-xs font-black text-white border border-[#E3DDD3] shadow-xs transition-all cursor-pointer min-h-[44px] disabled:opacity-50 font-['Montserrat'] backdrop-blur-md"
             >
               {isGeotagging ? (
-                <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+                <Loader2 className="w-4 h-4 text-[#FBD6C8] animate-spin" />
               ) : (
-                <Locate className="w-4 h-4 text-amber-400" />
+                <Locate className="w-4 h-4 text-[#FBD6C8]" />
               )}
               <span className="hidden sm:inline">{isGeotagging ? 'Geotagging...' : 'Auto-GPS'}</span>
             </button>
@@ -580,9 +580,9 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 aria-expanded={isDropdownOpen}
                 aria-label="Change current city location"
-                className="flex items-center space-x-2 bg-[#06182B]/80 hover:bg-[#06182B] px-3.5 py-2 rounded-xl text-xs font-black text-white border border-slate-700 shadow-xs hover:border-[#006D5B] transition-all cursor-pointer min-h-[44px] font-['Montserrat'] backdrop-blur-md"
+                className="flex items-center space-x-2 bg-[#2E2A26] hover:bg-[#635D55] px-3.5 py-2 rounded-xl text-xs font-black text-white border border-[#E3DDD3] shadow-xs transition-all cursor-pointer min-h-[44px] font-['Montserrat'] backdrop-blur-md"
               >
-                <MapPin className="w-4 h-4 text-amber-400" />
+                <MapPin className="w-4 h-4 text-[#FBD6C8]" />
                 <span>{activeCity.cityName}</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -594,11 +594,11 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
                     initial={{ opacity: 0, y: 8, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 6, scale: 0.96 }}
-                    className="absolute right-0 mt-2 w-64 bg-[#0A2540] rounded-2xl shadow-2xl border-2 border-[#006D5B] p-2 z-50 text-white font-['Montserrat']"
+                    className="absolute right-0 mt-2 w-64 bg-[#2E2A26] rounded-2xl shadow-2xl border-2 border-[#8F9E87] p-2 z-50 text-white font-['Montserrat']"
                   >
-                    <div className="px-3 py-1.5 text-[11px] font-black text-amber-300 uppercase tracking-wider flex items-center justify-between border-b border-slate-700/60 pb-2">
+                    <div className="px-3 py-1.5 text-[11px] font-black text-[#FBD6C8] uppercase tracking-wider flex items-center justify-between border-b border-[#635D55] pb-2">
                       <span>Select City</span>
-                      <span className="text-[10px] text-emerald-400 font-black">WCAG AAA</span>
+                      <span className="text-[10px] text-[#8F9E87] font-black">WCAG AAA</span>
                     </div>
                     <div className="space-y-1 mt-1.5 max-h-60 overflow-y-auto">
                       {CITIES.map((city) => (
@@ -607,17 +607,17 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
                           onClick={() => handleSelectCity(city)}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer min-h-[44px] ${
                             city.id === activeCity.id
-                              ? 'bg-[#006D5B] text-white border border-[#006D5B]'
-                              : 'hover:bg-slate-800 text-slate-200'
+                              ? 'bg-[#8F9E87] text-white border border-[#7E8D76]'
+                              : 'hover:bg-[#635D55] text-slate-200'
                           }`}
                         >
                           <div className="flex flex-col">
                             <span>{city.cityName}</span>
-                            <span className={`text-[10px] ${city.id === activeCity.id ? 'text-amber-200' : 'text-slate-400'}`}>
+                            <span className={`text-[10px] ${city.id === activeCity.id ? 'text-[#FBD6C8]' : 'text-slate-400'}`}>
                               {city.demonym} • {city.wardName}
                             </span>
                           </div>
-                          {city.id === activeCity.id && <Check className="w-4 h-4 text-amber-300" />}
+                          {city.id === activeCity.id && <Check className="w-4 h-4 text-[#FBD6C8]" />}
                         </button>
                       ))}
                     </div>
@@ -639,9 +639,9 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-3"
             >
-              <h1 className="font-['Montserrat'] font-black tracking-tight text-2xl sm:text-4xl lg:text-5xl leading-none text-[#2C2518]">
+              <h1 className="font-['Montserrat'] font-black tracking-tight text-2xl sm:text-4xl lg:text-5xl leading-none text-[#2E2A26]">
                 <span>I AM A PROUD </span>
-                <span className="inline-block text-[#063B2F] bg-[#A3E8D5] px-3 py-1 rounded-2xl border-2 border-[#7CD6B8]">
+                <span className="inline-block text-[#FFFFFF] bg-[#8F9E87] px-3 py-1 rounded-2xl border-2 border-[#7E8D76]">
                   {activeCity.demonym}
                 </span>
               </h1>

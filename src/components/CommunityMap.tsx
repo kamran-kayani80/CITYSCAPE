@@ -8,6 +8,9 @@ import { formatTimeAgo } from '../lib/utils';
 export type MapLayerMode = 'street' | 'satellite' | 'heatmap';
 
 function isValidLatLng(lat: any, lng: any): boolean {
+  if (lat === null || lat === undefined || lng === null || lng === undefined) return false;
+  if (typeof lat === 'string' && lat.trim() === '') return false;
+  if (typeof lng === 'string' && lng.trim() === '') return false;
   const nLat = Number(lat);
   const nLng = Number(lng);
   return !isNaN(nLat) && !isNaN(nLng) && isFinite(nLat) && isFinite(nLng) && Math.abs(nLat) <= 90 && Math.abs(nLng) <= 180;
@@ -128,18 +131,24 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
     if (!map) return;
 
     if (isRadiusFilterActive && radiusKm > 0 && isValidLatLng(centerLat, centerLng)) {
-      if (radiusCircleRef.current && map.hasLayer(radiusCircleRef.current)) {
-        radiusCircleRef.current.setLatLng([centerLat, centerLng]);
-        radiusCircleRef.current.setRadius(radiusKm * 1000);
-      } else {
-        radiusCircleRef.current = L.circle([centerLat, centerLng], {
-          radius: radiusKm * 1000,
-          color: '#006D5B',
-          weight: 2.5,
-          dashArray: '6, 6',
-          fillColor: '#006D5B',
-          fillOpacity: 0.12,
-        }).addTo(map);
+      const safeLat = Number(centerLat);
+      const safeLng = Number(centerLng);
+      const safeRadiusMeters = typeof radiusKm === 'number' && !isNaN(radiusKm) && isFinite(radiusKm) && radiusKm > 0 ? radiusKm * 1000 : 5000;
+
+      if (isValidLatLng(safeLat, safeLng)) {
+        if (radiusCircleRef.current && map.hasLayer(radiusCircleRef.current)) {
+          radiusCircleRef.current.setLatLng([safeLat, safeLng]);
+          radiusCircleRef.current.setRadius(safeRadiusMeters);
+        } else {
+          radiusCircleRef.current = L.circle([safeLat, safeLng], {
+            radius: safeRadiusMeters,
+            color: '#006D5B',
+            weight: 2.5,
+            dashArray: '6, 6',
+            fillColor: '#006D5B',
+            fillOpacity: 0.12,
+          }).addTo(map);
+        }
       }
     } else {
       if (radiusCircleRef.current && map.hasLayer(radiusCircleRef.current)) {
@@ -221,14 +230,17 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
           }
 
           // Accuracy circle
-          if (accuracy && accuracy < 5000) {
-            L.circle([latitude, longitude], {
-              radius: Math.min(accuracy, 200),
-              color: '#006D5B',
-              weight: 1.5,
-              fillColor: '#006D5B',
-              fillOpacity: 0.12,
-            }).addTo(map);
+          if (typeof accuracy === 'number' && !isNaN(accuracy) && isFinite(accuracy) && accuracy > 0 && accuracy < 5000) {
+            const safeAccRadius = Math.min(accuracy, 200);
+            if (!isNaN(safeAccRadius) && isFinite(safeAccRadius) && safeAccRadius > 0) {
+              L.circle([latitude, longitude], {
+                radius: safeAccRadius,
+                color: '#006D5B',
+                weight: 1.5,
+                fillColor: '#006D5B',
+                fillOpacity: 0.12,
+              }).addTo(map);
+            }
           }
         },
         (err) => {
@@ -496,12 +508,16 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
 
     // If report is selected, pan map to its coordinates
     if (selectedReportId) {
-      const selected = visibleReports.find((r) => r.id === selectedReportId);
+      const selected = reports.find((r) => r.id === selectedReportId);
       if (selected && isValidLatLng(selected.latitude, selected.longitude)) {
-        map.flyTo([Number(selected.latitude), Number(selected.longitude)], 15, { duration: 0.8 });
+        const sLat = Number(selected.latitude);
+        const sLng = Number(selected.longitude);
+        if (isValidLatLng(sLat, sLng)) {
+          map.flyTo([sLat, sLng], 15, { duration: 0.8 });
+        }
       }
     }
-  }, [visibleReports, selectedReportId, isPinningLocation, isMyReportsOnly, checkIsUserReport]);
+  }, [visibleReports, reports, selectedReportId, isPinningLocation, isMyReportsOnly, checkIsUserReport]);
 
   // Handle active pinning location marker for new reports modal
   useEffect(() => {
@@ -512,40 +528,46 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
       const pLat = Number(pinnedLocation.lat);
       const pLng = Number(pinnedLocation.lng);
 
-      if (pinMarkerRef.current && map.hasLayer(pinMarkerRef.current)) {
-        pinMarkerRef.current.setLatLng([pLat, pLng]);
-      } else {
-        const pinIcon = L.divIcon({
-          html: `
-            <div class="relative flex items-center justify-center">
-              <div class="w-10 h-10 rounded-full bg-[#008080] text-[#CCFF00] flex items-center justify-center shadow-xl border-2 border-white pulse-ring">
-                <svg class="w-6 h-6 fill-current animate-bounce" viewBox="0 0 24 24">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
+      if (isValidLatLng(pLat, pLng)) {
+        if (pinMarkerRef.current && map.hasLayer(pinMarkerRef.current)) {
+          pinMarkerRef.current.setLatLng([pLat, pLng]);
+        } else {
+          const pinIcon = L.divIcon({
+            html: `
+              <div class="relative flex items-center justify-center">
+                <div class="w-10 h-10 rounded-full bg-[#008080] text-[#CCFF00] flex items-center justify-center shadow-xl border-2 border-white pulse-ring">
+                  <svg class="w-6 h-6 fill-current animate-bounce" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                </div>
               </div>
-            </div>
-          `,
-          className: 'pin-picker-marker',
-          iconSize: [40, 40],
-          iconAnchor: [20, 40],
-        });
+            `,
+            className: 'pin-picker-marker',
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+          });
 
-        const marker = L.marker([pLat, pLng], {
-          icon: pinIcon,
-          draggable: true,
-        }).addTo(map);
+          const marker = L.marker([pLat, pLng], {
+            icon: pinIcon,
+            draggable: true,
+          }).addTo(map);
 
-        marker.on('dragend', (e) => {
-          const newPos = e.target.getLatLng();
-          if (onPinLocationChange && isValidLatLng(newPos.lat, newPos.lng)) {
-            onPinLocationChange(newPos.lat, newPos.lng);
-          }
-        });
+          marker.on('dragend', (e) => {
+            const newPos = e.target.getLatLng();
+            if (newPos && onPinLocationChange && isValidLatLng(newPos.lat, newPos.lng)) {
+              const nLat = Number(newPos.lat);
+              const nLng = Number(newPos.lng);
+              if (isValidLatLng(nLat, nLng)) {
+                onPinLocationChange(nLat, nLng);
+              }
+            }
+          });
 
-        pinMarkerRef.current = marker;
+          pinMarkerRef.current = marker;
+        }
+
+        map.flyTo([pLat, pLng], 16, { duration: 0.5 });
       }
-
-      map.flyTo([pLat, pLng], 16, { duration: 0.5 });
     } else {
       if (pinMarkerRef.current && map.hasLayer(pinMarkerRef.current)) {
         pinMarkerRef.current.remove();

@@ -249,7 +249,7 @@ export const IssueList: React.FC<IssueListProps> = ({
         <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
           <MapPin className="w-6 h-6" />
         </div>
-        <h3 className="text-base font-bold text-slate-900 dark:text-white">No Issues Found</h3>
+        <h3 className="text-base sm:text-lg font-black text-[#051F20]">No Issues Found</h3>
         <p className="text-xs text-slate-500 max-w-xs mt-1">
           No civic reports match your active search or category filters. Try clearing your search or report a new issue!
         </p>
@@ -335,10 +335,10 @@ export const IssueList: React.FC<IssueListProps> = ({
                           <Icon className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-black text-[#111827] dark:text-white truncate group-hover:text-[#006D5B] dark:group-hover:text-[#CCFF00]">
+                          <p className="text-xs font-black text-[#051F20] dark:text-[#DAF1DE] truncate group-hover:text-[#163832] dark:group-hover:text-[#8EB69B]">
                             {item.title}
                           </p>
-                          <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                          <p className="text-[10px] font-semibold text-[#235347] dark:text-slate-400 truncate mt-0.5">
                             {item.subtitle}
                           </p>
                         </div>
@@ -380,7 +380,7 @@ export const IssueList: React.FC<IssueListProps> = ({
 
       {/* Sidebar header */}
       <div className="p-3.5 clay-card-lvl2 flex items-center justify-between shadow-sm">
-        <span className="text-xs font-black uppercase tracking-widest text-[#2C2518] dark:text-slate-200">
+        <span className="text-xs font-black uppercase tracking-widest text-[#051F20]">
           Nearby Reports ({displayedReports.length})
         </span>
 
@@ -409,7 +409,7 @@ export const IssueList: React.FC<IssueListProps> = ({
           <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
             <MapPin className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">No Issues Match Search</h3>
+          <h3 className="text-base sm:text-lg font-black text-[#051F20]">No Issues Match Search</h3>
           <p className="text-xs text-slate-500 max-w-xs mt-1">
             No civic reports match "{query || selectedCategoryFilter}". Try clearing your search query or selecting a different category filter!
           </p>
@@ -451,19 +451,19 @@ export const IssueList: React.FC<IssueListProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.22, delay: Math.min(idx * 0.04, 0.3), ease: [0.16, 1, 0.3, 1] }}
             onClick={() => onSelectReport(report)}
-            className={`group relative clay-card-lvl2 p-5 transition-all duration-200 cursor-pointer font-['Montserrat'] ${
+            className={`group relative report-card-container p-5 transition-all duration-200 cursor-pointer font-['Montserrat'] ${
               isEmergency
-                ? 'border-2 border-red-400 bg-red-50/70 dark:bg-red-950/30 shadow-red-100/60 shadow-md'
+                ? 'border-2 border-red-500 bg-red-50/80 dark:bg-red-950/40 shadow-red-100/60 shadow-md'
                 : isSelected
-                ? 'ring-3 ring-[#7CD6B8] bg-[#F7F3EB] dark:bg-slate-900 shadow-xl border-[#7CD6B8]'
-                : 'hover:border-[#7CD6B8]'
+                ? 'ring-3 ring-[#163832] bg-[#DAF1DE] shadow-xl border-[#163832]'
+                : 'hover:border-[#235347]'
             }`}
           >
             {/* High-Contrast Visual Alert Badge for Emergency Reports */}
             {isEmergency && (
               <div className="mb-3 px-3 py-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between shadow-md border border-red-400">
                 <div className="flex items-center space-x-1.5">
-                  <Siren className="w-4 h-4 animate-bounce text-[#CCFF00]" />
+                  <Siren className="w-4 h-4 animate-bounce text-[#DAF1DE]" />
                   <span>EMERGENCY HAZARD ALERT</span>
                 </div>
                 <span className="bg-red-950/80 text-red-100 px-2 py-0.5 rounded font-mono text-[9px] font-extrabold border border-red-400/50">
@@ -474,12 +474,12 @@ export const IssueList: React.FC<IssueListProps> = ({
 
             {/* Offline Queued Badge for Underground Created Reports */}
             {(report.id.startsWith('off_') || (report as any).isOfflineQueued) && (
-              <div className="mb-2 px-2.5 py-1 bg-[#0A2540] text-[#CCFF00] border border-[#008080] rounded-xl text-[10px] font-mono font-bold flex items-center justify-between shadow-xs">
+              <div className="mb-2 px-2.5 py-1 bg-[#051F20] text-[#DAF1DE] border border-[#8EB69B] rounded-xl text-[10px] font-mono font-bold flex items-center justify-between shadow-xs">
                 <div className="flex items-center space-x-1.5">
-                  <WifiOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <WifiOff className="w-3.5 h-3.5 text-[#8EB69B] shrink-0" />
                   <span>📡 OFFLINE QUEUED: SUB-SURFACE SYNC READY</span>
                 </div>
-                <span className="text-[9px] bg-[#008080] text-[#CCFF00] px-1.5 py-0.5 rounded font-black">
+                <span className="text-[9px] bg-[#235347] text-[#DAF1DE] px-1.5 py-0.5 rounded font-black border border-[#8EB69B]">
                   AUTO-SYNC
                 </span>
               </div>
@@ -508,35 +508,35 @@ export const IssueList: React.FC<IssueListProps> = ({
                 </span>
 
                 {distanceTag && (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#0A2540] text-white dark:bg-[#006D5B] dark:text-[#CCFF00] border border-[#006D5B] flex items-center gap-1 shadow-2xs">
-                    <Navigation className="w-2.5 h-2.5 text-[#CCFF00]" />
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#235347] text-[#DAF1DE] border border-[#8EB69B] flex items-center gap-1 shadow-2xs">
+                    <Navigation className="w-2.5 h-2.5 text-[#8EB69B]" />
                     <span>{distanceTag}</span>
                   </span>
                 )}
               </div>
 
-              <span className="text-xs text-[#006D5B] dark:text-[#CCFF00] font-mono font-black px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">#{report.id}</span>
+              <span className="text-xs text-[#051F20] dark:text-[#051F20] font-mono font-black px-2.5 py-0.5 bg-[#8EB69B]/40 dark:bg-[#8EB69B]/30 rounded-lg border border-[#8EB69B]/60">#{report.id}</span>
             </div>
 
             <div className="flex gap-3 my-2.5">
               <img
                 src={report.imageUrls[0]}
                 alt={report.title}
-                className="w-20 h-20 rounded-2xl object-cover shrink-0 bg-slate-100 border-2 border-slate-300 dark:border-slate-700 shadow-xs group-hover:scale-102 transition-transform duration-300"
+                className="w-20 h-20 rounded-2xl object-cover shrink-0 bg-[#051F20] border-2 border-[#8EB69B] shadow-xs group-hover:scale-102 transition-transform duration-300"
               />
               <div className="min-w-0 flex-1">
-                <h3 className="font-['Montserrat'] font-black text-[#0A2540] dark:text-white text-base sm:text-lg line-clamp-1 group-hover:text-[#006D5B] dark:group-hover:text-[#CCFF00] transition-colors">
+                <h3 className="font-['Montserrat'] font-black text-[#051F20] dark:text-[#051F20] text-base sm:text-lg line-clamp-1 group-hover:text-[#163832] dark:group-hover:text-[#163832] transition-colors">
                   {report.title}
                 </h3>
-                <p className="text-xs text-[#111827] dark:text-slate-100 line-clamp-2 mt-1 leading-relaxed font-bold">
+                <p className="text-xs text-[#0B2B26] dark:text-[#0B2B26] line-clamp-2 mt-1 leading-relaxed font-bold">
                   {report.description}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t-2 border-slate-200 dark:border-slate-800 gap-2 flex-wrap sm:flex-nowrap">
-              <div className="flex items-center gap-1.5 text-xs text-[#0A2540] dark:text-slate-100 font-extrabold truncate max-w-[220px]">
-                <MapPin className="w-4 h-4 text-[#006D5B] dark:text-[#CCFF00] shrink-0" />
+            <div className="flex items-center justify-between pt-3 border-t-2 border-[#8EB69B]/50 dark:border-[#235347] gap-2 flex-wrap sm:flex-nowrap">
+              <div className="flex items-center gap-1.5 text-xs text-[#051F20] dark:text-[#051F20] font-extrabold truncate max-w-[220px]">
+                <MapPin className="w-4 h-4 text-[#163832] dark:text-[#163832] shrink-0" />
                 <span className="truncate">{report.addressText}</span>
               </div>
 
@@ -553,11 +553,11 @@ export const IssueList: React.FC<IssueListProps> = ({
                   onClick={(e) => onUpvoteReport(report.id, e)}
                   className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black transition-all cursor-pointer min-h-[48px] min-w-[48px] justify-center ${
                     report.userHasUpvoted
-                      ? 'bg-[#B45309] text-white shadow-md border-2 border-amber-300'
-                      : 'bg-slate-100 dark:bg-slate-800 text-[#0A2540] dark:text-white border-2 border-slate-300 dark:border-slate-600 hover:bg-[#0A2540] hover:text-white hover:border-[#0A2540]'
+                      ? 'bg-[#051F20] text-[#DAF1DE] shadow-md border-2 border-[#8EB69B]'
+                      : 'bg-[#163832] text-[#DAF1DE] border-2 border-[#8EB69B] hover:bg-[#051F20] hover:text-white'
                   }`}
                 >
-                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current text-white' : 'text-[#0A2540] dark:text-white'}`} />
+                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current text-[#DAF1DE]' : 'text-[#DAF1DE]'}`} />
                   <span className="font-extrabold">{report.upvotesCount}</span>
                 </motion.button>
               </div>

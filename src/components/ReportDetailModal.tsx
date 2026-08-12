@@ -27,6 +27,8 @@ import {
   Mail,
   Link2,
   Image as ImageIcon,
+  QrCode,
+  Printer,
 } from 'lucide-react';
 import { Report, Comment } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
@@ -39,6 +41,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
 import { ShareModal } from './ShareModal';
 import { getShareableUrl, ShareDataPayload, getSocialShareLinks } from '../lib/shareUtils';
+import { InfrastructureQrModal } from './InfrastructureQrModal';
 
 interface ReportDetailModalProps {
   report: Report | null;
@@ -66,6 +69,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   const [showResolvedPhoto, setShowResolvedPhoto] = useState(false);
   const [isForensicsOpen, setIsForensicsOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const { userCoords } = useUserLocation();
 
   // Dynamically update Open Graph and Twitter card meta tags for deep-link social media previews
@@ -172,10 +176,10 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 36 }}
         transition={{ type: 'spring', stiffness: 320, damping: 28, mass: 0.9 }}
-        className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-3xl report-card-container rounded-3xl shadow-2xl border-2 border-[#8EB69B] dark:border-[#235347] overflow-hidden my-auto max-h-[92vh] flex flex-col font-['Montserrat']"
       >
         {/* Header bar */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 gap-2 flex-wrap">
+        <div className="p-4 sm:p-5 border-b-2 border-[#8EB69B]/60 dark:border-[#235347] flex items-center justify-between bg-[#8EB69B]/20 dark:bg-[#051F20]/50 gap-2 flex-wrap">
           <div className="flex items-center space-x-2 flex-wrap gap-y-1">
             <span
               className="px-2.5 py-1 text-xs font-bold uppercase rounded-lg text-white shrink-0"
@@ -206,6 +210,16 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export PDF</span>
+            </button>
+
+            {/* Physical Infrastructure QR Tag Button */}
+            <button
+              onClick={() => setIsQrModalOpen(true)}
+              title="Generate printable physical QR code signage for infrastructure"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-extrabold bg-[#8F9E87] hover:bg-[#7E8D76] text-white border border-[#7E8D76] transition-all cursor-pointer shadow-xs min-h-[36px]"
+            >
+              <QrCode className="w-3.5 h-3.5 text-white" />
+              <span>Post QR Tag</span>
             </button>
 
             {/* Standard Share Button */}
@@ -279,12 +293,12 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               <span>•</span>
               <span className="text-slate-600 dark:text-slate-300 font-mono font-bold">Report ID: #{report.id}</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-heading font-black text-[#0A2540] dark:text-white leading-tight">
+            <h1 className="text-xl sm:text-2xl font-heading font-black text-[#051F20] leading-tight">
               {report.title}
             </h1>
-            <p className="text-xs text-[#111827] dark:text-slate-200 mt-1.5 flex items-center space-x-1.5 flex-wrap font-extrabold">
-              <span className="flex items-center space-x-1 text-[#0A2540] dark:text-slate-100">
-                <MapPin className="w-4 h-4 text-[#006D5B] dark:text-[#CCFF00] shrink-0" />
+            <p className="text-xs text-[#0B2B26] mt-1.5 flex items-center space-x-1.5 flex-wrap font-extrabold">
+              <span className="flex items-center space-x-1 text-[#051F20]">
+                <MapPin className="w-4 h-4 text-[#163832] dark:text-[#8EB69B] shrink-0" />
                 <span>{report.addressText}</span>
               </span>
               {distanceTag && (
@@ -396,7 +410,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
           {/* Description & Endorse Button */}
           <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-3 shadow-xs">
-            <p className="text-sm text-[#111827] dark:text-slate-100 font-semibold leading-relaxed whitespace-pre-line">
+            <p className="text-sm text-[#0B2B26] font-semibold leading-relaxed whitespace-pre-line">
               {report.description || 'No additional details provided by resident.'}
             </p>
 
@@ -494,6 +508,52 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                   </>
                 )}
               </button>
+            </div>
+
+            {/* PHYSICAL ON-SITE INFRASTRUCTURE QR TAG & POSTER MODULE */}
+            <div className="p-3.5 bg-[#FAF6F0] rounded-xl border-2 border-[#8F9E87] text-[#2E2A26] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center space-x-3 w-full sm:w-auto">
+                <div className="w-14 h-14 bg-white border-2 border-[#8F9E87] rounded-xl p-1 shrink-0 flex items-center justify-center shadow-xs">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(sharePayload.url)}`}
+                    alt="Physical Infrastructure QR Tag"
+                    className="w-12 h-12 object-contain"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="font-black text-xs text-[#2E2A26] uppercase">Physical Infrastructure QR Tag</span>
+                    <span className="px-1.5 py-0.5 bg-[#8F9E87] text-white text-[9px] font-black rounded uppercase">
+                      Printable Signage
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-600 font-semibold leading-tight mt-0.5">
+                    Post on damaged infrastructure so neighbors can scan to report or endorse instantly
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                <a
+                  href={`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(sharePayload.url)}`}
+                  download={`Cityscape-QR-${report.id.slice(0, 8)}.png`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-2 bg-[#F5EFE6] hover:bg-stone-200 text-[#2E2A26] text-xs font-black rounded-xl border border-[#E3DDD3] transition-all cursor-pointer flex items-center gap-1.5 min-h-[40px]"
+                  title="Download High-Res QR Code Image PNG"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#8F9E87]" />
+                  <span>QR PNG</span>
+                </a>
+
+                <button
+                  onClick={() => setIsQrModalOpen(true)}
+                  className="px-3.5 py-2 bg-[#8F9E87] hover:bg-[#7E8D76] text-white text-xs font-black rounded-xl transition-all cursor-pointer shadow-xs flex items-center gap-1.5 min-h-[40px]"
+                >
+                  <Printer className="w-3.5 h-3.5 text-white" />
+                  <span>Print Poster</span>
+                </button>
+              </div>
             </div>
 
             {/* Open Graph Social Media Preview Badge */}
@@ -672,6 +732,13 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           isOpen={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
           data={sharePayload}
+        />
+
+        <InfrastructureQrModal
+          isOpen={isQrModalOpen}
+          onClose={() => setIsQrModalOpen(false)}
+          report={report}
+          shareUrl={sharePayload.url}
         />
       </motion.div>
   );

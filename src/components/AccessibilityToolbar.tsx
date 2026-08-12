@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Eye,
@@ -6,10 +6,15 @@ import {
   HelpCircle,
   Sparkles,
   ChevronUp,
+  ChevronDown,
   Play,
   Pause,
   Megaphone,
   ChevronRight,
+  Volume2,
+  VolumeX,
+  X,
+  Accessibility,
 } from 'lucide-react';
 import { useAccessibility, FontScale } from '../context/AccessibilityContext';
 
@@ -35,11 +40,29 @@ export const AccessibilityToolbar: React.FC = () => {
 
   const [isOpenGuide, setIsOpenGuide] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAaaMenuOpen, setIsAaaMenuOpen] = useState(false);
   const [bulletins, setBulletins] = useState<string[]>(DEFAULT_BULLETINS);
   const [bulletinIndex, setBulletinIndex] = useState(0);
   const [isTapePlaying, setIsTapePlaying] = useState(true);
   const [currentCity, setCurrentCity] = useState<string>('Rawalpindi');
   const [isRefreshingNews, setIsRefreshingNews] = useState(false);
+
+  const aaaMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close Aaa menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (aaaMenuRef.current && !aaaMenuRef.current.contains(event.target as Node)) {
+        setIsAaaMenuOpen(false);
+      }
+    };
+    if (isAaaMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isAaaMenuOpen]);
 
   // Fetch live city bulletins from server
   const fetchLiveNews = async (city: string, force = false) => {
@@ -86,6 +109,7 @@ export const AccessibilityToolbar: React.FC = () => {
     const handleScroll = () => {
       if (window.scrollY > 60 && window.scrollY > lastScrollY) {
         setIsCollapsed(true);
+        setIsAaaMenuOpen(false);
       } else if (window.scrollY <= 20) {
         setIsCollapsed(false);
       }
@@ -109,24 +133,21 @@ export const AccessibilityToolbar: React.FC = () => {
     return () => clearInterval(interval);
   }, [isTapePlaying, bulletins]);
 
-  const handleReadScreenAloud = () => {
+  const handleToggleVoice = () => {
     if (speechEnabled) {
       stopSpeech();
       setSpeechEnabled(false);
     } else {
       setSpeechEnabled(true);
       speakText(
-        'CITYSCAPE Accessibility Voice Guidance Active. Welcome to Cityscape. You can report potholes, streetlights, sanitation, and hazards in 3 easy steps or report on behalf of a senior neighbor.'
+        'Voice Guidance Active. Welcome to Cityscape.'
       );
     }
   };
 
-  const handleCycleFontScale = () => {
-    const scales: FontScale[] = [100, 125, 150];
-    const nextIndex = (scales.indexOf(fontScale) + 1) % scales.length;
-    const nextScale = scales[nextIndex];
-    setFontScale(nextScale);
-    speakText(`Text size changed to ${nextScale} percent.`);
+  const handleSetScale = (scale: FontScale) => {
+    setFontScale(scale);
+    speakText(`Text size set to ${scale} percent.`);
   };
 
   return (
@@ -142,11 +163,11 @@ export const AccessibilityToolbar: React.FC = () => {
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           className="w-full bg-[#0A2540] text-white py-1.5 px-3 sm:px-6 border-b-2 border-[#006D5B] flex items-center justify-between gap-3 sticky top-0 shadow-md"
         >
-          {/* Left: News Bulletin Marquee Ticker Tape with Play/Pause */}
-          <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden py-0.5">
-            <div className="flex items-center space-x-1.5 shrink-0 bg-[#006D5B] text-white px-2 py-1 rounded-md text-[10px] font-black border border-[#CCFF00]/40">
+          {/* Main Bulletin Area - Maximized Space */}
+          <div className="flex items-center space-x-2 flex-1 min-w-0 py-0.5">
+            <div className="flex items-center space-x-1.5 shrink-0 bg-[#006D5B] text-white px-2.5 py-1 rounded-md text-[10px] font-black border border-[#CCFF00]/40">
               <Megaphone className="w-3.5 h-3.5 text-[#CCFF00] animate-pulse" />
-              <span className="hidden sm:inline uppercase tracking-wider text-[9px] text-[#CCFF00]">
+              <span className="hidden xs:inline uppercase tracking-wider text-[9px] text-[#CCFF00]">
                 CITY BULLETIN
               </span>
             </div>
@@ -164,7 +185,7 @@ export const AccessibilityToolbar: React.FC = () => {
               )}
             </button>
 
-            {/* Manual Ground Search Refresh Button */}
+            {/* Refresh Button */}
             <button
               onClick={() => fetchLiveNews(currentCity, true)}
               disabled={isRefreshingNews}
@@ -174,89 +195,189 @@ export const AccessibilityToolbar: React.FC = () => {
               <Sparkles className={`w-3.5 h-3.5 text-[#CCFF00] ${isRefreshingNews ? 'animate-spin' : ''}`} />
             </button>
 
-            {/* Scrolling / Animated News Tape Content */}
-            <div className="flex-1 overflow-hidden relative h-6 flex items-center text-xs text-slate-100 font-medium">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${currentCity}-${bulletinIndex}`}
-                  initial={{ y: 16, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -16, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="whitespace-nowrap truncate text-[11px] sm:text-xs font-semibold text-slate-100 flex items-center gap-1.5"
-                >
-                  <span className="text-[#CCFF00] font-black text-[10px] uppercase font-mono bg-[#006D5B]/40 px-1.5 py-0.5 rounded">
-                    📍 {currentCity} [{bulletins.length > 0 ? bulletinIndex + 1 : 0}/{bulletins.length}]
-                  </span>
-                  <span className="truncate">{bulletins[bulletinIndex] || 'Loading city infrastructure news...'}</span>
-                </motion.div>
-              </AnimatePresence>
+            {/* TV Channel Scrolling News Tape Content - Continuous Right-to-Left Scroll */}
+            <div className="flex-1 overflow-hidden relative h-7 flex items-center text-xs text-slate-100 font-medium min-w-0 bg-[#07192c]/70 rounded-md border border-[#006D5B]/60 px-2">
+              <div
+                className="animate-ticker-scroll items-center gap-6 py-0.5"
+                style={{
+                  animationPlayState: isTapePlaying ? 'running' : 'paused',
+                  animationDuration: `${Math.max(25, (bulletins.length || 1) * 12)}s`,
+                }}
+              >
+                {[
+                  ...(bulletins.length > 0 ? bulletins : ['Loading city infrastructure news...']),
+                  ...(bulletins.length > 0 ? bulletins : ['Loading city infrastructure news...']),
+                ].map((bulletinText, idx) => (
+                  <div key={idx} className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-semibold text-slate-100 shrink-0">
+                    <span className="text-[#CCFF00] font-black text-[10px] uppercase font-mono bg-[#006D5B] px-1.5 py-0.5 rounded border border-[#CCFF00]/40 shrink-0">
+                      📍 {currentCity}
+                    </span>
+                    <span className="whitespace-nowrap font-medium text-slate-100 tracking-wide">{bulletinText}</span>
+                    <span className="text-[#CCFF00] font-black font-mono text-xs px-2 opacity-80">✦</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Next Bulletin Quick Skip */}
             <button
               onClick={() => setBulletinIndex((prev) => (prev + 1) % (bulletins.length || 1))}
-              className="p-1 text-slate-300 hover:text-white shrink-0 cursor-pointer hidden md:block"
+              className="p-1.5 bg-[#07192c] hover:bg-[#006D5B] text-[#CCFF00] rounded-md transition-colors border border-[#006D5B]/60 shrink-0 cursor-pointer hidden sm:flex items-center justify-center"
               title="Next Bulletin"
             >
-              <ChevronRight className="w-4 h-4 text-[#CCFF00]" />
+              <ChevronRight className="w-3.5 h-3.5 text-[#CCFF00]" />
             </button>
           </div>
 
-          {/* Right: Small Icon Accessibility Functions Bar */}
-          <div className="flex items-center space-x-1 shrink-0">
-            {/* WCAG AAA Badge */}
-            <span className="hidden xl:inline-block px-2 py-0.5 rounded bg-[#CCFF00] text-[#0A2540] font-black text-[9px] tracking-wider uppercase mr-1">
-              AAA
-            </span>
-
-            {/* High Contrast Icon Button */}
+          {/* Right: SINGLE "Aaa" Accessibility Icon Button */}
+          <div className="relative shrink-0" ref={aaaMenuRef}>
             <button
-              onClick={() => {
-                setHighContrast((prev) => !prev);
-                if (!highContrast) {
-                  speakText('High contrast pitch-black mode enabled.');
-                } else {
-                  speakText('Standard color mode restored.');
-                }
-              }}
-              className={`p-1.5 sm:p-2 rounded-lg font-black transition-all cursor-pointer min-h-[34px] min-w-[34px] flex items-center justify-center border ${
-                highContrast
-                  ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] shadow-md'
-                  : 'bg-[#006D5B] hover:bg-[#004d40] text-white border-[#006D5B]'
+              onClick={() => setIsAaaMenuOpen(!isAaaMenuOpen)}
+              className={`px-2.5 py-1.5 rounded-lg font-black transition-all cursor-pointer min-h-[34px] flex items-center space-x-1.5 border shadow-sm ${
+                isAaaMenuOpen || highContrast || fontScale !== 100 || speechEnabled
+                  ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] ring-2 ring-[#CCFF00]/40'
+                  : 'bg-[#006D5B] hover:bg-[#005244] text-white border-[#006D5B]'
               }`}
-              title={highContrast ? 'High Contrast Mode ON (Tap to toggle)' : 'Enable High-Contrast Mode'}
+              title="Accessibility & Display Settings (Aaa)"
             >
-              <Eye className="w-4 h-4 text-[#CCFF00]" />
+              <Accessibility className={`w-4 h-4 ${isAaaMenuOpen || highContrast || fontScale !== 100 || speechEnabled ? 'text-[#0A2540]' : 'text-[#CCFF00]'}`} />
+              <span className="text-xs font-black tracking-tight font-mono">Aaa</span>
+              {fontScale !== 100 && (
+                <span className="text-[9px] px-1 bg-[#0A2540] text-[#CCFF00] rounded font-mono font-bold">
+                  {fontScale}%
+                </span>
+              )}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isAaaMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Font Scale Cycle Icon Button */}
-            <button
-              onClick={handleCycleFontScale}
-              className="p-1.5 sm:p-2 bg-[#07192c] hover:bg-[#006D5B] text-white rounded-lg font-black border border-[#006D5B] transition-all cursor-pointer min-h-[34px] min-w-[34px] flex items-center justify-center space-x-0.5"
-              title={`Text Scale: ${fontScale}% (Tap to cycle)`}
-            >
-              <Type className="w-3.5 h-3.5 text-[#CCFF00]" />
-              <span className="text-[9px] font-mono font-black text-[#CCFF00]">{fontScale}%</span>
-            </button>
+            {/* Accessibility Dropdown Menu Popover */}
+            <AnimatePresence>
+              {isAaaMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#0A2540] text-white rounded-2xl p-4 shadow-2xl border-2 border-[#006D5B] z-50 space-y-3.5 font-['Montserrat']"
+                >
+                  <div className="flex items-center justify-between border-b border-[#006D5B]/60 pb-2.5">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-1.5 bg-[#CCFF00] text-[#0A2540] rounded-lg">
+                        <Type className="w-4 h-4 font-black" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-[#CCFF00] uppercase tracking-wider">
+                          Accessibility (Aaa)
+                        </h4>
+                        <p className="text-[10px] text-slate-300">
+                          Senior & visual preferences
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setIsAaaMenuOpen(false)}
+                      className="p-1 hover:bg-[#006D5B] text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
 
-            {/* Senior Guide Modal Icon Button */}
-            <button
-              onClick={() => setIsOpenGuide(true)}
-              className="p-1.5 sm:p-2 bg-[#006D5B] hover:bg-[#004d40] text-white rounded-lg font-black transition-all min-h-[34px] min-w-[34px] flex items-center justify-center cursor-pointer border border-[#006D5B]"
-              title="Open Senior & Accessibility Help Guide"
-            >
-              <HelpCircle className="w-4 h-4 text-[#CCFF00]" />
-            </button>
+                  {/* 1. Font Scale Selector */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-200 flex items-center justify-between">
+                      <span>Text Zoom Level:</span>
+                      <span className="font-mono text-[#CCFF00]">{fontScale}%</span>
+                    </label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {([100, 125, 150] as FontScale[]).map((scale) => (
+                        <button
+                          key={scale}
+                          onClick={() => handleSetScale(scale)}
+                          className={`py-1.5 px-2 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                            fontScale === scale
+                              ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] shadow-sm'
+                              : 'bg-[#07192c] hover:bg-[#006D5B] text-slate-200 border-[#006D5B]/60'
+                          }`}
+                        >
+                          {scale}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-            {/* Slide Up / Collapse Bar Action Icon Button */}
-            <button
-              onClick={() => setIsCollapsed(true)}
-              className="p-1.5 bg-[#07192c] hover:bg-[#006D5B] text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer border border-[#006D5B]/50 shrink-0 min-h-[34px] min-w-[34px] flex items-center justify-center"
-              title="Slide up bar for full screen view"
-            >
-              <ChevronUp className="w-4 h-4 text-[#CCFF00]" />
-            </button>
+                  {/* 2. High Contrast Toggle */}
+                  <div className="flex items-center justify-between p-2.5 bg-[#07192c] rounded-xl border border-[#006D5B]/60">
+                    <div className="flex items-center space-x-2">
+                      <Eye className="w-4 h-4 text-[#CCFF00]" />
+                      <span className="text-xs font-bold text-slate-100">High Contrast Mode</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setHighContrast((prev) => !prev);
+                        if (!highContrast) {
+                          speakText('High contrast pitch-black mode enabled.');
+                        } else {
+                          speakText('Standard color mode restored.');
+                        }
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-extrabold cursor-pointer transition-colors border ${
+                        highContrast
+                          ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00]'
+                          : 'bg-[#006D5B] text-white border-[#006D5B]'
+                      }`}
+                    >
+                      {highContrast ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+
+                  {/* 3. Voice Guidance Read Aloud Toggle */}
+                  <div className="flex items-center justify-between p-2.5 bg-[#07192c] rounded-xl border border-[#006D5B]/60">
+                    <div className="flex items-center space-x-2">
+                      {speechEnabled ? (
+                        <Volume2 className="w-4 h-4 text-[#CCFF00] animate-pulse" />
+                      ) : (
+                        <VolumeX className="w-4 h-4 text-slate-400" />
+                      )}
+                      <span className="text-xs font-bold text-slate-100">Voice Guidance</span>
+                    </div>
+                    <button
+                      onClick={handleToggleVoice}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-extrabold cursor-pointer transition-colors border ${
+                        speechEnabled
+                          ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00]'
+                          : 'bg-[#006D5B] text-white border-[#006D5B]'
+                      }`}
+                    >
+                      {speechEnabled ? 'ACTIVE' : 'OFF'}
+                    </button>
+                  </div>
+
+                  {/* 4. Senior & Accessible Guide Trigger */}
+                  <button
+                    onClick={() => {
+                      setIsAaaMenuOpen(false);
+                      setIsOpenGuide(true);
+                    }}
+                    className="w-full py-2 px-3 bg-[#006D5B] hover:bg-[#00584a] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 cursor-pointer border border-[#CCFF00]/30 transition-colors"
+                  >
+                    <HelpCircle className="w-4 h-4 text-[#CCFF00]" />
+                    <span>Senior Accessibility Guide</span>
+                  </button>
+
+                  {/* 5. Collapse / Minimize Toolbar */}
+                  <button
+                    onClick={() => {
+                      setIsAaaMenuOpen(false);
+                      setIsCollapsed(true);
+                    }}
+                    className="w-full py-1.5 px-2 bg-[#07192c] hover:bg-[#006D5B] text-slate-300 hover:text-white rounded-xl text-[11px] font-semibold flex items-center justify-center space-x-1.5 cursor-pointer border border-[#006D5B]/40 transition-colors"
+                  >
+                    <ChevronUp className="w-3.5 h-3.5 text-[#CCFF00]" />
+                    <span>Minimize Top Bar</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       </div>

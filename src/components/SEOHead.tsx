@@ -187,7 +187,11 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView, selectedReport, re
       document.head.appendChild(geoSchema);
     }
 
-    if (selectedReport && selectedReport.latitude && selectedReport.longitude) {
+    const sLat = selectedReport ? Number(selectedReport.latitude) : NaN;
+    const sLng = selectedReport ? Number(selectedReport.longitude) : NaN;
+    const hasValidGeo = selectedReport && !isNaN(sLat) && !isNaN(sLng) && isFinite(sLat) && isFinite(sLng);
+
+    if (hasValidGeo) {
       const geoData = {
         "@context": "https://schema.org",
         "@type": "Place",
@@ -203,8 +207,8 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView, selectedReport, re
         },
         "geo": {
           "@type": "GeoCoordinates",
-          "latitude": Number(selectedReport.latitude),
-          "longitude": Number(selectedReport.longitude)
+          "latitude": sLat,
+          "longitude": sLng
         }
       };
       geoSchema.textContent = JSON.stringify(geoData);

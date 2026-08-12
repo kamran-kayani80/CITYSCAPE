@@ -93,7 +93,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden px-3 pb-3 pt-1 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent pointer-events-none">
         <nav
           aria-label="Mobile Navigation Dock"
-          className="pointer-events-auto max-w-md mx-auto bg-[#0A2540]/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-[#006D5B]/50 rounded-2xl p-1.5 shadow-2xl flex items-center justify-between gap-1 text-white"
+          className="pointer-events-auto max-w-md mx-auto bg-[#2E2A26]/95 dark:bg-[#1E1B18]/95 backdrop-blur-xl border-2 border-[#8F9E87]/60 rounded-2xl p-1.5 shadow-2xl flex items-center justify-between gap-1 text-white"
         >
           {/* Quick Tab 1: Map */}
           <motion.button
@@ -101,14 +101,14 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
             onClick={() => handleSelectView('map')}
             className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all cursor-pointer min-h-[56px] relative ${
               activeView === 'map'
-                ? 'text-[#CCFF00] font-black'
-                : 'text-slate-300 hover:text-white font-semibold'
+                ? 'text-[#FBD6C8] font-black'
+                : 'text-stone-300 hover:text-white font-semibold'
             }`}
           >
             {activeView === 'map' && (
               <motion.div
                 layoutId="mobileActiveDockPill"
-                className="absolute inset-0 bg-[#006D5B]/80 rounded-xl border border-[#CCFF00]/40 shadow-xs"
+                className="absolute inset-0 bg-[#8F9E87]/90 rounded-xl border border-[#FBD6C8]/40 shadow-xs"
                 transition={{ type: 'spring', stiffness: 380, damping: 28 }}
               />
             )}
@@ -124,14 +124,14 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
             onClick={() => handleSelectView('estate')}
             className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all cursor-pointer min-h-[56px] relative ${
               activeView === 'estate'
-                ? 'text-[#CCFF00] font-black'
-                : 'text-slate-300 hover:text-white font-semibold'
+                ? 'text-[#FBD6C8] font-black'
+                : 'text-stone-300 hover:text-white font-semibold'
             }`}
           >
             {activeView === 'estate' && (
               <motion.div
                 layoutId="mobileActiveDockPill"
-                className="absolute inset-0 bg-[#006D5B]/80 rounded-xl border border-[#CCFF00]/40 shadow-xs"
+                className="absolute inset-0 bg-[#8F9E87]/90 rounded-xl border border-[#FBD6C8]/40 shadow-xs"
                 transition={{ type: 'spring', stiffness: 380, damping: 28 }}
               />
             )}
@@ -147,7 +147,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.9 }}
               onClick={onOpenReportModal}
-              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#B45309] to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white shadow-xl flex flex-col items-center justify-center border-2 border-amber-300 ring-4 ring-amber-500/30 cursor-pointer min-h-[56px] min-w-[56px]"
+              className="w-14 h-14 rounded-2xl bg-[#8F9E87] hover:bg-[#7E8D76] text-white shadow-xl flex flex-col items-center justify-center border-2 border-[#FBD6C8] ring-4 ring-[#8F9E87]/30 cursor-pointer min-h-[56px] min-w-[56px]"
               aria-label="Report New Issue"
             >
               <Plus className="w-6 h-6 stroke-[3]" />
@@ -158,16 +158,16 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={() => handleSelectView('bulletin')}
-            className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all cursor-pointer min-h-[56px] relative ${
+            className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all cursor-pointer shrink-0 min-h-[56px] relative ${
               activeView === 'bulletin'
-                ? 'text-[#CCFF00] font-black'
-                : 'text-slate-300 hover:text-white font-semibold'
+                ? 'text-[#FBD6C8] font-black'
+                : 'text-stone-300 hover:text-white font-semibold'
             }`}
           >
             {activeView === 'bulletin' && (
               <motion.div
                 layoutId="mobileActiveDockPill"
-                className="absolute inset-0 bg-[#006D5B]/80 rounded-xl border border-[#CCFF00]/40 shadow-xs"
+                className="absolute inset-0 bg-[#8F9E87]/90 rounded-xl border border-[#FBD6C8]/40 shadow-xs"
                 transition={{ type: 'spring', stiffness: 380, damping: 28 }}
               />
             )}
@@ -181,10 +181,10 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={() => setIsDrawerOpen(true)}
-            className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all cursor-pointer min-h-[56px] relative ${
+            className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all cursor-pointer shrink-0 min-h-[56px] relative ${
               isDrawerOpen
-                ? 'text-[#CCFF00] font-black'
-                : 'text-slate-300 hover:text-white font-semibold'
+                ? 'text-[#FBD6C8] font-black'
+                : 'text-stone-300 hover:text-white font-semibold'
             }`}
             aria-label="Open All Modules Menu"
           >

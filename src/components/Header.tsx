@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
     (filter.severity && filter.severity !== 'ALL' ? 1 : 0);
 
   return (
-    <header className="sticky top-0 z-30 bg-[#F7F3EB]/95 dark:bg-[#1C1917]/95 backdrop-blur-md border-b-2 border-[#E4DACB] shadow-sm transition-all font-['Montserrat']">
+    <header className="sticky top-0 z-30 bg-[#F5EFE6]/95 dark:bg-[#24201D]/95 backdrop-blur-md border-b-2 border-[#E3DDD3] shadow-sm transition-all font-['Montserrat']">
       {/* Top Bar: Brand, Search, User Actions & Primary CTA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 py-2">
@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2 sm:gap-2.5 shrink-0 cursor-pointer group py-1 transition-transform hover:scale-[1.01]"
           >
             <CityscapeLogo size="md" showTagline={false} />
-            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#A3E8D5] text-[#063B2F] border border-[#7CD6B8] shadow-xs">
+            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#8F9E87] text-[#FFFFFF] border border-[#7E8D76] shadow-xs">
               Official
             </span>
           </div>
@@ -85,18 +85,18 @@ export const Header: React.FC<HeaderProps> = ({
           {activeView === 'map' && (
             <div className="flex-1 max-w-sm hidden md:block relative">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#006D5B]" />
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#635D55]" />
                 <input
                   type="text"
                   placeholder="Search location or hazard..."
                   value={filter.searchQuery || ''}
                   onChange={(e) => setFilter((prev) => ({ ...prev, searchQuery: e.target.value }))}
-                  className="w-full pl-9 pr-8 py-2.5 ui-kit-input text-xs font-bold outline-none transition-all placeholder-slate-400 min-h-[44px]"
+                  className="w-full pl-9 pr-8 py-2.5 ui-kit-input text-xs font-bold outline-none transition-all placeholder-[#8E877E] min-h-[44px]"
                 />
                 {filter.searchQuery && (
                   <button
                     onClick={() => setFilter((prev) => ({ ...prev, searchQuery: '' }))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#006D5B]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E877E] hover:text-[#2E2A26]"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -205,14 +205,14 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('map')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'map'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
               <MapIcon className="w-3.5 h-3.5" />
               <span>Map</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${
-                activeView === 'map' ? 'bg-[#006D5B] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100'
+                activeView === 'map' ? 'bg-[#7E8D76] text-white' : 'bg-[#E3DDD3] text-[#2E2A26]'
               }`}>
                 {totalReportsCount}
               </span>
@@ -225,13 +225,13 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('estate')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'estate'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black ring-2 ring-amber-500/40'
-                  : 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-100 border-emerald-300 dark:border-emerald-700 hover:bg-[#006D5B] hover:text-white font-black'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black ring-2 ring-[#FBD6C8]/60'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] border-[#E3DDD3] hover:bg-[#8F9E87] hover:text-white font-black'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <Building2 className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>HOA & Gated Estate</span>
-              <span className="bg-[#B45309] text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
+              <span className="bg-[#FBD6C8] text-[#2E2A26] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
                 PRIVATE
               </span>
             </motion.button>
@@ -242,11 +242,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('bulletin')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'bulletin'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
-              <Bell className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <Bell className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>Bulletin</span>
             </motion.button>
 
@@ -256,11 +256,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('sla')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'sla'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
-              <Clock className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <Clock className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>SLA Tracker</span>
             </motion.button>
 
@@ -270,13 +270,13 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('strategic')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'strategic'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <Sparkles className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>Strategic AI</span>
-              <span className="bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
+              <span className="bg-[#FBD6C8] text-[#2E2A26] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
                 ROADMAP
               </span>
             </motion.button>
@@ -287,11 +287,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('blog')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'blog'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
-              <BookOpen className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <BookOpen className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>Civic Journal</span>
             </motion.button>
 
@@ -299,13 +299,13 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('events')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'events'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
-              <Megaphone className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <Megaphone className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>Events & Ads</span>
-              <span className="bg-[#B45309] text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
+              <span className="bg-[#FBD6C8] text-[#2E2A26] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
                 HIRE
               </span>
             </button>
@@ -314,11 +314,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('gratitude')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'gratitude'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <Sparkles className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>Fame</span>
             </button>
 
@@ -326,19 +326,19 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('admin')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'admin'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <Building2 className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>Gov Desk</span>
               {isAdminMode ? (
-                <span className="bg-[#0A2540] text-[#CCFF00] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5 border border-[#CCFF00]/40">
-                  <ShieldCheck className="w-2.5 h-2.5 text-[#CCFF00]" />
+                <span className="bg-[#8F9E87] text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5 border border-[#7E8D76]">
+                  <ShieldCheck className="w-2.5 h-2.5 text-white" />
                   <span>$1,250/mo</span>
                 </span>
               ) : (
-                <span className="bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5">
+                <span className="bg-[#E3DDD3] text-[#2E2A26] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5">
                   <Lock className="w-2.5 h-2.5" />
                   <span>PASS</span>
                 </span>
@@ -349,11 +349,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('analytics')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'analytics'
-                  ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-[#006D5B] font-black'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5 text-[#006D5B] dark:text-[#CCFF00]" />
+              <BarChart3 className="w-3.5 h-3.5 text-[#8F9E87]" />
               <span>Stats</span>
             </button>
 
@@ -361,14 +361,14 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveView('profile')}
               className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
                 activeView === 'profile'
-                  ? 'bg-[#0A2540] text-white shadow-md font-black border-[#006D5B]'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-slate-100 hover:bg-slate-100 border-slate-300 dark:border-slate-700 font-extrabold'
+                  ? 'bg-[#8F9E87] text-white shadow-md font-black border-[#7E8D76]'
+                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
               }`}
             >
               <User className="w-3.5 h-3.5" />
               <span>Passport</span>
-              <span className="flex items-center gap-0.5 text-[10px] font-mono font-black text-amber-900 bg-amber-200 px-1.5 py-0.5 rounded border border-amber-400">
-                <Flame className="w-2.5 h-2.5 fill-amber-600 text-amber-600" />
+              <span className="flex items-center gap-0.5 text-[10px] font-mono font-black text-[#2E2A26] bg-[#FBD6C8] px-1.5 py-0.5 rounded border border-[#E3B4A2]">
+                <Flame className="w-2.5 h-2.5 fill-[#8F9E87] text-[#8F9E87]" />
                 <span>{userKarma}</span>
               </span>
             </button>
