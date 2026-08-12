@@ -1922,6 +1922,42 @@ function generateFallbackCityBulletins(cityName: string): CityBulletinFeed {
   };
 }
 
+function cleanAndParseJson(rawText: string): any {
+  if (!rawText || typeof rawText !== 'string') return null;
+
+  // 1. Remove markdown code blocks
+  let text = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+  // 2. Try direct JSON.parse
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    // continue to fallback extraction
+  }
+
+  // 3. Extract JSON object or array string
+  const firstBrace = text.indexOf('{');
+  const lastBrace = text.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    const candidate = text.substring(firstBrace, lastBrace + 1);
+    try {
+      return JSON.parse(candidate);
+    } catch (e) {
+      // sanitize common LLM output syntax glitches
+      const sanitized = candidate
+        .replace(/,\s*([\}\]])/g, '$1') // remove trailing commas
+        .replace(/\[\d+\]/g, ''); // remove citation marks like [1]
+      try {
+        return JSON.parse(sanitized);
+      } catch (e2) {
+        // continue
+      }
+    }
+  }
+
+  return null;
+}
+
 async function fetchCityInfrastructureNewsFromGemini(cityName: string): Promise<CityBulletinFeed> {
   const normCity = (cityName || 'Rawalpindi').trim();
   const key = normCity.toLowerCase();
@@ -1931,17 +1967,18 @@ async function fetchCityInfrastructureNewsFromGemini(cityName: string): Promise<
     const promptText = `Extract real, current, authentic city infrastructure news, road maintenance advisories, public works projects, water supply notices, transit developments, and city council announcements for the geotagged city of "${normCity}".
 Search official municipal government information departments, city council press offices, local public works agencies, WASA, transit authorities, and authentic local news portals.
 
-Respond ONLY with a valid JSON object matching this exact schema:
+You MUST respond strictly with a valid JSON object. Do not include markdown or conversational text.
+Schema:
 {
   "cityName": "${normCity}",
   "sourceCount": 5,
   "bulletins": [
     {
       "id": "b-1",
-      "category": "ROADWORK" | "UTILITY" | "EMERGENCY" | "SENIOR_SERVICES" | "PUBLIC_HEARING" | "ENVIRONMENT",
-      "priority": "CRITICAL" | "URGENT" | "REGULAR",
-      "title": "Emoji title for the headline (10-18 words)",
-      "description": "2-3 sentence accurate summary of the city infrastructure update.",
+      "category": "ROADWORK",
+      "priority": "CRITICAL",
+      "title": "Emoji title for headline (10-18 words)",
+      "description": "2-3 sentence accurate summary of city infrastructure update.",
       "department": "Name of official municipal department or news outlet",
       "sourceName": "Name of authentic source website or city council portal",
       "sourceUrl": "Source webpage URL if available",
@@ -1950,7 +1987,9 @@ Respond ONLY with a valid JSON object matching this exact schema:
       "verifiedBy": "Official Municipal Dept / Verified Local Press"
     }
   ]
-}`;
+}
+Valid category values: "ROADWORK", "UTILITY", "EMERGENCY", "SENIOR_SERVICES", "PUBLIC_HEARING", "ENVIRONMENT".
+Valid priority values: "CRITICAL", "URGENT", "REGULAR".`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3.6-flash",
@@ -1961,21 +2000,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
     });
 
     const text = response.text || '';
-    let parsed: any = null;
-
-    try {
-      const cleanJson = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-      parsed = JSON.parse(cleanJson);
-    } catch (e) {
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          parsed = JSON.parse(jsonMatch[0]);
-        } catch (err2) {
-          console.warn("[Bulletins API] Could not parse Gemini JSON response, falling back to structured city bulletin.", err2);
-        }
-      }
-    }
+    const parsed = cleanAndParseJson(text);
 
     if (parsed && Array.isArray(parsed.bulletins) && parsed.bulletins.length > 0) {
       const now = new Date();
@@ -2008,7 +2033,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
       return feed;
     }
   } catch (err) {
-    console.error(`[Bulletins API] Failed fetching live news from Gemini for ${normCity}:`, err);
+    console.error(`[Bulletins API] Could not extract live bulletins for ${normCity}, using structured city feed:`, err);
   }
 
   // Fallback if Gemini or search ground is unavailable

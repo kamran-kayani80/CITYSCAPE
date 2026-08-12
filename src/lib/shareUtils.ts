@@ -9,22 +9,24 @@ export interface ShareDataPayload {
 }
 
 export function getShareableUrl(type: ShareDataPayload['type'], idOrTag: string): string {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://cityscape.community';
+  // Always use the standard official domain for public shareable links
+  const STANDARD_DOMAIN = 'https://cityscape.gov';
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const basePath = pathname === '/' ? '' : pathname;
 
   switch (type) {
     case 'report':
-      return `${origin}${pathname}?reportId=${encodeURIComponent(idOrTag)}`;
+      return `${STANDARD_DOMAIN}${basePath}?reportId=${encodeURIComponent(idOrTag)}`;
     case 'bulletin':
-      return `${origin}${pathname}?bulletinId=${encodeURIComponent(idOrTag)}`;
+      return `${STANDARD_DOMAIN}${basePath}?bulletinId=${encodeURIComponent(idOrTag)}`;
     case 'event':
-      return `${origin}${pathname}?eventId=${encodeURIComponent(idOrTag)}`;
+      return `${STANDARD_DOMAIN}${basePath}?eventId=${encodeURIComponent(idOrTag)}`;
     case 'hashtag':
-      return `${origin}${pathname}?tag=${encodeURIComponent(idOrTag)}`;
+      return `${STANDARD_DOMAIN}${basePath}?tag=${encodeURIComponent(idOrTag)}`;
     case 'article':
-      return `${origin}${pathname}?articleId=${encodeURIComponent(idOrTag)}`;
+      return `${STANDARD_DOMAIN}${basePath}?articleId=${encodeURIComponent(idOrTag)}`;
     default:
-      return `${origin}${pathname}`;
+      return `${STANDARD_DOMAIN}${pathname}`;
   }
 }
 

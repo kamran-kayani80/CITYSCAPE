@@ -114,7 +114,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView, selectedReport, re
 
     const ogPageUrl = selectedReport
       ? getShareableUrl('report', selectedReport.id)
-      : window.location.origin + window.location.pathname;
+      : 'https://cityscape.gov' + (window.location.pathname === '/' ? '' : window.location.pathname);
 
     // Update Meta Description & Keywords
     setMetaTag('name', 'description', description);
