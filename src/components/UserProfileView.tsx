@@ -279,9 +279,38 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
         </div>
       )}
 
-      {/* 1. HERO CIVIC PASSPORT HEADER (Dark Midnight Indigo Card with Glowing Bar like in prompt image) */}
-      <div className="dark-indigo-card p-6 sm:p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. HERO CIVIC RESIDENT PASSPORT (Official Municipal Civic Identity Card) */}
+      <div className="bg-[#0A2540] rounded-2xl p-6 sm:p-8 relative overflow-hidden border-2 border-[#006D5B] text-white shadow-xl">
+        {/* Subtle Civic Arch Guilloché & Geometric Watermark */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#006D5B]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -left-12 -bottom-12 w-64 h-64 bg-[#B45309]/10 rounded-full blur-2xl pointer-events-none" />
+        
+        {/* Top Municipal Header Ribbon */}
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-[#006D5B]/40">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-[#006D5B] text-amber-300 rounded-xl border border-teal-400/30 shadow-xs">
+              <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+            </div>
+            <div>
+              <div className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-amber-400">
+                Official Municipal Identity Document
+              </div>
+              <div className="text-sm sm:text-base font-extrabold text-white tracking-wide">
+                CITYSCAPE CIVIC RESIDENT PASSPORT
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono font-bold text-slate-300 bg-[#071B2F] px-3 py-1.5 rounded-xl border border-[#CBD5E1]/30">
+              DOC ID: #CS-{profile.username ? profile.username.toUpperCase() : 'RESIDENT'}-2026
+            </span>
+            <span className="px-3 py-1.5 bg-[#006D5B] text-white rounded-xl text-xs font-bold border border-teal-300/40 flex items-center gap-1.5 shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Verified Neighbor</span>
+            </span>
+          </div>
+        </div>
 
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
           {/* Avatar & Title / Name */}
@@ -290,72 +319,73 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
               <img
                 src={profile.avatarUrl}
                 alt={profile.fullName}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-indigo-400/30 shadow-xl transition-transform group-hover:scale-105"
+                className="w-22 h-22 sm:w-26 sm:h-26 rounded-2xl object-cover ring-3 ring-[#006D5B] shadow-2xl transition-transform group-hover:scale-105 border-2 border-white/20"
               />
-              <div className="absolute inset-0 bg-slate-900/60 rounded-2xl flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="w-6 h-6 text-[#CCFF00]" />
-                <span className="text-[10px] font-black uppercase mt-1">Change</span>
+              <div className="absolute inset-0 bg-[#0A2540]/80 rounded-2xl flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="w-6 h-6 text-amber-300" />
+                <span className="text-[10px] font-bold uppercase mt-1">Change</span>
               </div>
-              <span className="absolute -bottom-2 -right-2 p-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 rounded-xl shadow-md">
-                <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+              <span className="absolute -bottom-2 -right-2 p-1.5 bg-[#B45309] text-white rounded-xl shadow-md border border-amber-300/40">
+                <Award className="w-4 h-4 stroke-[2.5]" />
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                   {profile.fullName}
                 </h1>
-                <span className="text-xs font-mono font-extrabold text-[#006D5B] bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-300">
+                <span className="text-xs font-mono font-bold text-teal-200 bg-[#071B2F] px-3 py-1 rounded-xl border border-[#006D5B]">
                   @{profile.username}
                 </span>
 
                 {/* Edit Profile & Upload Picture Button */}
                 <button
+                  type="button"
                   onClick={handleOpenEditModal}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#006D5B] hover:bg-[#004d40] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs"
+                  className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-[#B45309] hover:bg-[#92400E] text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm border border-amber-400/40 min-h-[40px]"
                   title="Upload picture as avatar and change username"
                 >
-                  <Edit3 className="w-3.5 h-3.5 text-amber-300" />
+                  <Edit3 className="w-3.5 h-3.5 text-amber-200" />
                   <span>Edit Profile & Avatar</span>
                 </button>
               </div>
 
               {/* Title Selector Dropdown */}
               <div className="flex items-center gap-2 pt-0.5">
-                <span className="text-xs text-slate-700 font-bold">Active Title:</span>
+                <span className="text-xs text-slate-300 font-bold">Civic Title:</span>
                 <select
                   value={selectedTitle}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  className="bg-slate-100 border border-slate-300 text-black font-extrabold text-xs px-3 py-1 rounded-xl outline-none cursor-pointer focus:ring-2 focus:ring-[#006D5B]"
+                  className="bg-[#071B2F] border-1.5 border-[#006D5B] text-amber-300 font-bold text-xs px-3 py-1.5 rounded-xl outline-none cursor-pointer focus:ring-2 focus:ring-[#006D5B]"
                 >
                   {profile.unlockedTitles.map((t) => (
-                    <option key={t} value={t} className="bg-white text-black">
+                    <option key={t} value={t} className="bg-[#0A2540] text-white">
                       🎖️ {t}
                     </option>
                   ))}
                 </select>
                 {titleSuccessMsg && (
-                  <span className="text-[10px] text-emerald-600 font-black animate-pulse">
-                    Updated!
+                  <span className="text-[11px] text-emerald-400 font-bold animate-pulse">
+                    ✓ Updated!
                   </span>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-800 font-bold">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#006D5B]" />
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-200 font-semibold">
+                <span className="flex items-center gap-1.5 bg-[#071B2F]/80 px-2.5 py-1 rounded-lg border border-[#CBD5E1]/20">
+                  <MapPin className="w-3.5 h-3.5 text-teal-300" />
                   <span>{profile.neighborhoodName}</span>
                 </span>
                 <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-[#006D5B]" />
-                  <span>Member since {profile.joinedDate}</span>
+                <span className="flex items-center gap-1.5 bg-[#071B2F]/80 px-2.5 py-1 rounded-lg border border-[#CBD5E1]/20">
+                  <Calendar className="w-3.5 h-3.5 text-teal-300" />
+                  <span>Resident since {profile.joinedDate}</span>
                 </span>
               </div>
 
               {/* Google Account Status Badge */}
-              <div className="pt-2">
+              <div className="pt-1">
                 <GoogleAuthButton
                   currentUserProfile={profile}
                   onAuthChange={(updated) => {
@@ -368,90 +398,96 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
             </div>
           </div>
 
-          {/* Civic Karma & Trust Score Pill */}
-          <div className="w-full lg:w-auto flex flex-row lg:flex-col items-center lg:items-end justify-between gap-3 p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+          {/* Civic Karma & Trust Score Module */}
+          <div className="w-full lg:w-auto flex flex-row lg:flex-col items-center lg:items-end justify-between gap-3 p-5 bg-[#071B2F] rounded-2xl border-1.5 border-[#006D5B] shadow-inner">
             <div className="flex items-center space-x-3">
-              <div className="p-2.5 icon-tile-amber rounded-2xl">
+              <div className="p-3 bg-[#B45309]/30 border border-amber-400/40 text-amber-400 rounded-2xl">
                 <Flame className="w-6 h-6 animate-pulse" />
               </div>
               <div>
-                <div className="text-2xl sm:text-3xl font-black font-mono text-white">
+                <div className="text-2xl sm:text-3xl font-extrabold font-mono text-white">
                   {profile.civicKarma}
                 </div>
-                <div className="text-[10px] font-black uppercase tracking-wider text-amber-300">
-                  Civic Karma
+                <div className="text-[11px] font-bold uppercase tracking-wider text-amber-300">
+                  Civic Karma Points
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-semibold text-indigo-100">
-              <span>Trust Score:</span>
-              <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full font-mono font-black">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
+              <span>Civic Trust Rating:</span>
+              <span className="px-3 py-1 bg-[#006D5B] text-white border border-teal-400/40 rounded-full font-mono font-bold text-xs">
                 {profile.trustScore}% Verified
               </span>
             </div>
           </div>
         </div>
 
-        {/* Glowing Progress Bar (Matches prompt dark card style) */}
-        <div className="mt-6 pt-5 border-t border-white/10 space-y-2">
-          <div className="flex justify-between items-center text-xs text-indigo-200 font-bold">
-            <span>Next Civic Level: Civic Sentinel</span>
-            <span>{profile.civicKarma} / 1200 XP</span>
+        {/* Milestone Progress Bar */}
+        <div className="mt-6 pt-5 border-t border-[#006D5B]/30 space-y-2">
+          <div className="flex justify-between items-center text-xs text-slate-200 font-bold">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Next Civic Tier: Civic Sentinel</span>
+            </span>
+            <span className="font-mono">{profile.civicKarma} / 1200 XP</span>
           </div>
-          <div className="w-full h-3 bg-indigo-950/80 rounded-full overflow-hidden p-0.5 border border-white/10">
-            <div className="h-full glowing-bar rounded-full" style={{ width: '70%' }} />
+          <div className="w-full h-3 bg-[#071B2F] rounded-full overflow-hidden p-0.5 border border-[#006D5B]/60">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#006D5B] to-[#B45309] shadow-sm transition-all duration-500"
+              style={{ width: `${Math.min(100, Math.round((profile.civicKarma / 1200) * 100))}%` }}
+            />
           </div>
         </div>
 
-        {/* Impact Statistics Grid */}
+        {/* Impact Statistics Grid (Brand Cohesive 6-Tile Layout) */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <div className="text-[11px] font-medium text-indigo-200/80">Reports Logged</div>
-            <div className="text-lg font-black font-mono text-white mt-0.5">
+          <div className="p-3.5 bg-[#071B2F] rounded-xl border-1.5 border-[#006D5B]/50 hover:border-[#006D5B] transition-colors">
+            <div className="text-[11px] font-bold text-slate-300">Reports Logged</div>
+            <div className="text-lg font-bold font-mono text-white mt-1">
               {profile.impactStats.reportsResolved} / {profile.impactStats.reportsSubmitted}
             </div>
-            <div className="text-[10px] text-emerald-400 font-bold">78% Resolved</div>
+            <div className="text-[10px] text-emerald-400 font-bold mt-0.5">78% Resolved</div>
           </div>
 
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <div className="text-[11px] font-medium text-indigo-200/80">Ground Checks</div>
-            <div className="text-lg font-black font-mono text-white mt-0.5">
+          <div className="p-3.5 bg-[#071B2F] rounded-xl border-1.5 border-[#006D5B]/50 hover:border-[#006D5B] transition-colors">
+            <div className="text-[11px] font-bold text-slate-300">Ground Checks</div>
+            <div className="text-lg font-bold font-mono text-white mt-1">
               {profile.impactStats.verificationsCount}
             </div>
-            <div className="text-[10px] text-cyan-400 font-bold">Verified</div>
+            <div className="text-[10px] text-teal-300 font-bold mt-0.5">Verified Local</div>
           </div>
 
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <div className="text-[11px] font-medium text-indigo-200/80">Upvotes Rec'd</div>
-            <div className="text-lg font-black font-mono text-white mt-0.5">
+          <div className="p-3.5 bg-[#071B2F] rounded-xl border-1.5 border-[#006D5B]/50 hover:border-[#006D5B] transition-colors">
+            <div className="text-[11px] font-bold text-slate-300">Upvotes Rec'd</div>
+            <div className="text-lg font-bold font-mono text-white mt-1">
               {profile.impactStats.upvotesReceived}
             </div>
-            <div className="text-[10px] text-indigo-300 font-bold">Endorsements</div>
+            <div className="text-[10px] text-amber-300 font-bold mt-0.5">Endorsements</div>
           </div>
 
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <div className="text-[11px] font-medium text-indigo-200/80">Upvotes Given</div>
-            <div className="text-lg font-black font-mono text-white mt-0.5">
+          <div className="p-3.5 bg-[#071B2F] rounded-xl border-1.5 border-[#006D5B]/50 hover:border-[#006D5B] transition-colors">
+            <div className="text-[11px] font-bold text-slate-300">Upvotes Given</div>
+            <div className="text-lg font-bold font-mono text-white mt-1">
               {profile.impactStats.upvotesGiven}
             </div>
-            <div className="text-[10px] text-indigo-300 font-bold">Community</div>
+            <div className="text-[10px] text-teal-200 font-bold mt-0.5">Community</div>
           </div>
 
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <div className="text-[11px] font-medium text-indigo-200/80">Hours Saved</div>
-            <div className="text-lg font-black font-mono text-white mt-0.5">
+          <div className="p-3.5 bg-[#071B2F] rounded-xl border-1.5 border-[#006D5B]/50 hover:border-[#006D5B] transition-colors">
+            <div className="text-[11px] font-bold text-slate-300">Hours Saved</div>
+            <div className="text-lg font-bold font-mono text-white mt-1">
               {profile.impactStats.estHoursSaved} hrs
             </div>
-            <div className="text-[10px] text-purple-300 font-bold">Prevention</div>
+            <div className="text-[10px] text-amber-200 font-bold mt-0.5">Prevention</div>
           </div>
 
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <div className="text-[11px] font-medium text-indigo-200/80">Value Created</div>
-            <div className="text-lg font-black font-mono text-white mt-0.5">
+          <div className="p-3.5 bg-[#071B2F] rounded-xl border-1.5 border-[#006D5B]/50 hover:border-[#006D5B] transition-colors">
+            <div className="text-[11px] font-bold text-slate-300">Civic Value</div>
+            <div className="text-lg font-bold font-mono text-emerald-400 mt-1">
               ${profile.impactStats.civicValueCreatedUsd.toLocaleString()}
             </div>
-            <div className="text-[10px] text-emerald-400 font-bold">Public Goods</div>
+            <div className="text-[10px] text-emerald-300 font-bold mt-0.5">Public Goods</div>
           </div>
         </div>
       </div>
@@ -462,7 +498,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
           <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col">
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50 dark:bg-slate-900">
               <div className="flex items-center space-x-2.5">
-                <div className="p-2 bg-[#008080] text-[#CCFF00] rounded-xl shadow-xs">
+                <div className="p-2 bg-[#006D5B] text-amber-300 rounded-xl shadow-xs">
                   <Camera className="w-5 h-5" />
                 </div>
                 <div>
@@ -493,16 +529,16 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
                       <img
                         src={editAvatarUrl || profile.avatarUrl}
                         alt="Avatar Preview"
-                        className="w-20 h-20 rounded-2xl object-cover ring-4 ring-[#008080] shadow-md"
+                        className="w-20 h-20 rounded-2xl object-cover ring-4 ring-[#006D5B] shadow-md"
                       />
-                      <span className="absolute -bottom-1 -right-1 p-1 bg-[#008080] text-[#CCFF00] rounded-lg text-[9px] font-black">
+                      <span className="absolute -bottom-1 -right-1 p-1 bg-[#006D5B] text-amber-300 rounded-lg text-[9px] font-black">
                         PREVIEW
                       </span>
                     </div>
 
                     <div className="space-y-2 w-full">
-                      <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#008080] hover:bg-[#006666] text-white font-black rounded-xl cursor-pointer shadow-xs transition-all text-xs min-h-[44px]">
-                        <Upload className="w-4 h-4 text-[#CCFF00]" />
+                      <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#006D5B] hover:bg-[#005244] text-white font-bold rounded-xl cursor-pointer shadow-xs transition-all text-xs min-h-[44px]">
+                        <Upload className="w-4 h-4 text-amber-300" />
                         <span>Upload Picture from Device</span>
                         <input
                           type="file"
@@ -531,7 +567,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
                           onClick={() => setEditAvatarUrl(preset.url)}
                           className={`relative rounded-xl overflow-hidden border-2 transition-all cursor-pointer aspect-square ${
                             editAvatarUrl === preset.url
-                              ? 'border-[#008080] ring-2 ring-[#008080]'
+                              ? 'border-[#006D5B] ring-2 ring-[#006D5B]'
                               : 'border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100'
                           }`}
                           title={preset.name}
@@ -575,7 +611,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
                       placeholder="e.g. Kaamika Yani"
                       value={editFullName}
                       onChange={(e) => setEditFullName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-[#008080] rounded-xl outline-none font-bold text-slate-900 dark:text-white min-h-[44px]"
+                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-[#006D5B] rounded-xl outline-none font-bold text-slate-900 dark:text-white min-h-[44px]"
                     />
                   </div>
 
@@ -584,7 +620,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
                       Civic Username Handle (@)
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-black text-[#008080] text-sm">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-black text-[#006D5B] text-sm">
                         @
                       </span>
                       <input
@@ -593,7 +629,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
                         placeholder="resident_username"
                         value={editUsername}
                         onChange={(e) => setEditUsername(e.target.value.replace(/\s+/g, '_'))}
-                        className="w-full pl-8 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-[#008080] rounded-xl outline-none font-mono font-bold text-slate-900 dark:text-white min-h-[44px]"
+                        className="w-full pl-8 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-[#006D5B] rounded-xl outline-none font-mono font-bold text-slate-900 dark:text-white min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -609,7 +645,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
                           key={handle}
                           type="button"
                           onClick={() => setEditUsername(handle)}
-                          className="px-2.5 py-1 bg-slate-100 hover:bg-[#008080] hover:text-white dark:bg-slate-800 dark:hover:bg-[#008080] text-slate-700 dark:text-slate-300 rounded-lg text-[11px] font-mono font-bold cursor-pointer transition-colors"
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-[#006D5B] hover:text-white dark:bg-slate-800 dark:hover:bg-[#006D5B] text-slate-700 dark:text-slate-300 rounded-lg text-[11px] font-mono font-bold cursor-pointer transition-colors"
                         >
                           @{handle}
                         </button>
@@ -634,9 +670,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
                   className="btn-primary-designer px-6 py-2.5 rounded-2xl text-xs font-black cursor-pointer min-h-[44px] flex items-center space-x-2"
                 >
                   {isSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-[#CCFF00]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-amber-300" />
                   ) : (
-                    <CheckCircle className="w-4 h-4 text-[#CCFF00]" />
+                    <CheckCircle className="w-4 h-4 text-amber-300" />
                   )}
                   <span>Save Profile & Avatar</span>
                 </button>
@@ -650,18 +686,18 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
       <div className="soft-card p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 className="text-lg font-heading font-black text-[#1c1a3b] dark:text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-indigo-600" />
+            <h3 className="text-lg font-heading font-black text-[#051F20] dark:text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-[#006D5B]" />
               <span>Civic Action Contribution Grid</span>
             </h3>
-            <p className="text-xs text-indigo-950/80 font-bold">Daily reports, verifications, and discussions logged over the last 6 months.</p>
+            <p className="text-xs text-[#111827] dark:text-slate-200 font-bold">Daily reports, verifications, and discussions logged over the last 6 months.</p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-indigo-900 font-semibold">
+          <div className="flex items-center gap-2 text-xs text-[#051F20] font-bold">
             <span>Less</span>
             <span className="w-3 h-3 rounded bg-[#e2dff4]" />
-            <span className="w-3 h-3 rounded bg-indigo-300" />
-            <span className="w-3 h-3 rounded bg-indigo-500" />
-            <span className="w-3 h-3 rounded bg-indigo-700" />
+            <span className="w-3 h-3 rounded bg-teal-300" />
+            <span className="w-3 h-3 rounded bg-[#006D5B]" />
+            <span className="w-3 h-3 rounded bg-[#0A2540]" />
             <span>More</span>
           </div>
         </div>
@@ -671,16 +707,16 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
             {heatmapDays.map((day, idx) => {
               const bgClasses = [
                 'bg-[#e2dff4]',
-                'bg-indigo-300',
-                'bg-indigo-500 text-white',
-                'bg-indigo-600 text-white',
-                'bg-purple-600 text-white',
+                'bg-teal-300',
+                'bg-[#006D5B] text-white',
+                'bg-[#0A2540] text-white',
+                'bg-emerald-800 text-white',
               ];
               return (
                 <div
                   key={idx}
                   title={`${day.date}: ${day.intensity} civic actions`}
-                  className={`w-3.5 h-3.5 rounded-sm transition-all hover:scale-125 hover:ring-2 hover:ring-indigo-500 cursor-pointer ${bgClasses[day.intensity]}`}
+                  className={`w-3.5 h-3.5 rounded-sm transition-all hover:scale-125 hover:ring-2 hover:ring-[#006D5B] cursor-pointer ${bgClasses[day.intensity]}`}
                 />
               );
             })}
@@ -691,11 +727,11 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
       {/* 3. IMPACT PORTFOLIO GRID ("Before & After" Showcase Cards) */}
       <div className="space-y-4">
         <div>
-          <h3 className="text-xl font-black text-[#1c1a3b] dark:text-white flex items-center gap-2">
+          <h3 className="text-xl font-black text-[#051F20] dark:text-white flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-500" />
             <span>Impact Portfolio: Before & After Proof</span>
           </h3>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-xs text-[#111827] dark:text-slate-200 font-bold">
             Real tangible results generated from your reports and community verification on the ground.
           </p>
         </div>
@@ -708,9 +744,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase">#{report.id}</span>
-                  <h4 className="font-extrabold text-[#1c1a3b] dark:text-white text-sm line-clamp-1">{report.title}</h4>
-                  <p className="text-xs text-slate-500 font-medium">{report.addressText}</p>
+                  <span className="text-[10px] font-mono text-[#006D5B] font-bold uppercase">#{report.id}</span>
+                  <h4 className="font-extrabold text-[#051F20] dark:text-white text-sm line-clamp-1">{report.title}</h4>
+                  <p className="text-xs text-[#006D5B] font-bold">{report.addressText}</p>
                 </div>
                 <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full border border-emerald-300">
                   RESOLVED
@@ -719,7 +755,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
 
               {/* Side-by-side Before & After comparison */}
               <div className="grid grid-cols-2 gap-3 pt-1">
-                <div className="relative rounded-2xl overflow-hidden h-36 bg-slate-100 border border-white">
+                <div className="relative rounded-2xl overflow-hidden h-36 bg-slate-100 border border-slate-200">
                   <img src={report.imageUrls[0]} alt="Before" className="w-full h-full object-cover" />
                   <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-slate-900/80 text-white text-[10px] font-black rounded-lg">
                     BEFORE
@@ -739,7 +775,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
               </div>
 
               {report.officialNote && (
-                <p className="text-xs text-slate-700 italic soft-inset p-3 border border-white/60 font-medium">
+                <p className="text-xs text-[#051F20] italic soft-inset p-3 border border-slate-200 font-medium">
                   "{report.officialNote}"
                 </p>
               )}
@@ -750,43 +786,43 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ onSelectReport
 
       {/* 4. CIVIC BADGES & MILESTONES DRAWER */}
       <div className="soft-card p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/60">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
           <div>
-            <h3 className="text-xl font-black text-[#1c1a3b] dark:text-white flex items-center gap-2">
+            <h3 className="text-xl font-black text-[#051F20] dark:text-white flex items-center gap-2">
               <Award className="w-5 h-5 text-amber-500" />
               <span>Civic Badges & Quality Milestones</span>
             </h3>
-            <p className="text-xs text-slate-500 font-medium">Earned through quality verifications and constructive follow-through.</p>
+            <p className="text-xs text-[#111827] dark:text-slate-200 font-bold">Earned through quality verifications and constructive follow-through.</p>
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-2 p-1.5 soft-inset text-xs font-bold">
+          <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold">
             <button
               onClick={() => setSelectedBadgeFilter('ALL')}
-              className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer min-h-[36px] ${
                 selectedBadgeFilter === 'ALL'
-                  ? 'soft-pill text-indigo-700 font-black'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#006D5B] text-white font-black shadow-xs'
+                  : 'text-[#051F20] dark:text-slate-200 hover:text-[#006D5B]'
               }`}
             >
               All ({badges.length})
             </button>
             <button
               onClick={() => setSelectedBadgeFilter('UNLOCKED')}
-              className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer min-h-[36px] ${
                 selectedBadgeFilter === 'UNLOCKED'
-                  ? 'soft-pill text-indigo-700 font-black'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#006D5B] text-white font-black shadow-xs'
+                  : 'text-[#051F20] dark:text-slate-200 hover:text-[#006D5B]'
               }`}
             >
               Unlocked ({badges.filter((b) => b.isUnlocked).length})
             </button>
             <button
               onClick={() => setSelectedBadgeFilter('IN_PROGRESS')}
-              className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer min-h-[36px] ${
                 selectedBadgeFilter === 'IN_PROGRESS'
-                  ? 'soft-pill text-indigo-700 font-black'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#006D5B] text-white font-black shadow-xs'
+                  : 'text-[#051F20] dark:text-slate-200 hover:text-[#006D5B]'
               }`}
             >
               In Progress ({badges.filter((b) => !b.isUnlocked).length})

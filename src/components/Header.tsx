@@ -25,6 +25,12 @@ import {
   Clock,
   Bell,
   Palette,
+  Download,
+  Smartphone,
+  Share2,
+  Users,
+  Landmark,
+  Compass,
 } from 'lucide-react';
 import { CityscapeLogo } from './CityscapeLogo';
 import { GoogleAuthButton } from './GoogleAuthButton';
@@ -37,6 +43,7 @@ interface HeaderProps {
   filter: ReportFilter;
   setFilter: React.Dispatch<React.SetStateAction<ReportFilter>>;
   onOpenReportModal: () => void;
+  onOpenDownloadShareModal?: (tab?: 'download' | 'invite' | 'share') => void;
   isAdminMode: boolean;
   setIsAdminMode: (admin: boolean) => void;
   totalReportsCount: number;
@@ -51,6 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
   filter,
   setFilter,
   onOpenReportModal,
+  onOpenDownloadShareModal,
   isAdminMode,
   setIsAdminMode,
   totalReportsCount,
@@ -66,317 +74,308 @@ export const Header: React.FC<HeaderProps> = ({
     (filter.severity && filter.severity !== 'ALL' ? 1 : 0);
 
   return (
-    <header className="sticky top-0 z-30 bg-[#F5EFE6]/95 dark:bg-[#24201D]/95 backdrop-blur-md border-b-2 border-[#E3DDD3] shadow-sm transition-all font-['Montserrat']">
+    <header className="sticky top-0 z-30 bg-[#FFFFFF] dark:bg-[#0A2540] border-b-2 border-[#CBD5E1] dark:border-slate-800 shadow-sm transition-all">
       {/* Top Bar: Brand, Search, User Actions & Primary CTA */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-3 py-2">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-3 py-1.5 sm:py-2">
           {/* Brand Logo & Name */}
           <div
             onClick={() => setActiveView('map')}
-            className="flex items-center gap-2 sm:gap-2.5 shrink-0 cursor-pointer group py-1 transition-transform hover:scale-[1.01]"
+            className="flex items-center gap-1.5 sm:gap-3 shrink-0 cursor-pointer group py-1 transition-transform hover:scale-[1.01]"
           >
-            <CityscapeLogo size="md" showTagline={false} />
-            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-[#8F9E87] text-[#FFFFFF] border border-[#7E8D76] shadow-xs">
+            <CityscapeLogo size="md" showTagline={false} fontSize="36px" />
+            <span className="hidden sm:inline-flex items-center px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-xl bg-[#006D5B] text-white border border-[#004D40] shadow-sm">
               Official
             </span>
           </div>
 
-          {/* Search bar for map/feed view */}
+          {/* Search bar for map/feed view - Modern & Cohesive Design */}
           {activeView === 'map' && (
-            <div className="flex-1 max-w-sm hidden md:block relative">
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#635D55]" />
+            <div className="flex-1 max-w-xs lg:max-w-sm hidden md:block">
+              <div className="relative flex items-center group">
+                <div className="absolute left-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#006D5B] dark:group-focus-within:text-teal-400 transition-colors">
+                  <Search className="w-4 h-4" />
+                </div>
                 <input
+                  id="header-map-search-input"
                   type="text"
-                  placeholder="Search location or hazard..."
+                  placeholder="Search streets, landmarks, reports..."
                   value={filter.searchQuery || ''}
                   onChange={(e) => setFilter((prev) => ({ ...prev, searchQuery: e.target.value }))}
-                  className="w-full pl-9 pr-8 py-2.5 ui-kit-input text-xs font-bold outline-none transition-all placeholder-[#8E877E] min-h-[44px]"
+                  className="w-full pl-9 pr-14 py-2 bg-slate-50/90 dark:bg-slate-800/90 hover:bg-slate-100/90 dark:hover:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-sm font-medium rounded-2xl border-1.5 border-slate-300 dark:border-slate-700 focus:border-[#006D5B] dark:focus:border-teal-400 focus:bg-white dark:focus:bg-slate-900 focus:ring-3 focus:ring-[#006D5B]/15 outline-none transition-all h-[38px] sm:h-[42px] shadow-2xs"
                 />
-                {filter.searchQuery && (
-                  <button
-                    onClick={() => setFilter((prev) => ({ ...prev, searchQuery: '' }))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E877E] hover:text-[#2E2A26]"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                <div className="absolute right-2.5 flex items-center gap-1">
+                  {filter.searchQuery ? (
+                    <button
+                      type="button"
+                      onClick={() => setFilter((prev) => ({ ...prev, searchQuery: '' }))}
+                      title="Clear search"
+                      aria-label="Clear search text"
+                      className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  ) : (
+                    <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 dark:text-slate-500 bg-slate-200/60 dark:bg-slate-700/60 rounded-md border border-slate-300/60 dark:border-slate-600/60 pointer-events-none">
+                      /
+                    </kbd>
+                  )}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Right Action buttons & Identity cluster */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Google Sign-In Button */}
-            <div>
-              <GoogleAuthButton
-                currentUserProfile={userProfile}
-                onAuthChange={onUserProfileChange}
-                variant="header"
-              />
-            </div>
+          {/* Right Action buttons & Identity cluster with Unified Hierarchy */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
+            {/* 1. User Identity & Persona Cluster */}
+            <div className="flex items-center gap-1.5 shrink-0 bg-slate-100/60 dark:bg-slate-800/60 p-0.5 sm:p-1 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+              {/* Google Sign-In / Account Button */}
+              <div className="shrink-0">
+                <GoogleAuthButton
+                  currentUserProfile={userProfile}
+                  onAuthChange={onUserProfileChange}
+                  variant="header"
+                />
+              </div>
 
-            {/* User Mode Toggle: Resident vs Staff */}
-            <button
-              onClick={() => setIsAdminMode(!isAdminMode)}
-              title={isAdminMode ? 'Switch to Resident Mode' : 'Switch to Staff Mode'}
-              className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border-2 text-xs font-extrabold transition-all cursor-pointer min-h-[44px] ${
-                isAdminMode
-                  ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
-                  : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-white border-slate-300 dark:border-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              {isAdminMode ? (
-                <>
-                  <Building2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Staff</span>
-                </>
-              ) : (
-                <>
-                  <UserCheck className="w-4 h-4 text-[#006D5B]" />
-                  <span className="hidden sm:inline">Resident</span>
-                </>
-              )}
-            </button>
-
-            {/* Mobile filter toggle */}
-            {activeView === 'map' && (
+              {/* User Mode Toggle: Resident vs Staff (Logically paired with Account Identity) */}
               <button
-                onClick={() => setShowFiltersMobile(!showFiltersMobile)}
-                className="lg:hidden relative p-2.5 text-[#111827] dark:text-white bg-slate-100 dark:bg-slate-800 rounded-xl border-2 border-slate-300 dark:border-slate-700 hover:bg-slate-200 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
-                aria-label="Toggle map filters"
+                id="btn-header-role-mode-toggle"
+                onClick={() => setIsAdminMode(!isAdminMode)}
+                aria-pressed={isAdminMode}
+                aria-label={isAdminMode ? 'Switch from Staff Mode to Resident Mode' : 'Switch from Resident Mode to Staff Mode'}
+                title={isAdminMode ? 'Active: Staff & Operations Mode (Click to switch to Resident)' : 'Active: Resident Mode (Click to switch to Staff/Public Works)'}
+                className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer h-[38px] sm:h-[42px] min-w-[80px] xs:min-w-[90px] sm:min-w-[104px] shrink-0 border ${
+                  isAdminMode
+                    ? 'bg-[#006D5B] text-white border-[#004D40] shadow-xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-300 dark:border-slate-600 hover:border-[#006D5B] dark:hover:border-teal-400'
+                }`}
               >
-                <Filter className="w-4 h-4 text-[#006D5B] dark:text-[#CCFF00]" />
-                {activeFiltersCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-white dark:ring-slate-900" />
+                {isAdminMode ? (
+                  <>
+                    <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 shrink-0" />
+                    <span className="truncate">Staff</span>
+                  </>
+                ) : (
+                  <>
+                    <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#006D5B] dark:text-teal-300 shrink-0" />
+                    <span className="truncate">Resident</span>
+                  </>
                 )}
               </button>
-            )}
+            </div>
 
-            {/* Primary CTA Button: Brief Heading "+ Report" */}
+            {/* Primary CTA Button: Report (Equal width & unified height, cohesive Cityscape Action Amber styling) */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              id="btn-header-primary-report"
+              whileHover={{ scale: 1.02, y: -1 }}
+              whileTap={{ scale: 0.97 }}
               onClick={onOpenReportModal}
-              className="ui-kit-btn-primary flex items-center space-x-1.5 py-2.5 px-5 text-xs cursor-pointer min-h-[44px]"
+              aria-label="Report a neighborhood issue to city team"
+              title="Report an Issue or Request to Municipal Public Works (+50 Civic Karma)"
+              className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 h-[38px] sm:h-[42px] min-w-[80px] xs:min-w-[92px] sm:min-w-[104px] text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#B45309] via-[#C25E10] to-[#92400E] hover:from-[#D97706] hover:via-[#B45309] hover:to-[#78350F] border-1.5 border-[#78350F] dark:border-amber-400/50 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(180,83,9,0.3)] hover:shadow-[0_4px_14px_rgba(180,83,9,0.45)] active:shadow-xs transition-all cursor-pointer shrink-0"
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Report</span>
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3] text-amber-200 shrink-0" />
+              <span className="truncate tracking-tight font-extrabold">Report</span>
             </motion.button>
           </div>
         </div>
       </div>
 
-      {/* Line 2: Dedicated Navigation Tabs Bar (Desktop / Large Screens) */}
-      <div className="hidden lg:block bg-[#EFE9DD] dark:bg-slate-900 border-t-2 border-[#E4DACB] py-2 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          {/* Main View Tabs (Short & Brief Labels) */}
-          <nav className="flex items-center gap-1.5 text-xs font-['Montserrat'] font-extrabold overflow-x-auto no-scrollbar py-0.5">
-            {/* Persistent Urgent / Emergency Tab */}
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              id="urgent-tab-btn"
-              onClick={() => {
-                setActiveView('map');
-                setFilter((prev) => ({
-                  ...prev,
-                  category: prev.category === 'EMERGENCY' ? 'ALL' : 'EMERGENCY',
-                }));
-              }}
-              title="View Urgent Emergency Hazards"
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'map' && filter.category === 'EMERGENCY'
-                  ? 'bg-red-600 text-white border-red-700 shadow-md ring-2 ring-red-400 font-black'
-                  : 'bg-red-100 dark:bg-red-950/80 text-red-900 dark:text-red-200 border-red-300 dark:border-red-800 hover:bg-red-600 hover:text-white font-extrabold'
-              }`}
-            >
-              <Siren className={`w-3.5 h-3.5 ${activeView === 'map' && filter.category === 'EMERGENCY' ? 'text-yellow-300 animate-bounce' : 'text-red-600 animate-pulse'}`} />
-              <span>Urgent</span>
-              <span className="bg-red-700 text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
-                ALERT
+      {/* Line 2: Dedicated Navigation Tabs Bar (Layered Multi-Tier Buttons with Full Title Visibility) */}
+      <div className="block bg-slate-50/90 dark:bg-[#071B2F] border-t-1.5 border-[#CBD5E1] dark:border-slate-800 py-2.5 px-3 sm:px-4">
+        <div className="max-w-7xl mx-auto space-y-2">
+          {/* Layer 1: Core Civic Operations & Emergency Response */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Core Operations & Portals
               </span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              id="discovery-tab-btn"
-              onClick={() => setActiveView('map')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'map'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <MapIcon className="w-3.5 h-3.5" />
-              <span>Map</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${
-                activeView === 'map' ? 'bg-[#7E8D76] text-white' : 'bg-[#E3DDD3] text-[#2E2A26]'
-              }`}>
-                {totalReportsCount}
-              </span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              id="hoa-gated-estate-tab-btn"
-              onClick={() => setActiveView('estate')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'estate'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black ring-2 ring-[#FBD6C8]/60'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] border-[#E3DDD3] hover:bg-[#8F9E87] hover:text-white font-black'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>HOA & Gated Estate</span>
-              <span className="bg-[#FBD6C8] text-[#2E2A26] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
-                PRIVATE
-              </span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setActiveView('bulletin')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'bulletin'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <Bell className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>Bulletin</span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setActiveView('sla')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'sla'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>SLA Tracker</span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setActiveView('strategic')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'strategic'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>Strategic AI</span>
-              <span className="bg-[#FBD6C8] text-[#2E2A26] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
-                ROADMAP
-              </span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setActiveView('blog')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'blog'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>Civic Journal</span>
-            </motion.button>
-
-            <button
-              onClick={() => setActiveView('events')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'events'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <Megaphone className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>Events & Ads</span>
-              <span className="bg-[#FBD6C8] text-[#2E2A26] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider">
-                HIRE
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveView('gratitude')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'gratitude'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>Fame</span>
-            </button>
-
-            <button
-              onClick={() => setActiveView('admin')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'admin'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>Gov Desk</span>
-              {isAdminMode ? (
-                <span className="bg-[#8F9E87] text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5 border border-[#7E8D76]">
-                  <ShieldCheck className="w-2.5 h-2.5 text-white" />
-                  <span>$1,250/mo</span>
+            </div>
+            <nav className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full" aria-label="Core Navigation Layer">
+              {/* Persistent Urgent / Emergency Tab */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                id="urgent-tab-btn"
+                onClick={() => {
+                  setActiveView('map');
+                  setFilter((prev) => ({
+                    ...prev,
+                    category: prev.category === 'EMERGENCY' ? 'ALL' : 'EMERGENCY',
+                  }));
+                }}
+                title="View Urgent Community Hazards"
+                className={`header-urgent-btn w-full ${
+                  activeView === 'map' && filter.category === 'EMERGENCY' ? 'active' : ''
+                }`}
+              >
+                <Siren className={`w-4 h-4 shrink-0 ${activeView === 'map' && filter.category === 'EMERGENCY' ? 'text-yellow-300 animate-bounce' : 'text-red-600 animate-pulse'}`} />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Urgent Hazards</span>
+                <span className="bg-red-700 text-white text-[9px] sm:text-[10px] h-4.5 sm:h-5 px-1.5 rounded-md font-bold uppercase tracking-wider inline-flex items-center justify-center leading-none shadow-xs shrink-0">
+                  ALERT
                 </span>
-              ) : (
-                <span className="bg-[#E3DDD3] text-[#2E2A26] text-[9px] px-1.5 py-0.2 rounded font-mono font-black uppercase tracking-wider flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" />
-                  <span>PASS</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                id="discovery-tab-btn"
+                onClick={() => setActiveView('map')}
+                className={`header-nav-btn w-full ${activeView === 'map' ? 'active' : ''}`}
+              >
+                <MapIcon className="w-4 h-4 shrink-0" />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Live Map</span>
+                <span className={`text-[9px] sm:text-[10px] h-4.5 sm:h-5 px-1.5 rounded-md font-bold inline-flex items-center justify-center leading-none shadow-xs shrink-0 ${
+                  activeView === 'map' ? 'bg-[#006D5B] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
+                }`}>
+                  {totalReportsCount}
                 </span>
-              )}
-            </button>
+              </motion.button>
 
-            <button
-              onClick={() => setActiveView('analytics')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'analytics'
-                  ? 'bg-[#8F9E87] text-[#FFFFFF] shadow-md border-[#7E8D76] font-black'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5 text-[#8F9E87]" />
-              <span>Stats</span>
-            </button>
+              {/* Primary Feature 1: HOA Gated Estate Portal */}
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.96 }}
+                id="hoa-gated-estate-tab-btn"
+                onClick={() => setActiveView('estate')}
+                title="HOA & Gated Community Private Portal"
+                className={`header-nav-btn-featured-hoa w-full ${activeView === 'estate' ? 'active' : ''}`}
+              >
+                <Building2 className={`w-4 h-4 shrink-0 ${activeView === 'estate' ? 'text-white' : 'text-[#059669] dark:text-[#34D399]'}`} />
+                <span className="font-extrabold tracking-tight text-xs sm:text-[13px] whitespace-nowrap">HOA Portal</span>
+                <span className={`text-[9px] sm:text-[10px] h-4.5 sm:h-5 px-1.5 rounded-md font-bold uppercase tracking-wider inline-flex items-center justify-center leading-none shadow-xs shrink-0 ${
+                  activeView === 'estate' 
+                    ? 'bg-white/25 text-white border border-white/30' 
+                    : 'bg-[#059669] text-white'
+                }`}>
+                  PRIME
+                </span>
+              </motion.button>
 
-            <button
-              onClick={() => setActiveView('profile')}
-              className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl transition-all cursor-pointer shrink-0 border-2 ${
-                activeView === 'profile'
-                  ? 'bg-[#8F9E87] text-white shadow-md font-black border-[#7E8D76]'
-                  : 'bg-[#F5EFE6] text-[#2E2A26] hover:bg-[#E8D7C8] border-[#E3DDD3] font-extrabold'
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>Passport</span>
-              <span className="flex items-center gap-0.5 text-[10px] font-mono font-black text-[#2E2A26] bg-[#FBD6C8] px-1.5 py-0.5 rounded border border-[#E3B4A2]">
-                <Flame className="w-2.5 h-2.5 fill-[#8F9E87] text-[#8F9E87]" />
-                <span>{userKarma}</span>
+              {/* Primary Feature 2: Gov Desk (Consolidated Municipal Administration & Public Works) */}
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.96 }}
+                id="gov-desk-tab-btn"
+                onClick={() => setActiveView('admin')}
+                title="Municipal Government & Public Works Administration"
+                className={`header-nav-btn-featured-gov w-full ${activeView === 'admin' ? 'active' : ''}`}
+              >
+                <ShieldCheck className={`w-4 h-4 shrink-0 ${activeView === 'admin' ? 'text-white' : 'text-[#2563EB] dark:text-[#60A5FA]'}`} />
+                <span className="font-extrabold tracking-tight text-xs sm:text-[13px] whitespace-nowrap">Gov Desk</span>
+                {isAdminMode ? (
+                  <span className={`text-[9px] sm:text-[10px] h-4.5 sm:h-5 px-1.5 rounded-md font-bold uppercase tracking-wider inline-flex items-center justify-center gap-0.5 leading-none shadow-xs shrink-0 ${
+                    activeView === 'admin' 
+                      ? 'bg-white/25 text-white border border-white/30' 
+                      : 'bg-[#2563EB] text-white'
+                  }`}>
+                    <span>STAFF</span>
+                  </span>
+                ) : (
+                  <span className={`text-[9px] sm:text-[10px] h-4.5 sm:h-5 px-1.5 rounded-md font-bold uppercase tracking-wider inline-flex items-center justify-center gap-0.5 leading-none shadow-xs shrink-0 ${
+                    activeView === 'admin' 
+                      ? 'bg-white/25 text-white border border-white/30' 
+                      : 'bg-[#1E3A8A] text-white dark:bg-[#3B82F6]'
+                  }`}>
+                    <span>GOV</span>
+                  </span>
+                )}
+              </motion.button>
+
+              {/* Citizen Passport / Profile */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setActiveView('profile')}
+                className={`header-nav-btn w-full ${activeView === 'profile' ? 'active' : ''}`}
+              >
+                <User className="w-4 h-4 shrink-0" />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Passport</span>
+                <span className="inline-flex items-center justify-center gap-0.5 text-[9px] sm:text-[10px] h-4.5 sm:h-5 font-bold text-[#B45309] bg-[#FEF3C7] px-1.5 rounded-md border border-[#FDE68A] shadow-xs leading-none shrink-0">
+                  <Flame className="w-3 h-3 fill-[#B45309] text-[#B45309]" />
+                  <span>{userKarma}</span>
+                </span>
+              </motion.button>
+            </nav>
+          </div>
+
+          {/* Layer 2: Community Spaces, Events & Civic Culture */}
+          <div className="flex flex-col gap-1 pt-1 border-t border-slate-200/80 dark:border-slate-800">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Community Hub & Culture
               </span>
-            </button>
+            </div>
+            <nav className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 w-full" aria-label="Community Navigation Layer">
+              {/* City Tourist Attractions & Heritage */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setActiveView('attractions')}
+                className={`header-nav-btn w-full ${activeView === 'attractions' ? 'active' : ''}`}
+              >
+                <Landmark className="w-4 h-4 shrink-0 text-[#006D5B] dark:text-teal-300" />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">City Attractions</span>
+                <span className="bg-[#006D5B] text-white text-[9px] sm:text-[10px] h-4.5 sm:h-5 px-1.5 rounded-md font-bold uppercase tracking-wider inline-flex items-center justify-center leading-none shadow-xs shrink-0">
+                  TOUR
+                </span>
+              </motion.button>
 
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setActiveView('bulletin')}
+                className={`header-nav-btn w-full ${activeView === 'bulletin' ? 'active' : ''}`}
+              >
+                <Bell className="w-4 h-4 shrink-0 text-[#006D5B] dark:text-teal-300" />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Bulletin Board</span>
+              </motion.button>
 
-          </nav>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setActiveView('blog')}
+                className={`header-nav-btn w-full ${activeView === 'blog' ? 'active' : ''}`}
+              >
+                <BookOpen className="w-4 h-4 shrink-0 text-[#006D5B] dark:text-teal-300" />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Civic Journal</span>
+              </motion.button>
 
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setActiveView('events')}
+                className={`header-nav-btn w-full ${activeView === 'events' ? 'active' : ''}`}
+              >
+                <Megaphone className="w-4 h-4 shrink-0 text-[#006D5B] dark:text-teal-300" />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Local Events</span>
+                <span className="bg-[#FEF3C7] text-[#B45309] text-[9px] sm:text-[10px] h-4.5 sm:h-5 px-1.5 rounded-md font-bold uppercase tracking-wider border border-[#FDE68A] inline-flex items-center justify-center leading-none shadow-xs shrink-0">
+                  HIRE
+                </span>
+              </motion.button>
 
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setActiveView('gratitude')}
+                className={`header-nav-btn w-full ${activeView === 'gratitude' ? 'active' : ''}`}
+              >
+                <Award className="w-4 h-4 shrink-0 text-[#006D5B] dark:text-teal-300" />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Fame & Badges</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setActiveView('brand')}
+                className={`header-nav-btn w-full ${activeView === 'brand' ? 'active' : ''}`}
+              >
+                <Palette className="w-4 h-4 shrink-0 text-[#006D5B] dark:text-teal-300" />
+                <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Brand Guide</span>
+              </motion.button>
+            </nav>
+          </div>
         </div>
       </div>
 
@@ -385,52 +384,56 @@ export const Header: React.FC<HeaderProps> = ({
         <div
           className={`${
             showFiltersMobile ? 'block' : 'hidden lg:block'
-          } bg-slate-100 dark:bg-slate-900 border-t-2 border-[#0A2540] dark:border-[#006D5B] py-2.5 px-4 transition-all`}
+          } bg-slate-50 dark:bg-[#071B2F] border-t-1.5 border-[#CBD5E1] dark:border-slate-800 py-3 px-4 transition-all`}
         >
-          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-            {/* Filter Pills */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[#111827] dark:text-slate-100 font-black uppercase tracking-wider text-[10px]">
-                Filter Status:
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-sm">
+            {/* Filter Pills with Equal-Width Button Layout */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
+              <span className="text-[#111827] dark:text-slate-200 font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 shrink-0">
+                <Filter className="w-3.5 h-3.5 text-[#006D5B] dark:text-teal-300" />
+                <span>Filter Status:</span>
               </span>
-              <button
-                onClick={() => setFilter((prev) => ({ ...prev, status: 'ALL' }))}
-                className={`px-3.5 py-1.5 rounded-full font-extrabold transition-all cursor-pointer border-2 ${
-                  !filter.status || filter.status === 'ALL'
-                    ? 'bg-[#0A2540] text-white border-[#0A2540] shadow-xs font-black'
-                    : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-slate-100 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                All Statuses
-              </button>
-              {(Object.keys(STATUS_CONFIG) as ReportStatus[]).map((st) => {
-                const conf = STATUS_CONFIG[st];
-                const isActive = filter.status === st;
-                return (
-                  <button
-                    key={st}
-                    onClick={() => setFilter((prev) => ({ ...prev, status: isActive ? 'ALL' : st }))}
-                    className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full font-extrabold transition-all cursor-pointer border-2 ${
-                      isActive
-                        ? `${conf.bgClass} ${conf.textClass} shadow-md ring-2 ring-[#0A2540] border-[#0A2540]`
-                        : 'bg-white dark:bg-slate-800 text-[#111827] dark:text-slate-100 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    <span className={`w-2.5 h-2.5 rounded-full ${conf.dotColor}`} />
-                    <span>{conf.label}</span>
-                  </button>
-                );
-              })}
+              <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setFilter((prev) => ({ ...prev, status: 'ALL' }))}
+                  title="Show all statuses"
+                  className={`header-filter-btn ${
+                    !filter.status || filter.status === 'ALL' ? 'active' : ''
+                  }`}
+                >
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0" />
+                  <span className="truncate">All Status</span>
+                </button>
+                {(Object.keys(STATUS_CONFIG) as ReportStatus[]).map((st) => {
+                  const conf = STATUS_CONFIG[st];
+                  const isActive = filter.status === st;
+                  return (
+                    <button
+                      key={st}
+                      onClick={() => setFilter((prev) => ({ ...prev, status: isActive ? 'ALL' : st }))}
+                      title={`Filter by ${conf.label}`}
+                      className={`header-filter-btn ${
+                        isActive
+                          ? 'active !border-[#006D5B] ring-2 ring-[#006D5B]/30'
+                          : ''
+                      }`}
+                    >
+                      <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${conf.dotColor}`} />
+                      <span className="truncate">{conf.label.split(' / ')[0]}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Category Dropdown & Sort */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2.5">
               <select
                 value={filter.category || 'ALL'}
                 onChange={(e) =>
                   setFilter((prev) => ({ ...prev, category: e.target.value as ReportCategory | 'ALL' }))
                 }
-                className="bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 text-[#111827] dark:text-white font-extrabold px-3 py-1.5 rounded-xl focus:ring-2 focus:ring-[#006D5B] outline-none cursor-pointer"
+                className="header-filter-select outline-none focus:ring-2 focus:ring-[#006D5B]"
               >
                 <option value="ALL">All Categories</option>
                 {(Object.keys(CATEGORY_CONFIG) as ReportCategory[]).map((cat) => (
@@ -448,7 +451,7 @@ export const Header: React.FC<HeaderProps> = ({
                     sortBy: e.target.value as 'newest' | 'oldest' | 'upvotes' | 'severity',
                   }))
                 }
-                className="bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 text-[#111827] dark:text-white font-extrabold px-3 py-1.5 rounded-xl focus:ring-2 focus:ring-[#006D5B] outline-none cursor-pointer"
+                className="header-filter-select outline-none focus:ring-2 focus:ring-[#006D5B]"
               >
                 <option value="newest">Sort: Newest First</option>
                 <option value="upvotes">Sort: Most Endorsed</option>
@@ -467,7 +470,7 @@ export const Header: React.FC<HeaderProps> = ({
                       sortBy: 'newest',
                     })
                   }
-                  className="text-xs text-[#B45309] dark:text-amber-400 font-black underline hover:text-amber-800 ml-1 cursor-pointer"
+                  className="text-sm text-[#B45309] dark:text-amber-400 font-bold underline hover:text-amber-800 ml-1 cursor-pointer min-h-[44px] flex items-center"
                 >
                   Clear
                 </button>

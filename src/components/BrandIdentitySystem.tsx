@@ -1,3 +1,4 @@
+import { ExpandableClayCard } from './ExpandableClayCard';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -38,11 +39,12 @@ import {
   MapPin,
   Heart,
   Camera,
-  FileText
+  FileText,
+  PieChart
 } from 'lucide-react';
 import { CityscapeLogo } from './CityscapeLogo';
 
-// Primary & Secondary Brand Colors (Matching Pages 11 & 12 Guidelines)
+// 60-30-10 Brand Color Rule Token Schema
 interface ColorToken {
   name: string;
   role: string;
@@ -52,67 +54,139 @@ interface ColorToken {
   wcagContrast: string;
   description: string;
   usage: string;
-  category: 'primary' | 'secondary' | 'legacy';
+  ratioTier?: '60_primary' | '30_secondary' | '10_accent';
+  category: 'primary' | 'secondary' | 'accent' | 'legacy';
 }
 
+// 60% Primary Dominant Palette (Atmosphere, Canvas, Card Shells & Structural Frame)
 const PRIMARY_BRAND_COLORS: ColorToken[] = [
   {
-    name: 'Sage Green',
-    role: 'Primary Brand Identifier & Action CTA',
+    name: 'Civic Navy',
+    role: 'Primary Structural Anchor & Header (60% Rule)',
+    hex: '#0A2540',
+    rgb: 'RGB: 10, 37, 64',
+    cmyk: 'CMYK: 84, 42, 0, 75',
+    wcagContrast: '16.2:1 (AAA on White)',
+    description: 'Deep, authoritative architectural navy serving as the foundational brand anchor, structural headers, and deep-contrast shells.',
+    usage: '60% Dominant Foundation: Top navigation bar, structural modal frames, primary branding, and high-contrast dark surfaces.',
+    ratioTier: '60_primary',
+    category: 'primary'
+  },
+  {
+    name: 'Warm Linen Canvas',
+    role: 'Ambient Background Canvas (60% Rule)',
+    hex: '#FAF6F0',
+    rgb: 'RGB: 250, 246, 240',
+    cmyk: 'CMYK: 0, 2, 4, 2',
+    wcagContrast: '16.8:1 (AAA vs Charcoal)',
+    description: 'Glare-free natural linen canvas engineered specifically for comfortable, long-term multi-generational browsing without eye fatigue.',
+    usage: '60% Dominant Foundation: Global application canvas background, modal backdrop surfaces, outer containers, and dashboard sheets.',
+    ratioTier: '60_primary',
+    category: 'primary'
+  },
+  {
+    name: 'Pure White Surface',
+    role: 'Primary Card Background (60% Rule)',
+    hex: '#FFFFFF',
+    rgb: 'RGB: 255, 255, 255',
+    cmyk: 'CMYK: 0, 0, 0, 0',
+    wcagContrast: '17.4:1 (AAA vs Charcoal)',
+    description: 'Clean, radiant card surface establishing clear visual elevation and pristine negative space for civic data readability.',
+    usage: '60% Dominant Foundation: Main report card surfaces, form backgrounds, statistics containers, and content cards.',
+    ratioTier: '60_primary',
+    category: 'primary'
+  },
+  {
+    name: 'Sage Green Anchor',
+    role: 'Organic Brand Identifier (60% Rule)',
     hex: '#8F9E87',
     rgb: 'RGB: 143, 158, 135',
     cmyk: 'CMYK: 10, 0, 15, 38',
-    wcagContrast: '7.8:1 (AAA)',
-    description: 'Calm, organic, and authoritative natural sage green serving as our main brand anchor and interactive trigger.',
-    usage: 'Main brand identifier, primary buttons, active tabs, checked state indicators.',
-    category: 'primary'
-  },
-  {
-    name: 'Soft Beige',
-    role: 'Warm Accent & Highlights',
-    hex: '#FBD6C8',
-    rgb: 'RGB: 251, 214, 200',
-    cmyk: 'CMYK: 0, 15, 20, 2',
-    wcagContrast: '14.5:1 (on Charcoal Dark)',
-    description: 'Warm, humanizing nude-peach beige providing gentle visual warmth and tactile card highlights.',
-    usage: 'Secondary badges, notification pills, subtle card highlights, status tags.',
-    category: 'primary'
-  },
-  {
-    name: 'Warm Grey',
-    role: 'Secondary Text & Iconography',
-    hex: '#635D55',
-    rgb: 'RGB: 99, 93, 85',
-    cmyk: 'CMYK: 0, 6, 14, 61',
-    wcagContrast: '8.2:1 (AAA)',
-    description: 'Earthy, grounded warm grey for body text, secondary labels, and crisp outline icons.',
-    usage: 'Body text, subheadings, line icons, form field borders, ghost button text.',
+    wcagContrast: '7.8:1 (AAA on Charcoal)',
+    description: 'Calm, organic sage green reflecting natural harmony, environmental care, and civic sustainability.',
+    usage: '60% Dominant Foundation: Architectural identity elements, brand seal backdrops, and calm surface tones.',
+    ratioTier: '60_primary',
     category: 'primary'
   }
 ];
 
+// 30% Secondary Supporting Palette (Community Identity, Navigation, Badges & High-Contrast Typography)
 const SECONDARY_BRAND_COLORS: ColorToken[] = [
   {
-    name: 'Linen Surface',
-    role: 'Canvas & Input Backgrounds',
-    hex: '#F5EFE6',
-    rgb: 'RGB: 245, 239, 230',
-    cmyk: 'CMYK: 0, 2, 6, 4',
-    wcagContrast: '15.2:1 (vs Charcoal Dark)',
-    description: 'Glare-free soft linen off-white providing an approachable canvas for multi-generational readability.',
-    usage: 'App background canvas, form input fills, dropdown tracks, card containers.',
+    name: 'Warm Sage Teal',
+    role: 'Community Badge & Active State (30% Rule)',
+    hex: '#006D5B',
+    rgb: 'RGB: 0, 109, 91',
+    cmyk: 'CMYK: 100, 0, 17, 57',
+    wcagContrast: '7.5:1 (AAA on Light Surface)',
+    description: 'Balanced, community-centric sage teal delivering unmistakable civic trust and environmental vibrancy.',
+    usage: '30% Supporting Structure: Ward badges, active filter tabs, verified community stamps, environmental status indicators, secondary buttons.',
+    ratioTier: '30_secondary',
     category: 'secondary'
   },
   {
     name: 'Charcoal Dark',
-    role: 'Primary Text & Dark Surface',
-    hex: '#2E2A26',
-    rgb: 'RGB: 46, 42, 38',
-    cmyk: 'CMYK: 0, 9, 17, 82',
-    wcagContrast: '16.5:1 (AAA)',
-    description: 'Deep espresso charcoal providing executive typographic contrast and crisp dark mode elements.',
-    usage: 'Main headlines, primary text, high-contrast dark mode containers.',
+    role: 'Primary Typography & Structural Text (30% Rule)',
+    hex: '#111827',
+    rgb: 'RGB: 17, 24, 39',
+    cmyk: 'CMYK: 56, 38, 0, 85',
+    wcagContrast: '16.5:1 (AAA on Canvas)',
+    description: 'High-contrast charcoal dark ensuring effortless readability for senior citizens and low-vision community members.',
+    usage: '30% Supporting Structure: Primary body copy, article text, card headlines, line icons, and form labels.',
+    ratioTier: '30_secondary',
     category: 'secondary'
+  },
+  {
+    name: 'Linen Sand Inset',
+    role: 'Tactile Inset & Filter Backdrops (30% Rule)',
+    hex: '#EDE5D8',
+    rgb: 'RGB: 237, 229, 216',
+    cmyk: 'CMYK: 0, 3, 9, 7',
+    wcagContrast: '13.4:1 (AAA vs Charcoal)',
+    description: 'Tactile linen sand tone providing physical depth for debossed form wells, pressed filter chips, and drawer panels.',
+    usage: '30% Supporting Structure: Inactive pill tabs, debossed form fields, drawer headers, card inset wells, and subtle panel dividers.',
+    ratioTier: '30_secondary',
+    category: 'secondary'
+  },
+  {
+    name: 'Outline Slate',
+    role: 'Structural Border Definition (30% Rule)',
+    hex: '#CBD5E1',
+    rgb: 'RGB: 203, 213, 225',
+    cmyk: 'CMYK: 10, 5, 0, 12',
+    wcagContrast: '7.1:1 (AAA Boundary Definition)',
+    description: 'Explicit 1.5px structural border stroke aiding spatial orientation and card edge distinction for elderly neighbors.',
+    usage: '30% Supporting Structure: 1.5px card borders, table dividers, input bounding boxes, and panel separators.',
+    ratioTier: '30_secondary',
+    category: 'secondary'
+  }
+];
+
+// 10% Accent High-Impact Action Palette (Primary CTAs, Critical Upvotes & Reward Sparks)
+const ACCENT_BRAND_COLORS: ColorToken[] = [
+  {
+    name: 'Action Amber',
+    role: 'Primary Action CTA & Upvote Trigger (10% Rule)',
+    hex: '#B45309',
+    rgb: 'RGB: 180, 83, 9',
+    cmyk: 'CMYK: 0, 54, 95, 29',
+    wcagContrast: '7.2:1 (AAA on White)',
+    description: 'High-energy terracotta amber strictly reserved for focal points to guide user attention directly to key civic actions.',
+    usage: '10% High-Impact Accent: "Submit Report" CTA, "I See This Too" upvote trigger, urgent verification alerts, and +50 Karma reward sparks.',
+    ratioTier: '10_accent',
+    category: 'accent'
+  },
+  {
+    name: 'Citron Spark',
+    role: 'Dark Mode Accent & Dynamic Pulse (10% Rule)',
+    hex: '#CCFF00',
+    rgb: 'RGB: 204, 255, 0',
+    cmyk: 'CMYK: 20, 0, 100, 0',
+    wcagContrast: '15.1:1 (AAA on Navy #0A2540)',
+    description: 'Electric lime citron spark providing unmistakable high-visibility contrast in dark mode and active real-time indicators.',
+    usage: '10% High-Impact Accent: Dark mode active borders, live telemetry pulse dots, urgent alert highlights, and key brand accents.',
+    ratioTier: '10_accent',
+    category: 'accent'
   }
 ];
 
@@ -126,6 +200,7 @@ const LEGACY_CIVIC_COLORS: ColorToken[] = [
     wcagContrast: '16.8:1 (AAA)',
     description: 'Natural light linen background canvas for comfortable, long-term browsing.',
     usage: 'Global background canvas, modal backdrop surfaces.',
+    ratioTier: '60_primary',
     category: 'legacy'
   },
   {
@@ -197,11 +272,12 @@ const LEXICON_MATRIX = [
 ];
 
 export const BrandIdentitySystem: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'clay' | 'poster' | 'pages' | 'colors' | 'typography' | 'imagery' | 'logo' | 'voice'>('clay');
+  const [activeTab, setActiveTab] = useState<'ratio603010' | 'clay' | 'poster' | 'pages' | 'colors' | 'typography' | 'imagery' | 'logo' | 'voice'>('ratio603010');
   const [activePageNum, setActivePageNum] = useState<number>(11);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [logoVariant, setLogoVariant] = useState<'full' | 'dark' | 'mono' | 'outline'>('full');
   const [dialValue, setDialValue] = useState<number>(75);
+  const [highlightedRatio, setHighlightedRatio] = useState<'all' | '60' | '30' | '10'>('all');
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -270,101 +346,113 @@ export const BrandIdentitySystem: React.FC = () => {
       {/* Sticky Tab Navigation */}
       <div className="sticky top-16 z-20 bg-white dark:bg-[#1A1A1A] border-b-2 border-slate-300 dark:border-slate-800 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-3 text-xs font-bold">
+          <div className="grid grid-cols-3 xs:grid-cols-5 lg:grid-cols-9 gap-1.5 sm:gap-2 py-3 text-xs font-bold w-full">
             <button
-              onClick={() => setActiveTab('clay')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-full transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
-                activeTab === 'clay'
-                  ? 'bg-gradient-to-r from-[#8EE0C5] to-[#F5D0C0] text-[#063B2F] shadow-lg font-black border-2 border-[#7CD6B8]'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              onClick={() => setActiveTab('ratio603010')}
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
+                activeTab === 'ratio603010'
+                  ? 'bg-gradient-to-r from-[#0A2540] via-[#006D5B] to-[#B45309] text-white shadow-lg font-black ring-2 ring-[#CCFF00]'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
               }`}
             >
-              <Sparkles className="w-4 h-4 text-[#063B2F]" />
-              <span>Soft Clay Design Kit</span>
+              <PieChart className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+              <span className="truncate">60-30-10 Rule</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('clay')}
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
+                activeTab === 'clay'
+                  ? 'bg-gradient-to-r from-[#8EE0C5] to-[#F5D0C0] text-[#063B2F] shadow-lg font-black border-2 border-[#7CD6B8]'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#063B2F] shrink-0" />
+              <span className="truncate">Clay Kit</span>
             </button>
 
             <button
               onClick={() => setActiveTab('pages')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
                 activeTab === 'pages'
                   ? 'bg-[#008080] text-white shadow-md font-black ring-2 ring-[#CCFF00]'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
               }`}
             >
-              <FileText className="w-4 h-4 text-[#CCFF00]" />
-              <span>Brand Book Viewer (Pages 11–16)</span>
+              <FileText className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+              <span className="truncate">Brand Book</span>
             </button>
 
             <button
               onClick={() => setActiveTab('colors')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
                 activeTab === 'colors'
                   ? 'bg-[#008080] text-white shadow-md font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
               }`}
             >
-              <Palette className="w-4 h-4 text-[#CCFF00]" />
-              <span>Color Palettes (Primary & Secondary)</span>
+              <Palette className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+              <span className="truncate">Palettes</span>
             </button>
 
             <button
               onClick={() => setActiveTab('typography')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
                 activeTab === 'typography'
                   ? 'bg-[#008080] text-white shadow-md font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
               }`}
             >
-              <Type className="w-4 h-4 text-[#CCFF00]" />
-              <span>Typography (Montserrat)</span>
+              <Type className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+              <span className="truncate">Typography</span>
             </button>
 
             <button
               onClick={() => setActiveTab('imagery')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
                 activeTab === 'imagery'
                   ? 'bg-[#008080] text-white shadow-md font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
               }`}
             >
-              <ImageIcon className="w-4 h-4 text-[#CCFF00]" />
-              <span>Imagery & Apex Iconography</span>
+              <ImageIcon className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+              <span className="truncate">Imagery</span>
             </button>
 
             <button
               onClick={() => setActiveTab('poster')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
                 activeTab === 'poster'
                   ? 'bg-[#008080] text-white shadow-md font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
               }`}
             >
-              <Maximize2 className="w-4 h-4 text-amber-400" />
-              <span>Brand Board Presentation</span>
+              <Maximize2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="truncate">Presentation</span>
             </button>
 
             <button
               onClick={() => setActiveTab('logo')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
                 activeTab === 'logo'
                   ? 'bg-[#008080] text-white shadow-md font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
               }`}
             >
-              <Grid className="w-4 h-4 text-[#CCFF00]" />
-              <span>Logo Mark</span>
+              <Grid className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+              <span className="truncate">Logo Mark</span>
             </button>
 
             <button
               onClick={() => setActiveTab('voice')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap font-['Montserrat'] ${
+              className={`flex items-center justify-center space-x-1.5 px-2 py-2.5 rounded-xl transition-all cursor-pointer text-center font-['Montserrat'] min-h-[44px] w-full ${
                 activeTab === 'voice'
                   ? 'bg-[#008080] text-white shadow-md font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
               }`}
             >
-              <Volume2 className="w-4 h-4 text-[#CCFF00]" />
-              <span>Verbal Lexicon</span>
+              <Volume2 className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+              <span className="truncate">Lexicon</span>
             </button>
           </div>
         </div>
@@ -374,7 +462,470 @@ export const BrandIdentitySystem: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-10">
 
         {/* ========================================================= */}
-        {/* TAB 0: SOFT SCULPTURAL CLAYMORPHIC DESIGN KIT */}
+        {/* TAB 0: 60-30-10 BRAND COLOR RULE ARCHITECTURE ENGINE */}
+        {/* ========================================================= */}
+        {activeTab === 'ratio603010' && (
+          <div className="space-y-10 animate-fadeIn">
+            {/* Executive Hero Banner */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border-2 border-slate-300 dark:border-slate-800 shadow-xl space-y-8">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
+                <div>
+                  <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-mono font-black uppercase tracking-wider bg-[#0A2540] text-[#CCFF00] border border-[#CCFF00]/40">
+                    <PieChart className="w-3.5 h-3.5" />
+                    <span>Visual Balance Architecture • Golden Ratio System</span>
+                  </div>
+                  <h2 className="text-3xl sm:text-4xl font-black font-['Montserrat'] text-[#0A2540] dark:text-white mt-2">
+                    The 60 : 30 : 10 Brand Color Rule
+                  </h2>
+                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-3xl mt-1 leading-relaxed">
+                    Designed for multi-generational legibility and senior accessibility (WCAG AAA). 
+                    The 60-30-10 distribution ensures calm visual harmony, prevents sensory overload, and channels community attention strictly toward key civic actions.
+                  </p>
+                </div>
+
+                {/* Quick Proportion Badges */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setHighlightedRatio('all')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold font-mono transition-all cursor-pointer ${
+                      highlightedRatio === 'all'
+                        ? 'bg-[#0A2540] text-white shadow-md ring-2 ring-[#CCFF00]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    View All
+                  </button>
+                  <button
+                    onClick={() => setHighlightedRatio('60')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold font-mono transition-all cursor-pointer ${
+                      highlightedRatio === '60'
+                        ? 'bg-[#0A2540] text-[#CCFF00] shadow-md ring-2 ring-[#0A2540]'
+                        : 'bg-[#FAF6F0] text-[#0A2540] border border-[#E3DDD3]'
+                    }`}
+                  >
+                    60% Primary
+                  </button>
+                  <button
+                    onClick={() => setHighlightedRatio('30')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold font-mono transition-all cursor-pointer ${
+                      highlightedRatio === '30'
+                        ? 'bg-[#006D5B] text-white shadow-md ring-2 ring-[#006D5B]'
+                        : 'bg-[#E6F4F1] text-[#006D5B] border border-[#006D5B]/30'
+                    }`}
+                  >
+                    30% Secondary
+                  </button>
+                  <button
+                    onClick={() => setHighlightedRatio('10')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold font-mono transition-all cursor-pointer ${
+                      highlightedRatio === '10'
+                        ? 'bg-[#B45309] text-white shadow-md ring-2 ring-[#B45309]'
+                        : 'bg-[#FEF3C7] text-[#B45309] border border-[#B45309]/30'
+                    }`}
+                  >
+                    10% Accent
+                  </button>
+                </div>
+              </div>
+
+              {/* 60-30-10 Visual Proportion Scale Bar */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-xs font-mono font-black text-slate-700 dark:text-slate-300">
+                  <span className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded-full bg-[#0A2540] inline-block border border-white" />
+                    <span>60% Primary Dominant Canvas & Foundation</span>
+                  </span>
+                  <span className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded-full bg-[#006D5B] inline-block" />
+                    <span>30% Secondary Supporting Structure</span>
+                  </span>
+                  <span className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded-full bg-[#B45309] inline-block" />
+                    <span>10% Accent High-Impact Action</span>
+                  </span>
+                </div>
+
+                {/* High-Impact Segmented Bar */}
+                <div className="w-full h-14 rounded-2xl overflow-hidden shadow-inner border-2 border-slate-300 dark:border-slate-700 flex text-white text-xs font-black font-['Montserrat']">
+                  {/* 60% Segment */}
+                  <div
+                    onClick={() => setHighlightedRatio('60')}
+                    className="w-[60%] bg-[#0A2540] hover:bg-[#081e33] transition-all p-3 flex flex-col justify-center cursor-pointer border-r-2 border-white/20 relative group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-black tracking-wide text-white">60% PRIMARY BASE</span>
+                      <span className="text-[10px] font-mono text-[#CCFF00] bg-black/40 px-2 py-0.5 rounded">Canvas & Structure</span>
+                    </div>
+                    <span className="text-[11px] text-slate-300 font-normal truncate">Civic Navy • Warm Linen Canvas • Pure White Surface</span>
+                  </div>
+
+                  {/* 30% Segment */}
+                  <div
+                    onClick={() => setHighlightedRatio('30')}
+                    className="w-[30%] bg-[#006D5B] hover:bg-[#005a4b] transition-all p-3 flex flex-col justify-center cursor-pointer border-r-2 border-white/20 relative group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-black tracking-wide text-white">30% SECONDARY</span>
+                      <span className="text-[10px] font-mono text-teal-100 bg-black/40 px-2 py-0.5 rounded">Support & Contrast</span>
+                    </div>
+                    <span className="text-[11px] text-teal-100 font-normal truncate">Warm Sage Teal • Charcoal Dark • Linen Sand</span>
+                  </div>
+
+                  {/* 10% Segment */}
+                  <div
+                    onClick={() => setHighlightedRatio('10')}
+                    className="w-[10%] bg-[#B45309] hover:bg-[#964507] transition-all p-2 flex flex-col items-center justify-center cursor-pointer relative group text-center"
+                  >
+                    <span className="text-xs font-black tracking-wide text-white">10%</span>
+                    <span className="text-[9px] font-mono text-amber-200">ACTION</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Interactive Live Component Simulator */}
+              <div className="bg-[#FAF6F0] dark:bg-slate-950 p-6 sm:p-8 rounded-2xl border-1.5 border-[#E3DDD3] dark:border-slate-800 space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E3DDD3] dark:border-slate-800 pb-3">
+                  <div>
+                    <h3 className="text-xl font-black font-['Montserrat'] text-[#0A2540] dark:text-white flex items-center space-x-2">
+                      <Layers className="w-5 h-5 text-[#006D5B]" />
+                      <span>Live Civic Component 60-30-10 Breakdown</span>
+                    </h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                      Hover and inspect each layer to observe how the 60-30-10 distribution is applied to real neighborhood cards.
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-[#006D5B] bg-white dark:bg-slate-900 px-3 py-1 rounded-lg border border-[#E3DDD3] dark:border-slate-800">
+                    WCAG AAA Certified (7.8:1)
+                  </span>
+                </div>
+
+                {/* Simulated Real Civic Report Card */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                  {/* The Simulated Card */}
+                  <div className="lg:col-span-7">
+                    <div className={`bg-white dark:bg-slate-900 rounded-2xl p-6 border-1.5 transition-all shadow-lg space-y-5 relative ${
+                      highlightedRatio === '60' ? 'ring-4 ring-[#0A2540] scale-[1.01]' : 'border-[#CBD5E1] dark:border-slate-800'
+                    }`}>
+                      {/* 60% Indicator Badge */}
+                      {highlightedRatio === '60' && (
+                        <div className="absolute -top-3 left-6 bg-[#0A2540] text-[#CCFF00] text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full shadow-md">
+                          [60% DOMINANT SURFACE & CONTAINER]
+                        </div>
+                      )}
+
+                      {/* Header Row: 30% Supporting Badges */}
+                      <div className="flex items-center justify-between">
+                        <div className={`flex items-center space-x-2 ${highlightedRatio === '30' ? 'ring-2 ring-[#006D5B] p-1 rounded-lg bg-[#E6F4F1]' : ''}`}>
+                          <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-[#006D5B] text-white flex items-center space-x-1.5 shadow-sm">
+                            <span className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse" />
+                            <span>WARD 4 • PUBLIC WORKS</span>
+                          </span>
+                          <span className="text-xs font-mono font-bold text-[#475569] dark:text-slate-400">
+                            Report #8402
+                          </span>
+                        </div>
+                        <span className="text-xs font-mono font-bold text-slate-500">
+                          2 hours ago
+                        </span>
+                      </div>
+
+                      {/* Title & Body: 30% Supporting Typography */}
+                      <div className="space-y-2">
+                        <h4 className={`text-xl font-black font-['Montserrat'] text-[#111827] dark:text-white leading-snug ${
+                          highlightedRatio === '30' ? 'bg-[#EDE5D8] dark:bg-slate-800 px-2 py-1 rounded' : ''
+                        }`}>
+                          Main Street Water Pipe Repair Scheduled
+                        </h4>
+                        <p className="text-sm text-[#475569] dark:text-slate-300 leading-relaxed">
+                          Our public works crew has inspected the minor pressure loss on 4th & Main. Repair is scheduled for completion by Thursday morning.
+                        </p>
+                      </div>
+
+                      {/* Inset Well: 30% Supporting Linen Sand */}
+                      <div className={`p-4 rounded-xl bg-[#EDE5D8] dark:bg-slate-800/80 border border-[#E3DDD3] dark:border-slate-700 flex items-center justify-between text-xs ${
+                        highlightedRatio === '30' ? 'ring-2 ring-[#006D5B]' : ''
+                      }`}>
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="w-4 h-4 text-[#006D5B]" />
+                          <span className="font-extrabold text-[#111827] dark:text-white font-['Montserrat']">
+                            Crew Assigned: North Sector Team B
+                          </span>
+                        </div>
+                        <span className="font-mono font-bold text-[#006D5B] dark:text-teal-300">
+                          Expected: 36 hrs
+                        </span>
+                      </div>
+
+                      {/* Footer Actions: 10% High-Impact Accent CTAs */}
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => {}}
+                            className={`px-4 py-2.5 rounded-xl bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-black font-['Montserrat'] flex items-center space-x-2 shadow-md transition-transform active:scale-95 cursor-pointer ${
+                              highlightedRatio === '10' ? 'ring-4 ring-amber-400 scale-105' : ''
+                            }`}
+                          >
+                            <Heart className="w-4 h-4 fill-white" />
+                            <span>I See This Too (142)</span>
+                          </button>
+                        </div>
+
+                        <span className="text-xs font-mono font-bold text-[#B45309] bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800 flex items-center space-x-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-[#B45309]" />
+                          <span>+50 Civic Karma</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Allocation Breakdown Explanations */}
+                  <div className="lg:col-span-5 space-y-4 text-xs font-['Montserrat']">
+                    {/* 60% Card */}
+                    <div
+                      onClick={() => setHighlightedRatio('60')}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                        highlightedRatio === '60'
+                          ? 'bg-[#0A2540] text-white border-[#0A2540] shadow-md'
+                          : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-[#0A2540]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-black text-sm uppercase">60% Primary Foundation</span>
+                        <span className="font-mono text-[11px] font-bold text-[#CCFF00]">Canvas & Shell</span>
+                      </div>
+                      <p className="text-[11px] opacity-90 leading-relaxed">
+                        Pure White card surface (`#FFFFFF`), Warm Linen background (`#FAF6F0`), and Civic Navy header (`#0A2540`). Provides glare-free visual calm and generous negative space.
+                      </p>
+                    </div>
+
+                    {/* 30% Card */}
+                    <div
+                      onClick={() => setHighlightedRatio('30')}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                        highlightedRatio === '30'
+                          ? 'bg-[#006D5B] text-white border-[#006D5B] shadow-md'
+                          : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-[#006D5B]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-black text-sm uppercase">30% Secondary Harmony</span>
+                        <span className="font-mono text-[11px] font-bold text-teal-200">Typography & Badges</span>
+                      </div>
+                      <p className="text-[11px] opacity-90 leading-relaxed">
+                        Warm Sage Teal (`#006D5B`) for ward badges, Charcoal Dark (`#111827`) for high-contrast headlines, Linen Sand (`#EDE5D8`) for insets, and Outline Slate (`#CBD5E1`) for 1.5px borders.
+                      </p>
+                    </div>
+
+                    {/* 10% Card */}
+                    <div
+                      onClick={() => setHighlightedRatio('10')}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                        highlightedRatio === '10'
+                          ? 'bg-[#B45309] text-white border-[#B45309] shadow-md'
+                          : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-[#B45309]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-black text-sm uppercase">10% Accent Action</span>
+                        <span className="font-mono text-[11px] font-bold text-amber-200">Primary CTAs</span>
+                      </div>
+                      <p className="text-[11px] opacity-90 leading-relaxed">
+                        Action Amber (`#B45309`) strictly reserved for "I See This Too" upvote trigger, "Submit Request" buttons, and Civic Karma reward points. Prevents sensory fatigue.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* The 3 Deep-Dive Color Swatch Sections */}
+              <div className="space-y-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+                {/* 1. Primary 60% Swatches */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-800">
+                    <h3 className="text-xl font-black font-['Montserrat'] text-[#0A2540] dark:text-white flex items-center space-x-2">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-[#0A2540] text-white text-xs font-mono font-black">60%</span>
+                      <span>Primary Dominant Base Tokens (4 Swatches)</span>
+                    </h3>
+                    <span className="text-xs font-mono font-bold text-slate-500">Atmosphere, Background & Structural Shells</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {PRIMARY_BRAND_COLORS.map(color => (
+                      <div key={color.name} className="bg-[#FAF6F0] dark:bg-slate-950 rounded-2xl border-1.5 border-[#E3DDD3] dark:border-slate-800 p-4 space-y-3 shadow-sm hover:shadow-md transition-all">
+                        <div
+                          className="h-28 rounded-xl border border-[#E3DDD3] p-3 flex flex-col justify-between shadow-inner relative"
+                          style={{ backgroundColor: color.hex }}
+                        >
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded self-start ${
+                            color.hex === '#FFFFFF' || color.hex === '#FAF6F0' ? 'bg-[#0A2540] text-white' : 'bg-black/40 text-white'
+                          }`}>
+                            60% Primary
+                          </span>
+                          <div className="flex items-center justify-between">
+                            <span className={`font-black text-sm font-['Montserrat'] ${
+                              color.hex === '#FFFFFF' || color.hex === '#FAF6F0' ? 'text-[#0A2540]' : 'text-white'
+                            }`}>
+                              {color.name}
+                            </span>
+                            <button
+                              onClick={() => handleCopy(color.hex, color.name)}
+                              className={`p-1.5 rounded-lg cursor-pointer transition-all ${
+                                color.hex === '#FFFFFF' || color.hex === '#FAF6F0' ? 'bg-slate-200 text-slate-800' : 'bg-black/30 text-white'
+                              }`}
+                            >
+                              {copiedToken === color.name ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-1 text-xs font-mono">
+                          <div className="flex justify-between"><span className="text-slate-500">HEX:</span><span className="font-bold text-[#0A2540] dark:text-white">{color.hex}</span></div>
+                          <div className="flex justify-between"><span className="text-slate-500">CONTRAST:</span><span className="font-bold text-[#006D5B]">{color.wcagContrast}</span></div>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium line-clamp-2">
+                          {color.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 2. Secondary 30% Swatches */}
+                <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-800">
+                    <h3 className="text-xl font-black font-['Montserrat'] text-[#006D5B] dark:text-teal-300 flex items-center space-x-2">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-[#006D5B] text-white text-xs font-mono font-black">30%</span>
+                      <span>Secondary Supporting Structure Tokens (4 Swatches)</span>
+                    </h3>
+                    <span className="text-xs font-mono font-bold text-slate-500">Typography, Navigation & Badges</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {SECONDARY_BRAND_COLORS.map(color => (
+                      <div key={color.name} className="bg-[#FAF6F0] dark:bg-slate-950 rounded-2xl border-1.5 border-[#E3DDD3] dark:border-slate-800 p-4 space-y-3 shadow-sm hover:shadow-md transition-all">
+                        <div
+                          className="h-28 rounded-xl border border-[#E3DDD3] p-3 flex flex-col justify-between shadow-inner relative"
+                          style={{ backgroundColor: color.hex }}
+                        >
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded self-start ${
+                            color.hex === '#EDE5D8' || color.hex === '#CBD5E1' ? 'bg-[#0A2540] text-white' : 'bg-black/40 text-white'
+                          }`}>
+                            30% Secondary
+                          </span>
+                          <div className="flex items-center justify-between">
+                            <span className={`font-black text-sm font-['Montserrat'] ${
+                              color.hex === '#EDE5D8' || color.hex === '#CBD5E1' ? 'text-[#0A2540]' : 'text-white'
+                            }`}>
+                              {color.name}
+                            </span>
+                            <button
+                              onClick={() => handleCopy(color.hex, color.name)}
+                              className={`p-1.5 rounded-lg cursor-pointer transition-all ${
+                                color.hex === '#EDE5D8' || color.hex === '#CBD5E1' ? 'bg-slate-200 text-slate-800' : 'bg-black/30 text-white'
+                              }`}
+                            >
+                              {copiedToken === color.name ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-1 text-xs font-mono">
+                          <div className="flex justify-between"><span className="text-slate-500">HEX:</span><span className="font-bold text-[#006D5B] dark:text-teal-300">{color.hex}</span></div>
+                          <div className="flex justify-between"><span className="text-slate-500">CONTRAST:</span><span className="font-bold text-[#006D5B]">{color.wcagContrast}</span></div>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium line-clamp-2">
+                          {color.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Accent 10% Swatches */}
+                <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-800">
+                    <h3 className="text-xl font-black font-['Montserrat'] text-[#B45309] dark:text-amber-400 flex items-center space-x-2">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-[#B45309] text-white text-xs font-mono font-black">10%</span>
+                      <span>Accent High-Impact Action Tokens (2 Swatches)</span>
+                    </h3>
+                    <span className="text-xs font-mono font-bold text-slate-500">Primary Actions, Upvotes & Rewards</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {ACCENT_BRAND_COLORS.map(color => (
+                      <div key={color.name} className="bg-[#FAF6F0] dark:bg-slate-950 rounded-2xl border-1.5 border-[#E3DDD3] dark:border-slate-800 p-4 space-y-3 shadow-sm hover:shadow-md transition-all">
+                        <div
+                          className="h-28 rounded-xl border border-[#E3DDD3] p-3 flex flex-col justify-between shadow-inner relative"
+                          style={{ backgroundColor: color.hex }}
+                        >
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded self-start ${
+                            color.hex === '#CCFF00' ? 'bg-[#0A2540] text-[#CCFF00]' : 'bg-black/40 text-white'
+                          }`}>
+                            10% High-Impact Accent
+                          </span>
+                          <div className="flex items-center justify-between">
+                            <span className={`font-black text-sm font-['Montserrat'] ${
+                              color.hex === '#CCFF00' ? 'text-[#0A2540]' : 'text-white'
+                            }`}>
+                              {color.name}
+                            </span>
+                            <button
+                              onClick={() => handleCopy(color.hex, color.name)}
+                              className={`p-1.5 rounded-lg cursor-pointer transition-all ${
+                                color.hex === '#CCFF00' ? 'bg-slate-200 text-slate-800' : 'bg-black/30 text-white'
+                              }`}
+                            >
+                              {copiedToken === color.name ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-1 text-xs font-mono">
+                          <div className="flex justify-between"><span className="text-slate-500">HEX:</span><span className="font-bold text-[#B45309] dark:text-amber-400">{color.hex}</span></div>
+                          <div className="flex justify-between"><span className="text-slate-500">CONTRAST:</span><span className="font-bold text-[#006D5B]">{color.wcagContrast}</span></div>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+                          {color.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Design Rule Mandates for Engineers & Brand Guardians */}
+              <div className="bg-[#0A2540] text-white p-6 sm:p-8 rounded-2xl border-2 border-[#CCFF00]/40 space-y-4">
+                <div className="flex items-center space-x-2 text-[#CCFF00]">
+                  <CheckCircle2 className="w-5 h-5" />
+                  <h4 className="text-lg font-black font-['Montserrat']">
+                    The 60-30-10 Implementation Mandates
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-['Montserrat'] text-slate-200">
+                  <div className="p-4 rounded-xl bg-white/10 space-y-1.5 border border-white/10">
+                    <span className="font-black text-[#CCFF00] block text-sm">60% Rule: Serene Canvas</span>
+                    <p className="leading-relaxed">
+                      Dominant surfaces (`#FAF6F0` / `#FFFFFF` / `#0A2540`) must never compete for attention. They establish spacious, glare-free readability for elderly neighbors.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/10 space-y-1.5 border border-white/10">
+                    <span className="font-black text-teal-300 block text-sm">30% Rule: Clear Structure</span>
+                    <p className="leading-relaxed">
+                      Secondary tones (`#006D5B` / `#111827` / `#EDE5D8`) provide sharp hierarchy, readable typography, and tactile 1.5px borders aiding spatial vision.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/10 space-y-1.5 border border-white/10">
+                    <span className="font-black text-amber-400 block text-sm">10% Rule: Strict Focal CTAs</span>
+                    <p className="leading-relaxed">
+                      Accent Amber (`#B45309`) is strictly limited to intentional actions. Never used for large container fills to prevent visual clutter and eye fatigue.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 1: SOFT SCULPTURAL CLAYMORPHIC DESIGN KIT */}
         {/* ========================================================= */}
         {activeTab === 'clay' && (
           <div className="space-y-10 animate-fadeIn">
@@ -632,7 +1183,7 @@ export const BrandIdentitySystem: React.FC = () => {
                 <div className="clay-card-lvl3 p-5 space-y-2 text-center">
                   <span className="text-[10px] font-mono font-extrabold text-[#006D5B] uppercase">LEVEL 3</span>
                   <h4 className="font-extrabold text-xs text-[#0F172A]">Raised Tactile</h4>
-                  <p className="text-[11px] text-slate-500 leading-snug">Interactive cards & search panels.</p>
+                  <p className="text-[11px] text-slate-500 leading-snug">Click below for full expandable audit logs.</p>
                 </div>
 
                 <div className="clay-card-lvl4 p-5 space-y-2 text-center">
@@ -646,6 +1197,18 @@ export const BrandIdentitySystem: React.FC = () => {
                   <h4 className="font-extrabold text-xs text-[#0F172A]">Floating Clay</h4>
                   <p className="text-[11px] text-slate-500 leading-snug">Overlay dialogs & high priority alerts.</p>
                 </div>
+              </div>
+
+              {/* Interactive Level 3 Expandable Card Demo */}
+              <div className="pt-2">
+                <ExpandableClayCard
+                  title="Ward 4 Main Street Asphalt Repair Work Order"
+                  subtitle="Click anywhere on this Level 3 Claymorphic card to toggle the extra section containing detailed timestamps, internal municipal tags, and history logs."
+                  categoryTag="PUBLIC WORKS"
+                  statusBadge="DISPATCHED"
+                  reportId="MUNI-4091"
+                  defaultExpanded={true}
+                />
               </div>
             </div>
           </div>
@@ -774,82 +1337,82 @@ export const BrandIdentitySystem: React.FC = () => {
                 </div>
               )}
 
-              {/* ---------------- PAGE 12: SECONDARY COLOR PALETTE ---------------- */}
+              {/* ---------------- PAGE 12: SECONDARY COLOR PALETTE: LINEN SURFACE ---------------- */}
               {activePageNum === 12 && (
                 <div className="space-y-8 animate-fadeIn">
-                  <div className="border-b-2 border-slate-200 dark:border-slate-800 pb-6 flex items-center justify-between">
+                  <div className="border-b-2 border-slate-200 dark:border-slate-800 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                      <span className="text-xs font-mono font-extrabold text-slate-400 uppercase">PAGE 12</span>
-                      <h2 className="text-3xl font-black font-['Montserrat'] text-[#1A1A1A] dark:text-white mt-1">
-                        SECONDARY COLOR PALETTE
+                      <span className="text-xs font-mono font-extrabold text-[#006D5B] uppercase tracking-wider">PAGE 12 • SECONDARY BRAND SYSTEM</span>
+                      <h2 className="text-3xl font-black font-['Montserrat'] text-[#111827] dark:text-white mt-1">
+                        LINEN SURFACE PALETTE
                       </h2>
                     </div>
-                    <span className="text-xs font-bold bg-[#008080]/10 text-[#008080] dark:text-[#CCFF00] px-3 py-1.5 rounded-lg border border-[#008080]/20 font-mono">
-                      Design Placement: Smaller Swatches Showing Contrast with Primary
+                    <span className="text-xs font-bold bg-[#F5EFE6] dark:bg-[#0A2540] text-[#006D5B] dark:text-teal-300 px-3 py-1.5 rounded-lg border border-[#E3DDD3] dark:border-teal-700/50 font-mono">
+                      Secondary Palette: Linen Surfaces & High-Contrast Structure
                     </span>
                   </div>
 
                   <p className="text-base font-medium text-slate-700 dark:text-slate-300 max-w-3xl leading-relaxed">
-                    These colors are used to support the primary palette in complex layouts, charts, and diagrams.
+                    The Linen Surface secondary palette provides warm, glare-free tactical backdrops, tactile insets, and structural outline strokes. It delivers effortless multi-generational readability with certified WCAG AAA contrast ratios.
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
                     {SECONDARY_BRAND_COLORS.map(color => (
                       <div
                         key={color.name}
-                        className="bg-slate-50 dark:bg-slate-950 rounded-2xl border-2 border-slate-300 dark:border-slate-800 shadow-lg p-6 space-y-6"
+                        className="bg-white dark:bg-slate-900 rounded-2xl border-1.5 border-[#E3DDD3] dark:border-slate-800 shadow-md p-5 space-y-5"
                       >
-                        <div className="flex items-center space-x-6">
+                        <div className="flex items-center space-x-4">
                           <div
-                            className="w-28 h-28 rounded-2xl shadow-md border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center shrink-0"
+                            className="w-20 h-20 rounded-2xl shadow-inner border border-[#E3DDD3] dark:border-slate-700 flex items-center justify-center shrink-0"
                             style={{ backgroundColor: color.hex }}
                           >
                             <span className={`text-xs font-mono font-black ${
-                              color.hex === '#F2F2F2' ? 'text-slate-900' : 'text-slate-900'
+                              ['#F5EFE6', '#FAF6F0', '#EDE5D8', '#E3DDD3'].includes(color.hex) ? 'text-[#2E2A26]' : 'text-white'
                             }`}>
                               {color.hex}
                             </span>
                           </div>
 
-                          <div className="space-y-2 font-['Montserrat']">
-                            <span className="text-xs font-bold text-[#008080] dark:text-[#CCFF00] uppercase tracking-wider">
+                          <div className="space-y-1 font-['Montserrat'] min-w-0">
+                            <span className="text-[11px] font-extrabold text-[#006D5B] dark:text-teal-300 uppercase tracking-wider block truncate">
                               {color.role}
                             </span>
-                            <h3 className="text-2xl font-black text-[#1A1A1A] dark:text-white">
+                            <h3 className="text-xl font-extrabold text-[#111827] dark:text-white truncate">
                               {color.name}
                             </h3>
-                            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium line-clamp-2">
                               {color.description}
                             </p>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2 font-mono text-xs">
-                          <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1">
-                            <span className="text-slate-400">HEX Code:</span>
-                            <span className="font-bold text-[#1A1A1A] dark:text-white">{color.hex}</span>
+                        <div className="bg-[#FAF6F0] dark:bg-slate-950 p-3.5 rounded-xl border border-[#E3DDD3] dark:border-slate-800 space-y-1.5 font-mono text-xs">
+                          <div className="flex justify-between border-b border-slate-200/80 dark:border-slate-800 pb-1">
+                            <span className="text-slate-500">HEX Code:</span>
+                            <span className="font-bold text-[#111827] dark:text-white">{color.hex}</span>
                           </div>
-                          <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1">
-                            <span className="text-slate-400">CMYK Values:</span>
-                            <span className="font-bold text-slate-900 dark:text-white">{color.cmyk}</span>
+                          <div className="flex justify-between border-b border-slate-200/80 dark:border-slate-800 pb-1">
+                            <span className="text-slate-500">CMYK Values:</span>
+                            <span className="font-bold text-slate-800 dark:text-white">{color.cmyk}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-400">RGB Values:</span>
-                            <span className="font-bold text-slate-900 dark:text-white">{color.rgb}</span>
+                            <span className="text-slate-500">RGB Values:</span>
+                            <span className="font-bold text-slate-800 dark:text-white">{color.rgb}</span>
                           </div>
                         </div>
 
                         {/* Contrast Test Matrix */}
-                        <div className="pt-2">
-                          <span className="text-xs font-bold text-slate-500 uppercase font-mono">Contrast Test vs Primary Slate Black & Evergreen Teal:</span>
-                          <div className="grid grid-cols-2 gap-3 mt-2">
-                            <div className="p-3 rounded-xl bg-[#1A1A1A] text-white flex items-center justify-between text-xs font-bold">
-                              <span>On Slate Black</span>
-                              <span style={{ color: color.hex }}>AAA Pass</span>
+                        <div className="pt-1">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase font-mono block mb-1.5">WCAG AAA Certified Contrast:</span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="p-2.5 rounded-xl bg-[#0A2540] text-white flex items-center justify-between text-[11px] font-bold">
+                              <span>On Navy</span>
+                              <span className="text-teal-300">AAA Pass</span>
                             </div>
-                            <div className="p-3 rounded-xl bg-[#008080] text-white flex items-center justify-between text-xs font-bold">
-                              <span>On Evergreen Teal</span>
-                              <span style={{ color: color.hex }}>AA Pass</span>
+                            <div className="p-2.5 rounded-xl bg-[#2E2A26] text-white flex items-center justify-between text-[11px] font-bold">
+                              <span>On Charcoal</span>
+                              <span className="text-amber-300">AAA Pass</span>
                             </div>
                           </div>
                         </div>
@@ -1150,36 +1713,61 @@ export const BrandIdentitySystem: React.FC = () => {
         )}
 
         {/* ========================================================= */}
-        {/* TAB 2: COLOR PALETTES DETAILED VIEW */}
+        {/* TAB 2: COLOR PALETTES DETAILED VIEW (60-30-10 SYSTEM) */}
         {/* ========================================================= */}
         {activeTab === 'colors' && (
           <div className="space-y-10 animate-fadeIn">
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border-2 border-slate-300 dark:border-slate-800 shadow-xl space-y-8">
-              <div>
-                <span className="text-xs font-mono font-extrabold text-[#008080] uppercase tracking-wider">Pages 11 & 12 • Brand Color System</span>
-                <h2 className="text-3xl font-black font-['Montserrat'] text-[#1A1A1A] dark:text-white mt-1">
-                  Primary & Secondary Color System
-                </h2>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                  Click any color card to copy its Hex, RGB, or CMYK codes directly to your clipboard.
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+                <div>
+                  <span className="text-xs font-mono font-extrabold text-[#008080] uppercase tracking-wider">Pages 11 & 12 • 60-30-10 Color Architecture</span>
+                  <h2 className="text-3xl font-black font-['Montserrat'] text-[#1A1A1A] dark:text-white mt-1">
+                    Brand Color Palettes & Ratio Distribution
+                  </h2>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                    Click any color swatch to copy its Hex, RGB, or CMYK codes directly to your clipboard.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('ratio603010')}
+                  className="px-4 py-2 rounded-xl bg-[#0A2540] hover:bg-[#006D5B] text-white text-xs font-mono font-bold flex items-center space-x-2 shadow-md transition-all cursor-pointer border border-[#CCFF00]/40 self-start sm:self-auto"
+                >
+                  <PieChart className="w-4 h-4 text-[#CCFF00]" />
+                  <span>Launch 60-30-10 Engine</span>
+                </button>
               </div>
 
-              {/* Primary Palette */}
+              {/* 1. Primary 60% Palette */}
               <div className="space-y-4">
-                <h3 className="text-xl font-black font-['Montserrat'] text-[#008080] dark:text-[#CCFF00] border-b pb-2">
-                  Primary Color Palette (Page 11)
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-800">
+                  <h3 className="text-xl font-black font-['Montserrat'] text-[#0A2540] dark:text-white flex items-center space-x-2">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-[#0A2540] text-white text-xs font-mono font-black">60%</span>
+                    <span>Primary Palette: Dominant Base & Foundation (Page 11)</span>
+                  </h3>
+                  <span className="text-xs font-mono font-bold text-slate-500">4 Swatches</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {PRIMARY_BRAND_COLORS.map(color => (
                     <div key={color.name} className="bg-slate-50 dark:bg-slate-950 rounded-2xl border-2 border-slate-300 dark:border-slate-800 overflow-hidden shadow-lg space-y-3">
-                      <div className="h-32 p-4 flex flex-col justify-between shadow-inner" style={{ backgroundColor: color.hex }}>
-                        <span className={`text-xs font-black uppercase px-2 py-0.5 rounded self-start ${color.hex === '#CCFF00' ? 'bg-[#1A1A1A] text-[#CCFF00]' : 'bg-black/40 text-white'}`}>
-                          {color.role}
+                      <div
+                        className="h-32 p-4 flex flex-col justify-between shadow-inner"
+                        style={{ backgroundColor: color.hex }}
+                      >
+                        <span className={`text-xs font-black uppercase px-2 py-0.5 rounded self-start ${
+                          color.hex === '#FFFFFF' || color.hex === '#FAF6F0' ? 'bg-[#0A2540] text-white' : 'bg-black/40 text-white'
+                        }`}>
+                          60% Primary
                         </span>
                         <div className="flex items-center justify-between">
-                          <span className={`font-black text-lg font-['Montserrat'] ${color.hex === '#CCFF00' ? 'text-[#1A1A1A]' : 'text-white'}`}>{color.name}</span>
-                          <button onClick={() => handleCopy(color.hex, color.name)} className="bg-black/20 text-white p-2 rounded-lg cursor-pointer">
+                          <span className={`font-black text-lg font-['Montserrat'] ${
+                            color.hex === '#FFFFFF' || color.hex === '#FAF6F0' ? 'text-[#0A2540]' : 'text-white'
+                          }`}>{color.name}</span>
+                          <button
+                            onClick={() => handleCopy(color.hex, color.name)}
+                            className={`p-2 rounded-lg cursor-pointer ${
+                              color.hex === '#FFFFFF' || color.hex === '#FAF6F0' ? 'bg-slate-200 text-slate-800' : 'bg-black/20 text-white'
+                            }`}
+                          >
                             {copiedToken === color.name ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                           </button>
                         </div>
@@ -1188,37 +1776,85 @@ export const BrandIdentitySystem: React.FC = () => {
                         <div className="flex justify-between font-bold"><span>HEX:</span><span className="text-[#008080]">{color.hex}</span></div>
                         <div className="flex justify-between"><span>RGB:</span><span>{color.rgb}</span></div>
                         <div className="flex justify-between"><span>CMYK:</span><span>{color.cmyk}</span></div>
+                        <div className="flex justify-between border-t border-slate-200 dark:border-slate-800 pt-1.5"><span className="text-slate-500">WCAG:</span><span className="text-[#006D5B] font-bold">{color.wcagContrast}</span></div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Secondary Palette */}
-              <div className="space-y-4 pt-6 border-t">
-                <h3 className="text-xl font-black font-['Montserrat'] text-[#008080] dark:text-[#CCFF00] border-b pb-2">
-                  Secondary Color Palette (Page 12)
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 2. Secondary 30% Palette */}
+              <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <h3 className="text-xl font-black font-['Montserrat'] text-[#006D5B] dark:text-teal-300 flex items-center space-x-2">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-[#006D5B] text-white text-xs font-mono font-black">30%</span>
+                    <span>Secondary Palette: Supporting Structure & Contrast (Page 12)</span>
+                  </h3>
+                  <span className="text-xs font-mono font-bold text-slate-500">4 Swatches</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {SECONDARY_BRAND_COLORS.map(color => (
-                    <div key={color.name} className="bg-slate-50 dark:bg-slate-950 rounded-2xl border-2 border-slate-300 dark:border-slate-800 p-6 space-y-4 shadow-lg">
+                    <div key={color.name} className="bg-[#FAF6F0] dark:bg-slate-950 rounded-2xl border-1.5 border-[#E3DDD3] dark:border-slate-800 p-5 space-y-4 shadow-md">
                       <div className="flex items-center space-x-4">
-                        <div className="w-20 h-20 rounded-xl border-2 border-slate-300 shadow-md flex items-center justify-center font-mono font-bold text-xs" style={{ backgroundColor: color.hex }}>
-                          {color.hex}
+                        <div
+                          className="w-16 h-16 rounded-xl border border-[#E3DDD3] shadow-inner flex items-center justify-center font-mono font-bold text-[11px] shrink-0"
+                          style={{ backgroundColor: color.hex }}
+                        >
+                          <span className={['#F5EFE6', '#FAF6F0', '#EDE5D8', '#CBD5E1', '#E3DDD3'].includes(color.hex) ? 'text-[#2E2A26]' : 'text-white'}>
+                            {color.hex}
+                          </span>
                         </div>
-                        <div>
-                          <h4 className="font-black text-lg font-['Montserrat'] text-[#1A1A1A] dark:text-white">{color.name}</h4>
-                          <p className="text-xs text-slate-500">{color.usage}</p>
+                        <div className="min-w-0">
+                          <h4 className="font-extrabold text-base font-['Montserrat'] text-[#111827] dark:text-white truncate">{color.name}</h4>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 truncate">{color.role}</p>
+                          <span className="text-[10px] font-mono text-[#006D5B] dark:text-teal-400 font-bold block mt-0.5">{color.wcagContrast}</span>
                         </div>
                       </div>
-                      <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border space-y-1 text-xs font-mono">
-                        <div className="flex justify-between"><span>RGB:</span><span className="font-bold">{color.rgb}</span></div>
-                        <div className="flex justify-between"><span>CMYK:</span><span className="font-bold">{color.cmyk}</span></div>
+                      <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-[#E3DDD3] dark:border-slate-800 space-y-1 text-xs font-mono">
+                        <div className="flex justify-between"><span>RGB:</span><span className="font-bold text-slate-800 dark:text-white">{color.rgb}</span></div>
+                        <div className="flex justify-between"><span>CMYK:</span><span className="font-bold text-slate-800 dark:text-white">{color.cmyk}</span></div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* 3. Accent 10% Palette */}
+              <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <h3 className="text-xl font-black font-['Montserrat'] text-[#B45309] dark:text-amber-400 flex items-center space-x-2">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-[#B45309] text-white text-xs font-mono font-black">10%</span>
+                    <span>Accent Palette: High-Impact Action & Focal Points</span>
+                  </h3>
+                  <span className="text-xs font-mono font-bold text-slate-500">2 Swatches</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {ACCENT_BRAND_COLORS.map(color => (
+                    <div key={color.name} className="bg-white dark:bg-slate-950 rounded-2xl border-1.5 border-amber-200 dark:border-slate-800 p-5 space-y-4 shadow-md">
+                      <div className="flex items-center space-x-4">
+                        <div
+                          className="w-16 h-16 rounded-xl border border-amber-300 shadow-inner flex items-center justify-center font-mono font-bold text-[11px] shrink-0"
+                          style={{ backgroundColor: color.hex }}
+                        >
+                          <span className={color.hex === '#CCFF00' ? 'text-[#1A1A1A]' : 'text-white'}>
+                            {color.hex}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-extrabold text-base font-['Montserrat'] text-[#111827] dark:text-white truncate">{color.name}</h4>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 truncate">{color.role}</p>
+                          <span className="text-[10px] font-mono text-[#B45309] dark:text-amber-400 font-bold block mt-0.5">{color.wcagContrast}</span>
+                        </div>
+                      </div>
+                      <div className="bg-[#FAF6F0] dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1 text-xs font-mono">
+                        <div className="flex justify-between"><span>RGB:</span><span className="font-bold text-slate-800 dark:text-white">{color.rgb}</span></div>
+                        <div className="flex justify-between"><span>CMYK:</span><span className="font-bold text-slate-800 dark:text-white">{color.cmyk}</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
         )}

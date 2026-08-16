@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, CheckCircle, ShieldCheck, User, X, Mail } from 'lucide-react';
-import { GoogleUser, UserProfile } from '../types';
-import { loginWithGoogle } from '../lib/firebase';
+import { LogOut, CheckCircle, ShieldCheck, User, X, Mail, Lock, UserPlus, LogIn, AlertCircle } from 'lucide-react';
+import { UserProfile } from '../types';
+import { loginWithGoogle, registerWithEmail, loginWithEmail, logoutUser } from '../lib/firebase';
+import { AuthModal } from './AuthModal';
 
 interface GoogleAuthButtonProps {
   currentUserProfile?: UserProfile | null;
@@ -17,8 +18,13 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(Boolean(currentUserProfile?.isGoogleConnected));
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
+
+  // Form states
   const [customEmail, setCustomEmail] = useState('');
+  const [customPassword, setCustomPassword] = useState('');
   const [customName, setCustomName] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsConnected(Boolean(currentUserProfile?.isGoogleConnected));
@@ -27,12 +33,10 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   // Listen for popup OAuth postMessage response
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Accept messages from same origin, run.app, or localhost
       if (event.data?.type === 'GOOGLE_AUTH_SUCCESS') {
         setIsLoading(false);
         setIsConnected(true);
         setShowAccountModal(false);
-        // Refresh profile state
         fetch('/api/profile')
           .then((res) => res.json())
           .then((data) => {
@@ -50,6 +54,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
 
   const connectAccountDirectly = async (email: string, name: string, picture?: string) => {
     setIsLoading(true);
+    setAuthError(null);
     try {
       const res = await fetch('/api/auth/google/connect-demo', {
         method: 'POST',
@@ -58,7 +63,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
           email,
           name,
           picture: picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-          id: `google-${Date.now()}`,
+          id: `user-${Date.now()}`,
         }),
       });
 
@@ -71,7 +76,54 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         }
       }
     } catch (err) {
-      console.error('Direct Google connect error:', err);
+      console.error('Direct connect error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customEmail.trim()) return;
+
+    setIsLoading(true);
+    setAuthError(null);
+
+    try {
+      if (authMode === 'REGISTER') {
+        if (customPassword.length < 6) {
+          throw new Error('Password must be at least 6 characters long.');
+        }
+        // Firebase Auth User Registration
+        const user = await registerWithEmail(customEmail.trim(), customPassword, customName.trim() || undefined);
+        await connectAccountDirectly(
+          user.email || customEmail.trim(),
+          user.displayName || customName.trim() || customEmail.trim().split('@')[0],
+          user.photoURL || undefined
+        );
+      } else {
+        // Firebase Auth Login
+        let user;
+        if (customPassword) {
+          try {
+            user = await loginWithEmail(customEmail.trim(), customPassword);
+          } catch (fErr: any) {
+            console.warn('Firebase login attempt:', fErr);
+            // If user doesn't exist in Firebase yet or password mistyped, allow quick sign in fallback
+            if (fErr.code === 'auth/user-not-found' || fErr.code === 'auth/wrong-password' || fErr.code === 'auth/invalid-credential') {
+              throw new Error('Invalid email or password. Please check credentials or switch to Create Account.');
+            }
+          }
+        }
+        await connectAccountDirectly(
+          user?.email || customEmail.trim(),
+          user?.displayName || customName.trim() || customEmail.trim().split('@')[0],
+          user?.photoURL || undefined
+        );
+      }
+    } catch (err: any) {
+      console.error('Email Auth Error:', err);
+      setAuthError(err?.message || 'Authentication failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -79,6 +131,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    setAuthError(null);
 
     // Step 1: Try Firebase Auth Google Sign-In Popup
     try {
@@ -92,7 +145,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         return;
       }
     } catch (firebaseErr) {
-      console.warn('Firebase popup auth fallback to server OAuth / modal:', firebaseErr);
+      console.warn('Firebase popup auth fallback:', firebaseErr);
     }
 
     // Step 2: Try Server OAuth Popup
@@ -107,7 +160,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         );
 
         if (popup) {
-          // Check if popup closed without completing after 8 seconds
           const timer = setInterval(() => {
             if (popup.closed) {
               clearInterval(timer);
@@ -121,13 +173,14 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
       console.warn('Server OAuth launch warning:', serverErr);
     }
 
-    // Step 3: If popups are blocked in iframe preview, open in-app account selector modal
+    // Step 3: Open in-app account modal for manual email or demo login
     setIsLoading(false);
     setShowAccountModal(true);
   };
 
   const handleDisconnect = async () => {
     try {
+      await logoutUser().catch(() => {});
       const res = await fetch('/api/auth/google/disconnect', { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
@@ -137,7 +190,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         }
       }
     } catch (err) {
-      console.error('Failed to disconnect Google account:', err);
+      console.error('Failed to disconnect account:', err);
     }
   };
 
@@ -154,188 +207,109 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     <>
       {isConnected && currentUserProfile?.email ? (
         variant === 'header' ? (
-          <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-full text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-            <GoogleIcon />
-            <span className="truncate max-w-[130px]">{currentUserProfile.email}</span>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setShowAccountModal(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setShowAccountModal(true);
+              }
+            }}
+            title="Resident Account: Click to view details or manage session"
+            aria-label="Resident Account: Click to view details or manage session"
+            className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 bg-[#0A2540] hover:bg-[#0e3357] dark:bg-[#071B2F] dark:hover:bg-[#0b2947] text-white border-1.5 border-[#006D5B] dark:border-teal-500/50 rounded-xl text-xs sm:text-sm font-bold shadow-xs h-[38px] sm:h-[42px] min-w-[76px] xs:min-w-[88px] sm:min-w-[100px] whitespace-nowrap cursor-pointer transition-all active:scale-98 focus:outline-none focus:ring-2 focus:ring-teal-400 group shrink-0"
+          >
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#006D5B] text-teal-100 flex items-center justify-center text-[10px] sm:text-xs font-bold shrink-0 border border-teal-300/40 shadow-xs group-hover:scale-105 transition-transform">
+                {currentUserProfile.fullName ? currentUserProfile.fullName.charAt(0).toUpperCase() : 'R'}
+              </div>
+              <div className="flex flex-col text-left leading-tight hidden xs:flex">
+                <span className="text-[11px] sm:text-xs font-bold text-white max-w-[50px] xs:max-w-[70px] sm:max-w-[110px] truncate group-hover:text-teal-200 transition-colors">
+                  {currentUserProfile.fullName || currentUserProfile.email.split('@')[0]}
+                </span>
+              </div>
+            </div>
+            <div className="h-3 w-px bg-slate-700/80 mx-0.5 shrink-0 hidden xs:block" />
             <button
-              onClick={handleDisconnect}
-              title="Disconnect Google Account"
-              className="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 p-0.5 rounded-full hover:bg-emerald-200/50 cursor-pointer"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDisconnect();
+              }}
+              title="Sign Out / Disconnect Account"
+              aria-label="Sign Out / Disconnect Account"
+              className="text-slate-300 hover:text-rose-400 p-1 rounded-lg hover:bg-white/10 transition-all cursor-pointer min-h-[24px] min-w-[24px] flex items-center justify-center shrink-0 active:scale-95"
             >
-              <LogOut className="w-3 h-3" />
+              <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
         ) : (
-          <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl space-y-3">
+          <div className="p-4 bg-white dark:bg-[#0A2540] border-1.5 border-[#CBD5E1] dark:border-slate-700 rounded-xl space-y-3 text-[#111827] dark:text-white shadow-sm">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl shadow-xs">
-                  <GoogleIcon />
+              <div className="flex items-center space-x-3">
+                <div className="p-2.5 bg-[#E6F4F1] dark:bg-[#004D40] text-[#006D5B] dark:text-teal-200 rounded-xl border border-[#006D5B]/30">
+                  <ShieldCheck className="w-5 h-5 text-[#006D5B] dark:text-teal-200" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <span>Google Account Connected</span>
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                  <div className="text-sm font-bold text-[#111827] dark:text-white flex items-center gap-1.5">
+                    <span>Resident Account Connected</span>
+                    <CheckCircle className="w-4 h-4 text-[#006D5B] dark:text-teal-300" />
                   </div>
-                  <div className="text-xs text-slate-500 font-mono">{currentUserProfile.email}</div>
+                  <div className="text-xs text-[#006D5B] dark:text-teal-300 font-mono font-bold">{currentUserProfile.email}</div>
                 </div>
               </div>
 
               <button
                 onClick={handleDisconnect}
-                className="px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl border border-red-200/60 transition-colors cursor-pointer"
+                className="px-4 py-2.5 text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 rounded-xl border border-rose-300 dark:border-rose-800 transition-colors cursor-pointer min-h-[48px]"
               >
-                Disconnect
+                Sign Out
               </button>
             </div>
           </div>
         )
       ) : variant === 'header' ? (
         <button
-          onClick={handleGoogleLogin}
+          onClick={() => setShowAccountModal(true)}
           disabled={isLoading}
-          className="btn-soft-tactile pro-button flex items-center space-x-2 px-3 py-1.5 rounded-2xl text-xs cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 bg-[#0A2540] hover:bg-[#006D5B] text-white border-1.5 border-[#006D5B]/50 rounded-xl text-xs sm:text-sm font-bold shadow-xs cursor-pointer disabled:opacity-50 h-[38px] sm:h-[42px] min-w-[76px] xs:min-w-[88px] sm:min-w-[100px] whitespace-nowrap transition-all active:scale-97 shrink-0"
         >
-          <GoogleIcon />
-          <span>{isLoading ? 'Connecting...' : 'Sign in'}</span>
+          <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-300 shrink-0" />
+          <span className="leading-none truncate">{isLoading ? '...' : 'Sign In'}</span>
         </button>
       ) : (
-        <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-3 shadow-xs">
+        <div className="p-4 sm:p-5 bg-white dark:bg-[#0A2540] border-1.5 border-[#CBD5E1] dark:border-slate-700 rounded-xl space-y-3.5 shadow-sm text-[#111827] dark:text-white">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl">
-              <GoogleIcon />
+            <div className="p-2.5 bg-[#006D5B] text-white rounded-xl shadow-xs">
+              <UserPlus className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white">Sign in with Google</h4>
-              <p className="text-[11px] text-slate-500">Auto-verify reports and earn extra Civic Karma</p>
+              <h4 className="text-sm font-bold text-[#111827] dark:text-white">Resident Account Access</h4>
+              <p className="text-xs font-medium text-[#006D5B] dark:text-teal-300">Sign in or register to submit and verify neighborhood reports</p>
             </div>
           </div>
 
           <button
-            onClick={handleGoogleLogin}
+            onClick={() => setShowAccountModal(true)}
             disabled={isLoading}
-            className="w-full flex items-center justify-center space-x-2 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50 pro-button"
+            className="w-full flex items-center justify-center space-x-2 py-3.5 px-4 bg-[#B45309] hover:bg-[#92400E] text-white rounded-xl text-sm font-bold transition-all shadow-md active:scale-98 cursor-pointer disabled:opacity-50 min-h-[56px]"
           >
-            <GoogleIcon />
-            <span>{isLoading ? 'Connecting Google Account...' : 'Connect Google Account'}</span>
+            <LogIn className="w-5 h-5 text-white" />
+            <span>{isLoading ? 'Loading Auth...' : 'Open Resident Sign In / Register'}</span>
           </button>
         </div>
       )}
 
-      {/* In-App Interactive Google Account Selector Modal (Fallback when popups blocked in iframe) */}
-      {showAccountModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-settled-in">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center space-x-2.5">
-                <GoogleIcon />
-                <span className="font-bold text-sm text-slate-900 dark:text-white">Sign in with Google</span>
-              </div>
-              <button
-                onClick={() => setShowAccountModal(false)}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Enter your email address to sign in or connect your Google account:
-            </p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (customEmail.trim()) {
-                  connectAccountDirectly(
-                    customEmail.trim(),
-                    customName.trim() || customEmail.trim().split('@')[0]
-                  );
-                }
-              }}
-              className="space-y-3 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700"
-            >
-              <div>
-                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Email Address <span className="text-amber-600">*</span>
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                  <input
-                    type="email"
-                    required
-                    value={customEmail}
-                    onChange={(e) => setCustomEmail(e.target.value)}
-                    placeholder="your.email@example.com"
-                    className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#008080] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Full Name (Optional)
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                  <input
-                    type="text"
-                    value={customName}
-                    onChange={(e) => setCustomName(e.target.value)}
-                    placeholder="e.g. Jane Doe"
-                    className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#008080] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={!customEmail.trim() || isLoading}
-                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] font-bold text-xs rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>{isLoading ? 'Signing in...' : 'Sign In with Email'}</span>
-              </button>
-            </form>
-
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <span className="text-[11px] font-bold text-slate-500 block">Or select a demo profile:</span>
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => connectAccountDirectly('resident@cityscape.org', 'Civic Resident')}
-                  className="w-full flex items-center space-x-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-[#008080] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
-                >
-                  <div className="w-8 h-8 rounded-full bg-teal-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
-                    CR
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-slate-900 dark:text-white truncate">Civic Resident</div>
-                    <div className="text-[11px] text-slate-500 font-mono truncate">resident@cityscape.org</div>
-                  </div>
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => connectAccountDirectly('alex.m@sfgov.org', 'Alex Morgan (Civic Lead)')}
-                  className="w-full flex items-center space-x-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-[#008080] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer"
-                >
-                  <div className="w-8 h-8 rounded-full bg-[#0A2540] text-[#CCFF00] font-bold flex items-center justify-center text-xs shrink-0">
-                    AM
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-slate-900 dark:text-white truncate">Alex Morgan (Civic Lead)</div>
-                    <div className="text-[11px] text-slate-500 font-mono truncate">alex.m@sfgov.org</div>
-                  </div>
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Accessible Resident Account Authentication & Registration Modal */}
+      <AuthModal
+        isOpen={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        currentUserProfile={currentUserProfile}
+        onAuthChange={onAuthChange}
+        initialMode={authMode}
+      />
     </>
   );
 };
-

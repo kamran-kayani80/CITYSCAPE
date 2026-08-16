@@ -1,33 +1,66 @@
 export interface ShareDataPayload {
-  type: 'report' | 'bulletin' | 'event' | 'hashtag' | 'article';
+  type: 'report' | 'bulletin' | 'event' | 'hashtag' | 'article' | 'trial_invite' | 'app_download';
   title: string;
   text: string;
   url: string;
   idOrTag?: string;
   address?: string;
   category?: string;
+  wardName?: string;
+  referralCode?: string;
 }
 
-export function getShareableUrl(type: ShareDataPayload['type'], idOrTag: string): string {
+export function getShareableUrl(
+  type: ShareDataPayload['type'],
+  idOrTag?: string,
+  extraParams?: Record<string, string>
+): string {
   // Use current live origin so all shared links are immediately accessible
-  const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://cityscape.community';
+  const origin =
+    typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : 'https://cityscape.community';
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
   const basePath = pathname === '/' ? '' : pathname;
 
-  switch (type) {
-    case 'report':
-      return `${origin}${basePath}?reportId=${encodeURIComponent(idOrTag)}`;
-    case 'bulletin':
-      return `${origin}${basePath}?bulletinId=${encodeURIComponent(idOrTag)}`;
-    case 'event':
-      return `${origin}${basePath}?eventId=${encodeURIComponent(idOrTag)}`;
-    case 'hashtag':
-      return `${origin}${basePath}?tag=${encodeURIComponent(idOrTag)}`;
-    case 'article':
-      return `${origin}${basePath}?articleId=${encodeURIComponent(idOrTag)}`;
-    default:
-      return `${origin}${pathname}`;
+  const urlObj = new URL(`${origin}${basePath}`);
+  
+  if (type === 'report' && idOrTag) {
+    urlObj.searchParams.set('reportId', idOrTag);
+  } else if (type === 'bulletin' && idOrTag) {
+    urlObj.searchParams.set('bulletinId', idOrTag);
+  } else if (type === 'event' && idOrTag) {
+    urlObj.searchParams.set('eventId', idOrTag);
+  } else if (type === 'hashtag' && idOrTag) {
+    urlObj.searchParams.set('tag', idOrTag);
+  } else if (type === 'article' && idOrTag) {
+    urlObj.searchParams.set('articleId', idOrTag);
+  } else if (type === 'trial_invite') {
+    urlObj.searchParams.set('trial_invite', 'true');
+    urlObj.searchParams.set('source', 'neighbor_invite');
+  } else if (type === 'app_download') {
+    urlObj.searchParams.set('install', 'true');
   }
+
+  if (extraParams) {
+    Object.entries(extraParams).forEach(([k, v]) => {
+      if (v) urlObj.searchParams.set(k, v);
+    });
+  }
+
+  return urlObj.toString();
+}
+
+export function getPlatformSpecificUrl(platform: 'mobile' | 'desktop' | 'universal', inviteCode?: string): string {
+  const origin =
+    typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : 'https://cityscape.community';
+  const urlObj = new URL(origin);
+  urlObj.searchParams.set('trial', 'active');
+  urlObj.searchParams.set('platform', platform);
+  if (inviteCode) urlObj.searchParams.set('ref', inviteCode);
+  return urlObj.toString();
 }
 
 export function canNativeShare(): boolean {

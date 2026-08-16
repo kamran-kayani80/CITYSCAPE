@@ -273,9 +273,27 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
       markersLayerRef.current = null;
       heatmapLayerRef.current = null;
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.remove();
+        } catch (e) {}
         mapInstanceRef.current = null;
       }
+    };
+  }, []);
+
+  // Ensure map updates bounds when container resizes or enters viewport
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+    const observer = new ResizeObserver(() => {
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.invalidateSize();
+        } catch (e) {}
+      }
+    });
+    observer.observe(mapContainerRef.current);
+    return () => {
+      observer.disconnect();
     };
   }, []);
 
@@ -452,56 +470,56 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
       // Build popup content HTML
       const catConf = CATEGORY_CONFIG[report.category] || CATEGORY_CONFIG.OTHER;
       const popupHtml = `
-        <div class="w-64 p-3.5 space-y-2.5 bg-[#f4faf9] text-[#1A1A1A] font-sans">
+        <div class="w-68 sm:w-72 p-3.5 sm:p-4 space-y-3 bg-white text-[#051F20] font-['Montserrat'] rounded-xl border-1.5 border-[#CBD5E1] shadow-xl">
           ${
             isMyReport
-              ? `<div class="px-2.5 py-1 bg-[#006D5B] text-[#CCFF00] font-black rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-between shadow-xs">
-                  <span>👤 YOUR CIVIC CONTRIBUTION</span>
-                  <span>MY ISSUE</span>
+              ? `<div class="px-3 py-1.5 bg-[#006D5B] text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-between shadow-xs">
+                  <span>👤 YOUR CONTRIBUTION</span>
+                  <span>MY REPORT</span>
                 </div>`
               : isEmergency
-              ? `<div class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center justify-between shadow-xs">
+              ? `<div class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-between shadow-xs">
                   <span>🚨 EMERGENCY ALERT</span>
-                  <span>PRIORITY 1</span>
+                  <span>CRITICAL</span>
                 </div>`
               : ''
           }
-          <div class="relative h-28 w-full rounded-xl overflow-hidden bg-[#008080]/10">
+          <div class="relative h-28 sm:h-32 w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
             <img src="${report.imageUrls[0]}" alt="${report.title}" class="w-full h-full object-cover"/>
-            <span class="absolute top-2 left-2 px-2.5 py-0.5 text-[10px] font-black rounded-md uppercase tracking-wider text-white shadow-xs" style="background-color: ${statusConf.pinHex}">
+            <span class="absolute top-2 left-2 px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg uppercase tracking-wider text-white shadow-md border border-black/20" style="background-color: ${statusConf.pinHex}">
               ${statusConf.label}
             </span>
           </div>
 
-          <div>
-            <span class="text-[10px] font-black text-[#008080] uppercase tracking-wider">${catConf.label}</span>
-            <h4 class="font-heading font-black text-sm text-[#1c1a3b] line-clamp-1 leading-snug">${report.title}</h4>
-            <p class="text-xs text-slate-600 line-clamp-1 mt-0.5 font-medium">${report.addressText}</p>
+          <div class="space-y-1">
+            <span class="text-xs font-extrabold text-[#006D5B] uppercase tracking-wider">${catConf.label}</span>
+            <h4 class="font-extrabold text-base text-[#051F20] line-clamp-1 leading-snug">${report.title}</h4>
+            <p class="text-xs text-[#006D5B] line-clamp-1 font-bold">${report.addressText}</p>
           </div>
 
-          <div class="flex flex-col gap-2 pt-2 border-t border-slate-200 text-xs">
-            <div class="flex items-center gap-1.5">
-              <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" rel="noopener noreferrer" title="Google Maps" aria-label="Google Maps" class="flex-1 py-1.5 px-2 bg-[#008080] text-white hover:bg-[#006666] font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+          <div class="flex flex-col gap-2 pt-2 border-t-1.5 border-[#CBD5E1] text-xs">
+            <div class="flex items-center gap-1">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" rel="noopener noreferrer" title="Google Maps" aria-label="Google Maps" class="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-[#006D5B] text-[#051F20] hover:text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 border border-slate-300 transition-colors min-h-[36px]">
                 <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="#EA4335"/><circle cx="12" cy="9" r="2.5" fill="#FFFFFF"/></svg>
-                Google Maps
+                Maps
               </a>
-              <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" rel="noopener noreferrer" title="Waze" aria-label="Waze" class="py-1.5 px-2 bg-sky-500 text-white hover:bg-sky-600 font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+              <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" rel="noopener noreferrer" title="Waze" aria-label="Waze" class="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-[#0284C7] text-[#051F20] hover:text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 border border-slate-300 transition-colors min-h-[36px]">
                 <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3C6.48 3 2 7.03 2 12C2 14.82 3.42 17.32 5.65 18.91C5.46 19.64 5.09 20.65 4.3 21.41C4.12 21.58 4.22 21.88 4.46 21.91C5.69 22.06 7.15 21.75 8.35 20.93C9.48 21.32 10.71 21.5 12 21.5C17.52 21.5 22 17.47 22 12.5C22 7.53 17.52 3 12 3Z" fill="#33CCFF"/><circle cx="8.5" cy="10.5" r="1.5" fill="#0F172A"/><circle cx="15.5" cy="10.5" r="1.5" fill="#0F172A"/></svg>
                 Waze
               </a>
-              <a href="https://maps.apple.com/?daddr=${lat},${lng}" target="_blank" rel="noopener noreferrer" title="Apple Maps" aria-label="Apple Maps" class="py-1.5 px-2 bg-slate-800 text-white hover:bg-slate-700 font-bold rounded-lg text-[10px] flex items-center justify-center gap-1 shadow-2xs">
+              <a href="https://maps.apple.com/?daddr=${lat},${lng}" target="_blank" rel="noopener noreferrer" title="Apple Maps" aria-label="Apple Maps" class="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-[#0A2540] text-[#051F20] hover:text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 border border-slate-300 transition-colors min-h-[36px]">
                 <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="5" fill="#007AFF"/><path d="M12 4.5L15.5 12L12 10.8L8.5 12L12 4.5Z" fill="#FFFFFF"/><path d="M12 19.5L15.5 12L12 13.2L8.5 12L12 19.5Z" fill="#FF3B30"/></svg>
-                Apple Maps
+                Apple
               </a>
             </div>
-            <button id="popup-btn-${report.id}" class="w-full btn-primary-designer py-1.5 rounded-xl text-xs font-extrabold cursor-pointer">
-              View Details →
+            <button id="popup-btn-${report.id}" class="w-full min-h-[44px] py-2 px-3 bg-[#0A2540] hover:bg-[#006D5B] text-white rounded-xl text-xs font-bold cursor-pointer transition-all shadow-sm flex items-center justify-center gap-1">
+              View Report Details →
             </button>
           </div>
         </div>
       `;
 
-      marker.bindPopup(popupHtml, { maxWidth: 280 });
+      marker.bindPopup(popupHtml, { maxWidth: 300 });
 
       marker.on('click', () => {
         onSelectReport(report);
@@ -654,213 +672,103 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
       {/* Leaflet map container element */}
       <div ref={mapContainerRef} className="w-full h-full min-h-[350px] z-1" />
 
-      {/* Geotagged Status Badge Overlay */}
+      {/* Layer Control Toggle (Top Left Overlay - Clean & Adaptive) */}
       {!isPinningLocation && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 hidden sm:flex items-center space-x-2 px-3.5 py-1.5 bg-[#0A2540]/90 backdrop-blur-md rounded-full shadow-lg border border-[#006D5B] text-white">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#CCFF00] animate-ping" />
-          <span className="text-[11px] font-black uppercase tracking-wider text-[#CCFF00]">
-            GEO-TAGGED MAP ACTIVE
-          </span>
-          {userLocation ? (
-            <span className="text-[10px] font-mono text-slate-300 border-l border-white/20 pl-2">
-              {userLocation.lat.toFixed(4)}°N, {Math.abs(userLocation.lng).toFixed(4)}°W
-            </span>
-          ) : (
-            <span className="text-[10px] font-mono text-slate-300 border-l border-white/20 pl-2">
-              GPS SENSOR READY
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Layer Control Toggle (Top Left Overlay) */}
-      {!isPinningLocation && (
-        <div className="absolute top-4 left-4 z-20 flex items-center p-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-lg border border-white/80 dark:border-slate-800">
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20 max-w-[calc(100%-80px)] sm:max-w-none flex flex-wrap items-center gap-1 p-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/90 dark:border-slate-800 transition-all duration-200">
           <button
+            type="button"
             onClick={() => setMapMode('street')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer min-h-[36px] ${
               mapMode === 'street'
                 ? 'bg-[#008080] text-white shadow-xs'
-                : 'text-slate-700 dark:text-slate-300 hover:text-[#008080]'
+                : 'text-slate-700 dark:text-slate-300 hover:text-[#008080] hover:bg-slate-100 dark:hover:bg-slate-800/80'
             }`}
             title="Street Vector Map"
+            aria-label="Street Vector Map"
           >
-            <MapIcon className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Street</span>
+            <MapIcon className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xs:inline sm:inline">Street</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setMapMode('satellite')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer min-h-[36px] ${
               mapMode === 'satellite'
                 ? 'bg-[#008080] text-white shadow-xs'
-                : 'text-slate-700 dark:text-slate-300 hover:text-[#008080]'
+                : 'text-slate-700 dark:text-slate-300 hover:text-[#008080] hover:bg-slate-100 dark:hover:bg-slate-800/80'
             }`}
             title="Satellite Aerial View"
+            aria-label="Satellite Aerial View"
           >
-            <Globe className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Satellite</span>
+            <Globe className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xs:inline sm:inline">Satellite</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setMapMode('heatmap')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer min-h-[36px] ${
               mapMode === 'heatmap'
                 ? 'bg-gradient-to-r from-red-500 to-amber-500 text-white shadow-xs'
-                : 'text-slate-700 dark:text-slate-300 hover:text-red-500'
+                : 'text-slate-700 dark:text-slate-300 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-slate-800/80'
             }`}
             title="Infrastructure Density Heat Map"
+            aria-label="Infrastructure Density Heat Map"
           >
-            <Flame className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+            <Flame className="w-3.5 h-3.5 text-amber-300 fill-amber-300 shrink-0" />
             <span className="hidden sm:inline">Heat Map</span>
           </button>
 
-          <div className="h-4 border-r border-slate-300 dark:border-slate-700 mx-1"></div>
+          <div className="hidden xs:block h-4 border-r border-slate-300 dark:border-slate-700 mx-0.5 sm:mx-1"></div>
 
           <button
             id="my-reports-toggle-btn"
+            type="button"
             onClick={() => setIsMyReportsOnly(!isMyReportsOnly)}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-black transition-all cursor-pointer min-h-[36px] ${
               isMyReportsOnly
                 ? 'bg-[#CCFF00] text-[#0A2540] shadow-md ring-2 ring-[#006D5B]'
-                : 'text-slate-700 dark:text-slate-300 hover:text-[#008080]'
+                : 'text-slate-700 dark:text-slate-300 hover:text-[#008080] hover:bg-slate-100 dark:hover:bg-slate-800/80'
             }`}
             title="Toggle My Reports filter (Dims all other civic reports on map)"
+            aria-label="Toggle My Reports filter"
           >
-            <UserCheck className="w-3.5 h-3.5 text-[#006D5B]" />
-            <span>My Reports {myReportsCount > 0 ? `(${myReportsCount})` : ''}</span>
+            <UserCheck className="w-3.5 h-3.5 text-[#006D5B] shrink-0" />
+            <span className="whitespace-nowrap">
+              <span className="hidden sm:inline">My Reports</span>
+              <span className="sm:hidden">Mine</span>
+              {myReportsCount > 0 ? ` (${myReportsCount})` : ''}
+            </span>
           </button>
         </div>
       )}
 
-      {/* Active My Reports Filter Banner Overlay */}
+      {/* Active My Reports Filter Banner Overlay (Responsive) */}
       {isMyReportsOnly && !isPinningLocation && (
-        <div className="absolute top-16 right-4 sm:right-auto sm:left-80 z-20 bg-[#0A2540] text-white p-3 rounded-2xl shadow-xl border-2 border-[#006D5B] flex items-center gap-3 font-['Montserrat'] animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="p-2 bg-[#006D5B] rounded-xl text-[#CCFF00] shrink-0">
-            <UserCheck className="w-4 h-4" />
+        <div className="absolute top-14 sm:top-16 left-3 sm:left-auto sm:right-auto sm:left-80 right-3 sm:right-auto z-20 bg-[#0A2540]/95 backdrop-blur-md text-white p-2.5 sm:p-3 rounded-2xl shadow-xl border-2 border-[#006D5B] flex items-center gap-2.5 sm:gap-3 font-['Montserrat'] animate-in fade-in slide-in-from-top-2 duration-200 max-w-[calc(100%-24px)] sm:max-w-md">
+          <div className="p-1.5 sm:p-2 bg-[#006D5B] rounded-xl text-[#CCFF00] shrink-0">
+            <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          <div className="pr-1">
-            <div className="text-xs font-black text-[#CCFF00] uppercase tracking-wider flex items-center gap-1.5">
+          <div className="pr-1 min-w-0">
+            <div className="text-[11px] sm:text-xs font-black text-[#CCFF00] uppercase tracking-wider flex items-center gap-1.5">
               <span>MY REPORTS FILTER ACTIVE</span>
             </div>
-            <p className="text-[10px] text-slate-300 font-medium">
+            <p className="text-[9px] sm:text-[10px] text-slate-300 font-medium truncate sm:whitespace-normal">
               {myReportsCount > 0
-                ? `Highlighting your ${myReportsCount} report${myReportsCount > 1 ? 's' : ''} (other issues dimmed)`
+                ? `Highlighting ${myReportsCount} report${myReportsCount > 1 ? 's' : ''} (others dimmed)`
                 : 'No reports created yet — submit an issue to track your impact'}
             </p>
           </div>
           <button
+            type="button"
             onClick={() => setIsMyReportsOnly(false)}
-            className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-all cursor-pointer"
+            className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-all cursor-pointer shrink-0 min-h-[32px] min-w-[32px] flex items-center justify-center"
             title="Reset My Reports Filter"
+            aria-label="Reset My Reports Filter"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
-        </div>
-      )}
-
-      {/* Range Slider Distance Filter Overlay (Top Left below mode toggle) */}
-      {/* Range Slider Distance Filter Overlay (Top Left below mode toggle - Collapsible) */}
-      {!isPinningLocation && (
-        <div className="absolute top-16 left-4 z-20 font-['Montserrat']">
-          {!isRadiusPanelOpen ? (
-            <button
-              onClick={() => setIsRadiusPanelOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-[#0A2540]/95 text-white backdrop-blur-md rounded-xl border-2 border-[#006D5B] shadow-lg text-xs font-black cursor-pointer hover:bg-[#0A2540] transition-all"
-            >
-              <CircleDot className="w-3.5 h-3.5 text-[#CCFF00] animate-pulse shrink-0" />
-              <span>Radius Filter</span>
-              {isRadiusFilterActive && (
-                <span className="bg-[#CCFF00] text-[#0A2540] text-[10px] px-1.5 py-0.5 rounded font-black">
-                  {radiusKm}km
-                </span>
-              )}
-            </button>
-          ) : (
-            <div className="bg-[#0A2540]/95 text-white backdrop-blur-md rounded-2xl shadow-xl border-2 border-[#006D5B] p-3.5 w-64 sm:w-72 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CircleDot className="w-4 h-4 text-[#CCFF00] animate-pulse shrink-0" />
-                  <span className="text-xs font-black uppercase tracking-wider text-white">Distance Radius</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => {
-                      const nextState = !isRadiusFilterActive;
-                      setIsRadiusFilterActive(nextState);
-                      if (nextState && !userLocation) {
-                        handleLocateUser();
-                      }
-                    }}
-                    className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase cursor-pointer transition-all ${
-                      isRadiusFilterActive
-                        ? 'bg-[#CCFF00] text-[#0A2540] shadow-xs'
-                        : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
-                    }`}
-                  >
-                    {isRadiusFilterActive ? 'Filter ON' : 'All'}
-                  </button>
-                  <button
-                    onClick={() => setIsRadiusPanelOpen(false)}
-                    className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                    title="Minimize Radius Panel"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {isRadiusFilterActive && (
-                <div className="space-y-2 pt-1 border-t border-slate-700/80">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-300 font-extrabold text-[11px]">Max Distance:</span>
-                    <span className="font-mono font-black text-[#CCFF00] text-sm">
-                      {radiusKm} km <span className="text-[10px] font-medium text-slate-400">({(radiusKm * 0.621371).toFixed(1)} mi)</span>
-                    </span>
-                  </div>
-
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="25"
-                    step="0.5"
-                    value={radiusKm}
-                    onChange={(e) => setRadiusKm(Number(e.target.value))}
-                    className="w-full accent-[#CCFF00] h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer"
-                  />
-
-                  {/* Quick Presets */}
-                  <div className="flex items-center justify-between gap-1 text-[10px] font-bold pt-0.5">
-                    {[1, 3, 5, 10, 20].map((preset) => (
-                      <button
-                        key={preset}
-                        onClick={() => setRadiusKm(preset)}
-                        className={`px-2 py-1 rounded-lg cursor-pointer transition-all ${
-                          radiusKm === preset
-                            ? 'bg-[#006D5B] text-[#CCFF00] font-black'
-                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                        }`}
-                      >
-                        {preset}km
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between text-[10px] text-teal-300 font-extrabold pt-1 border-t border-slate-800">
-                    <span>Showing {visibleReports.length} of {reports.length} reports</span>
-                    {!userLocation && (
-                      <button
-                        onClick={handleLocateUser}
-                        className="text-[#CCFF00] underline font-bold cursor-pointer hover:text-white"
-                      >
-                        Use GPS Center
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       )}
 
@@ -892,47 +800,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
         </button>
       </div>
 
-      {/* Map Legend Overlay */}
-      {!isPinningLocation && (
-        <>
-          {mapMode === 'heatmap' ? (
-            <div className="absolute bottom-6 left-6 z-20 hidden md:block p-3.5 bg-[#0A2540] rounded-2xl border-2 border-[#006D5B] shadow-2xl w-64">
-              <div className="flex items-center space-x-2 text-xs font-['Montserrat'] font-black text-white mb-2">
-                <Flame className="w-4 h-4 text-[#CCFF00] fill-[#CCFF00]" />
-                <span>Hazard Density Heat Map</span>
-              </div>
-              <div className="h-2.5 w-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500 mb-2 border border-white/20"></div>
-              <div className="flex justify-between text-[10px] text-slate-300 font-extrabold uppercase tracking-wider">
-                <span>Low</span>
-                <span>Moderate</span>
-                <span>Critical Hotspot</span>
-              </div>
-            </div>
-          ) : (
-            <div className="absolute bottom-6 left-6 z-20 hidden md:block p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border-2 border-slate-300 dark:border-slate-800 shadow-lg w-60">
-              <h4 className="text-[10px] font-['Montserrat'] font-black uppercase tracking-widest text-[#006D5B] mb-2.5">Status Legend</h4>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2.5 text-[#111827] dark:text-slate-200 font-bold">
-                  <div className="w-3 h-3 rounded-full bg-red-500 shrink-0 shadow-xs"></div>
-                  <span>Open (Priority Hazard)</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-[#111827] dark:text-slate-200 font-bold">
-                  <div className="w-3 h-3 rounded-full bg-amber-500 shrink-0 shadow-xs"></div>
-                  <span>Work in Progress</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-[#111827] dark:text-slate-200 font-bold">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0 shadow-xs"></div>
-                  <span>Resolved / Fixed</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-[#006D5B] dark:text-[#CCFF00] font-black border-t border-slate-200 dark:border-slate-800 pt-1.5 mt-1">
-                  <div className="w-3 h-3 rounded-full bg-[#006D5B] border-2 border-[#CCFF00] shrink-0 shadow-xs"></div>
-                  <span>My Reports (Highlighted)</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+      {/* Map Legend Overlay Removed as requested */}
     </div>
   );
 };

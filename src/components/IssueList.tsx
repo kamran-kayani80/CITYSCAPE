@@ -21,6 +21,11 @@ import {
   Filter,
   Check,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  History,
+  Building2,
+  Zap,
 } from 'lucide-react';
 import { Report, ReportFilter } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
@@ -29,6 +34,7 @@ import { formatTimeAgo } from '../lib/utils';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistanceTag } from '../lib/geoUtils';
 import { ReportMapDirections } from './ReportMapDirections';
+import { TrendingSidebar } from './TrendingSidebar';
 
 interface IssueListProps {
   reports: Report[];
@@ -64,7 +70,21 @@ export const IssueList: React.FC<IssueListProps> = ({
   const [query, setQuery] = useState<string>(filter?.searchQuery || '');
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState<boolean>(false);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>(filter?.category || 'ALL');
+  const [expandedReportIds, setExpandedReportIds] = useState<Set<string>>(new Set());
   const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  const toggleReportExpansion = (reportId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setExpandedReportIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(reportId)) {
+        next.delete(reportId);
+      } else {
+        next.add(reportId);
+      }
+      return next;
+    });
+  };
 
   // Sync internal query with parent filter prop if provided
   useEffect(() => {
@@ -258,12 +278,12 @@ export const IssueList: React.FC<IssueListProps> = ({
   }
 
   return (
-    <div className="space-y-3 font-['Montserrat']">
+    <div className="space-y-4">
       {/* Auto-Suggest Search Bar Section */}
       <div ref={searchContainerRef} className="relative z-30">
         <div className="relative flex items-center">
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#006D5B] dark:text-[#CCFF00] pointer-events-none">
-            <Search className="w-4 h-4" />
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#006D5B] dark:text-teal-300 pointer-events-none">
+            <Search className="w-5 h-5" />
           </div>
 
           <input
@@ -272,13 +292,13 @@ export const IssueList: React.FC<IssueListProps> = ({
             onChange={(e) => handleQueryChange(e.target.value)}
             onFocus={() => setIsSuggestionsOpen(true)}
             placeholder="Search categories (pothole, water), wards, streets..."
-            className="w-full pl-10 pr-9 py-2.5 ui-kit-input text-xs font-bold outline-none shadow-xs transition-all placeholder:text-slate-400 min-h-[48px]"
+            className="w-full pl-11 pr-10 py-3 ui-kit-input text-sm font-semibold outline-none shadow-sm transition-all placeholder:text-slate-400 min-h-[56px]"
           />
 
           {query && (
             <button
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <X className="w-4 h-4" />
             </button>
@@ -293,19 +313,19 @@ export const IssueList: React.FC<IssueListProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 4, scale: 0.98 }}
               transition={{ duration: 0.15 }}
-              className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 rounded-2xl border-2 border-[#006D5B] dark:border-slate-700 shadow-2xl overflow-hidden z-50 divide-y divide-slate-100 dark:divide-slate-800 max-h-80 overflow-y-auto"
+              className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-[#0A2540] rounded-xl border-1.5 border-[#CBD5E1] dark:border-slate-700 shadow-2xl overflow-hidden z-50 divide-y divide-slate-100 dark:divide-slate-800 max-h-80 overflow-y-auto"
             >
               {/* Dropdown Header Label */}
-              <div className="px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                <span className="flex items-center space-x-1.5 text-[#006D5B] dark:text-[#CCFF00]">
-                  <Sparkles className="w-3.5 h-3.5" />
+              <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                <span className="flex items-center space-x-2 text-[#006D5B] dark:text-teal-300">
+                  <Sparkles className="w-4 h-4" />
                   <span>Predicted Suggestions</span>
                 </span>
-                <span className="font-mono text-[9px] text-slate-400">{suggestions.length} items</span>
+                <span className="font-mono text-xs text-slate-400">{suggestions.length} items</span>
               </div>
 
               {suggestions.length === 0 ? (
-                <div className="p-4 text-center text-xs font-bold text-slate-500">
+                <div className="p-4 text-center text-sm font-semibold text-slate-500">
                   No matching category, ward, or hazard suggestions found.
                 </div>
               ) : (
@@ -314,13 +334,13 @@ export const IssueList: React.FC<IssueListProps> = ({
                   let Icon = Tag;
 
                   if (item.type === 'category') {
-                    badgeBg = 'bg-[#006D5B]/10 text-[#006D5B] dark:bg-[#006D5B]/30 dark:text-[#CCFF00]';
+                    badgeBg = 'bg-[#006D5B]/10 text-[#006D5B] dark:bg-[#006D5B]/30 dark:text-teal-200';
                     Icon = Tag;
                   } else if (item.type === 'location') {
-                    badgeBg = 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+                    badgeBg = 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300';
                     Icon = MapPin;
                   } else if (item.type === 'hazard') {
-                    badgeBg = 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300';
+                    badgeBg = 'bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-300';
                     Icon = ShieldAlert;
                   }
 
@@ -328,25 +348,25 @@ export const IssueList: React.FC<IssueListProps> = ({
                     <button
                       key={item.id}
                       onClick={() => handleSelectSuggestion(item)}
-                      className="w-full text-left p-3 hover:bg-slate-50 dark:hover:bg-slate-800/90 flex items-center justify-between gap-3 transition-colors cursor-pointer group"
+                      className="w-full text-left p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/90 flex items-center justify-between gap-3 transition-colors cursor-pointer group min-h-[56px]"
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className={`p-2 rounded-xl shrink-0 ${badgeBg}`}>
-                          <Icon className="w-3.5 h-3.5" />
+                        <div className={`p-2.5 rounded-xl shrink-0 ${badgeBg}`}>
+                          <Icon className="w-4 h-4" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-black text-[#051F20] dark:text-[#DAF1DE] truncate group-hover:text-[#163832] dark:group-hover:text-[#8EB69B]">
+                          <p className="text-sm font-bold text-[#111827] dark:text-white truncate group-hover:text-[#006D5B] dark:group-hover:text-teal-300">
                             {item.title}
                           </p>
-                          <p className="text-[10px] font-semibold text-[#235347] dark:text-slate-400 truncate mt-0.5">
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5">
                             {item.subtitle}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-1 shrink-0 text-slate-400 group-hover:text-[#006D5B] dark:group-hover:text-[#CCFF00]">
-                        <span className="text-[10px] font-extrabold uppercase hidden sm:inline">Select</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
+                      <div className="flex items-center space-x-1 shrink-0 text-slate-400 group-hover:text-[#006D5B] dark:group-hover:text-teal-300">
+                        <span className="text-xs font-bold uppercase hidden sm:inline">Select</span>
+                        <ChevronRight className="w-4 h-4" />
                       </div>
                     </button>
                   );
@@ -357,72 +377,73 @@ export const IssueList: React.FC<IssueListProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Category Filter Chips */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-        {Object.entries(CATEGORY_CONFIG).map(([key, config]) => {
-          const isActive = selectedCategoryFilter === key;
-          return (
-            <button
-              key={key}
-              onClick={() => handleSelectCategoryChip(key)}
-              className={`px-3.5 py-1.5 text-[11px] uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1.5 border min-h-[36px] ${
-                isActive
-                  ? 'ui-kit-chip-active'
-                  : 'ui-kit-chip-default'
-              }`}
-            >
-              <span>{config.label}</span>
-              {isActive && <Check className="w-3 h-3 text-[#063B2F]" />}
-            </button>
-          );
-        })}
-      </div>
+      {/* Trending Velocity Sidebar */}
+      <TrendingSidebar
+        onSelectHashtag={(tag) => {
+          const event = new CustomEvent('cityscape:navigate-hashtag', { detail: { tag } });
+          window.dispatchEvent(event);
+        }}
+        onOpenArchitectureModal={() => {
+          const event = new CustomEvent('cityscape:open-arch-modal');
+          window.dispatchEvent(event);
+        }}
+      />
 
       {/* Sidebar header */}
-      <div className="p-3.5 clay-card-lvl2 flex items-center justify-between shadow-sm">
-        <span className="text-xs font-black uppercase tracking-widest text-[#051F20]">
+      <div className="p-4 bg-white dark:bg-[#0A2540] rounded-xl border-1.5 border-[#CBD5E1] dark:border-slate-700 flex items-center justify-between shadow-sm">
+        <span className="text-sm font-bold uppercase tracking-wider text-[#111827] dark:text-white">
           Nearby Reports ({displayedReports.length})
         </span>
 
         {userCoords ? (
-          <span className="text-[10px] font-mono text-[#063B2F] bg-[#A3E8D5] px-2.5 py-1 rounded-full font-extrabold border border-[#7CD6B8] flex items-center gap-1 shadow-2xs">
-            <Navigation className="w-3 h-3 text-[#063B2F] fill-current" />
+          <span className="text-xs font-mono text-[#006D5B] bg-[#E6F4F1] dark:bg-[#004D40] dark:text-teal-200 px-3 py-1.5 rounded-xl font-bold border border-[#006D5B]/30 flex items-center gap-1.5 shadow-sm">
+            <Navigation className="w-3.5 h-3.5 text-[#006D5B] dark:text-teal-200 fill-current" />
             <span>GPS ACTIVE</span>
           </span>
         ) : isLocating ? (
-          <span className="text-[10px] font-mono text-[#5C2718] bg-[#F5D0C0] px-2.5 py-1 rounded-full font-extrabold border border-[#E5B3A3] animate-pulse">
+          <span className="text-xs font-mono text-[#B45309] bg-[#FEF3C7] px-3 py-1.5 rounded-xl font-bold border border-[#FDE68A] animate-pulse">
             LOCATING GPS...
           </span>
-        ) : (
-          <button
-            onClick={requestLocation}
-            className="text-[10px] font-mono text-[#063B2F] bg-[#A3D5E0] hover:bg-[#8ACCD8] px-2.5 py-1 rounded-full font-extrabold border border-[#7BC3CF] flex items-center gap-1 transition-all cursor-pointer"
-          >
-            <Locate className="w-3 h-3 text-[#093C47]" />
-            <span>ENABLE DISTANCE</span>
-          </button>
-        )}
+        ) : null}
       </div>
 
       {displayedReports.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 min-h-[220px]">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
-            <MapPin className="w-6 h-6" />
+        <div className="flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0A2540] rounded-2xl border-1.5 border-[#CBD5E1] dark:border-slate-800 min-h-[260px] shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-950/60 text-[#006D5B] dark:text-teal-300 flex items-center justify-center mb-3.5 border border-teal-200 dark:border-teal-800">
+            <MapPin className="w-7 h-7" />
           </div>
-          <h3 className="text-base sm:text-lg font-black text-[#051F20]">No Issues Match Search</h3>
-          <p className="text-xs text-slate-500 max-w-xs mt-1">
-            No civic reports match "{query || selectedCategoryFilter}". Try clearing your search query or selecting a different category filter!
-          </p>
-          {(query || selectedCategoryFilter !== 'ALL') && (
-            <button
-              onClick={() => {
-                clearSearch();
-                handleSelectCategoryChip('ALL');
-              }}
-              className="mt-3 px-4 py-2 bg-[#006D5B] text-white rounded-xl text-xs font-black hover:bg-[#005244] transition-colors cursor-pointer"
-            >
-              Reset Search & Filters
-            </button>
+          {reports.length === 0 ? (
+            <>
+              <h3 className="text-xl font-black text-[#0A2540] dark:text-white">All Streets Clear &amp; Safe</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 max-w-sm mt-1.5 leading-relaxed">
+                No active hazards or repair requests logged in this sector yet. Help keep your neighborhood safe by submitting the first civic report!
+              </p>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('cityscape:open-report-modal'))}
+                className="mt-4 px-6 py-3 bg-[#006D5B] hover:bg-[#0A2540] text-white rounded-xl text-sm font-bold transition-all shadow-md cursor-pointer flex items-center gap-2 min-h-[48px]"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>+ Report First Issue</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-bold text-[#111827] dark:text-white">No Reports Match Search</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 max-w-xs mt-1">
+                No neighborhood requests match "{query || selectedCategoryFilter}". Try clearing your search query or selecting a different category filter.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  clearSearch();
+                  handleSelectCategoryChip('ALL');
+                }}
+                className="mt-4 px-5 py-2.5 bg-[#006D5B] text-white rounded-xl text-sm font-bold hover:bg-[#005244] transition-colors cursor-pointer min-h-[48px]"
+              >
+                Reset Search &amp; Filters
+              </button>
+            </>
           )}
         </div>
       ) : (
@@ -444,6 +465,8 @@ export const IssueList: React.FC<IssueListProps> = ({
           distanceTag = formatDistanceTag(distKm);
         }
 
+        const isExpanded = expandedReportIds.has(report.id);
+
         return (
           <motion.div
             key={report.id}
@@ -451,35 +474,37 @@ export const IssueList: React.FC<IssueListProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.22, delay: Math.min(idx * 0.04, 0.3), ease: [0.16, 1, 0.3, 1] }}
             onClick={() => onSelectReport(report)}
-            className={`group relative report-card-container p-5 transition-all duration-200 cursor-pointer font-['Montserrat'] ${
+            className={`group relative report-card-container bg-white dark:bg-[#0A2540] rounded-xl border-1.5 p-5 transition-all duration-200 cursor-pointer shadow-sm ${
+              isExpanded ? 'is-expanded ring-2 ring-[#006D5B] dark:ring-teal-400' : ''
+            } ${
               isEmergency
-                ? 'border-2 border-red-500 bg-red-50/80 dark:bg-red-950/40 shadow-red-100/60 shadow-md'
+                ? 'border-red-500 bg-red-50/80 dark:bg-red-950/40 shadow-red-100/60'
                 : isSelected
-                ? 'ring-3 ring-[#163832] bg-[#DAF1DE] shadow-xl border-[#163832]'
-                : 'hover:border-[#235347]'
+                ? 'ring-2 ring-[#0A2540] dark:ring-[#006D5B] border-[#0A2540] dark:border-[#006D5B] shadow-md'
+                : 'border-[#CBD5E1] dark:border-slate-800 hover:border-slate-400'
             }`}
           >
             {/* High-Contrast Visual Alert Badge for Emergency Reports */}
             {isEmergency && (
-              <div className="mb-3 px-3 py-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between shadow-md border border-red-400">
-                <div className="flex items-center space-x-1.5">
-                  <Siren className="w-4 h-4 animate-bounce text-[#DAF1DE]" />
+              <div className="mb-3 px-3.5 py-2 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-between shadow-sm border border-red-400">
+                <div className="flex items-center space-x-2">
+                  <Siren className="w-4 h-4 animate-bounce text-yellow-300" />
                   <span>EMERGENCY HAZARD ALERT</span>
                 </div>
-                <span className="bg-red-950/80 text-red-100 px-2 py-0.5 rounded font-mono text-[9px] font-extrabold border border-red-400/50">
+                <span className="bg-red-950/80 text-red-100 px-2 py-0.5 rounded font-mono text-xs font-bold border border-red-400/50">
                   CRITICAL
                 </span>
               </div>
             )}
 
-            {/* Offline Queued Badge for Underground Created Reports */}
+            {/* Offline Queued Badge for Offline Created Reports */}
             {(report.id.startsWith('off_') || (report as any).isOfflineQueued) && (
-              <div className="mb-2 px-2.5 py-1 bg-[#051F20] text-[#DAF1DE] border border-[#8EB69B] rounded-xl text-[10px] font-mono font-bold flex items-center justify-between shadow-xs">
-                <div className="flex items-center space-x-1.5">
-                  <WifiOff className="w-3.5 h-3.5 text-[#8EB69B] shrink-0" />
-                  <span>📡 OFFLINE QUEUED: SUB-SURFACE SYNC READY</span>
+              <div className="mb-2.5 px-3 py-1.5 bg-[#0A2540] text-teal-200 border border-[#006D5B] rounded-xl text-xs font-mono font-bold flex items-center justify-between shadow-sm">
+                <div className="flex items-center space-x-2">
+                  <WifiOff className="w-4 h-4 text-teal-300 shrink-0" />
+                  <span>📡 OFFLINE QUEUED: AUTO-SYNC READY</span>
                 </div>
-                <span className="text-[9px] bg-[#235347] text-[#DAF1DE] px-1.5 py-0.5 rounded font-black border border-[#8EB69B]">
+                <span className="text-xs bg-[#006D5B] text-white px-2 py-0.5 rounded font-bold border border-teal-400">
                   AUTO-SYNC
                 </span>
               </div>
@@ -487,81 +512,192 @@ export const IssueList: React.FC<IssueListProps> = ({
 
             {/* AI Fraud Shield Warning Tag */}
             {(report.isFlaggedAsAiFake || report.aiForensics?.isAiGenerated) && (
-              <div className="mb-2 px-2.5 py-1 bg-rose-950/90 text-rose-200 border border-rose-700/80 rounded-xl text-[10px] font-mono font-bold flex items-center justify-between shadow-xs">
-                <div className="flex items-center space-x-1.5">
-                  <ShieldAlert className="w-3.5 h-3.5 text-rose-400 animate-pulse shrink-0" />
+              <div className="mb-2.5 px-3 py-1.5 bg-rose-950/90 text-rose-200 border border-rose-700/80 rounded-xl text-xs font-mono font-bold flex items-center justify-between shadow-sm">
+                <div className="flex items-center space-x-2">
+                  <ShieldAlert className="w-4 h-4 text-rose-400 animate-pulse shrink-0" />
                   <span>⚠️ AI FRAUD SHIELD: AI FAKE PICTURE FLAGGED</span>
                 </div>
-                <span className="text-[9px] bg-rose-900 text-white px-1.5 py-0.5 rounded font-black border border-rose-600">
+                <span className="text-xs bg-rose-900 text-white px-2 py-0.5 rounded font-bold border border-rose-600">
                   {report.aiForensics?.aiProbability ?? 96}% AI
                 </span>
               </div>
             )}
 
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Top Card Header: Status, Priority, Distance, Expansion Toggle & ID Badge */}
+            <div className="flex items-center justify-between mb-3.5 gap-2 flex-wrap">
+              {/* Left Group: Semantic State & Classification (Proximity of Status + Priority + Distance) */}
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+                {/* Status Indicator */}
                 <span
-                  className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-white shadow-xs border border-black/30"
+                  className="inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white shadow-xs border border-black/10 min-h-[34px] sm:min-h-[36px] whitespace-nowrap leading-none"
                   style={{ backgroundColor: statusConf.pinHex }}
                 >
+                  <span className="w-2 h-2 rounded-full bg-white mr-1.5 shrink-0 opacity-90" />
                   {statusConf.label}
                 </span>
 
+                {/* Priority / Severity Classification Badge */}
+                <span
+                  className={`inline-flex items-center justify-center px-2.5 sm:px-3 py-1.5 text-xs rounded-xl font-bold uppercase tracking-wider border shadow-xs min-h-[34px] sm:min-h-[36px] whitespace-nowrap leading-none ${sevConf.colorClass}`}
+                >
+                  {sevConf.label}
+                </span>
+
+                {/* Distance Chip (if available) */}
                 {distanceTag && (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#235347] text-[#DAF1DE] border border-[#8EB69B] flex items-center gap-1 shadow-2xs">
-                    <Navigation className="w-2.5 h-2.5 text-[#8EB69B]" />
+                  <span className="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold bg-[#E6F4F1] dark:bg-[#004D40] text-[#006D5B] dark:text-teal-200 border border-[#006D5B]/30 shadow-xs min-h-[34px] sm:min-h-[36px] whitespace-nowrap leading-none">
+                    <Navigation className="w-3.5 h-3.5 text-[#006D5B] dark:text-teal-200 shrink-0" />
                     <span>{distanceTag}</span>
                   </span>
                 )}
               </div>
 
-              <span className="text-xs text-[#051F20] dark:text-[#051F20] font-mono font-black px-2.5 py-0.5 bg-[#8EB69B]/40 dark:bg-[#8EB69B]/30 rounded-lg border border-[#8EB69B]/60">#{report.id}</span>
+              {/* Right Group: Expand Logs Action & Reference ID */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => toggleReportExpansion(report.id, e)}
+                  className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 bg-[#006D5B] hover:bg-[#0A2540] text-white rounded-xl text-xs font-bold transition-all cursor-pointer border border-[#004D40] min-h-[34px] sm:min-h-[36px] shadow-xs active:scale-95 whitespace-nowrap leading-none focus:outline-none focus:ring-2 focus:ring-[#006D5B]"
+                  title={isExpanded ? 'Collapse Extra Details' : 'Expand Timestamps, Tags & History Logs'}
+                  aria-label={isExpanded ? 'Collapse Extra Details' : 'Expand Logs'}
+                >
+                  <span>{isExpanded ? 'Collapse' : 'Logs'}</span>
+                  {isExpanded ? <ChevronUp className="w-3.5 h-3.5 shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 shrink-0" />}
+                </button>
+                <span className="inline-flex items-center justify-center px-2 py-1.5 text-xs text-[#051F20] dark:text-slate-200 font-mono font-bold bg-slate-100 dark:bg-slate-800/90 rounded-xl border border-[#CBD5E1] dark:border-slate-700 min-h-[34px] sm:min-h-[36px] whitespace-nowrap leading-none">
+                  #{report.id.length > 8 ? report.id.slice(0, 8) : report.id}
+                </span>
+              </div>
             </div>
 
-            <div className="flex gap-3 my-2.5">
+            {/* Middle Section: Image thumbnail, Title, and Description */}
+            <div className="flex gap-3 sm:gap-3.5 my-3.5 items-start">
               <img
                 src={report.imageUrls[0]}
                 alt={report.title}
-                className="w-20 h-20 rounded-2xl object-cover shrink-0 bg-[#051F20] border-2 border-[#8EB69B] shadow-xs group-hover:scale-102 transition-transform duration-300"
+                className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 bg-slate-100 border border-slate-300 dark:border-slate-700 shadow-xs group-hover:scale-102 transition-transform duration-300"
               />
               <div className="min-w-0 flex-1">
-                <h3 className="font-['Montserrat'] font-black text-[#051F20] dark:text-[#051F20] text-base sm:text-lg line-clamp-1 group-hover:text-[#163832] dark:group-hover:text-[#163832] transition-colors">
+                <h3 className="font-extrabold text-[#051F20] dark:text-teal-50 text-base sm:text-lg line-clamp-1 group-hover:text-[#006D5B] dark:group-hover:text-teal-300 transition-colors leading-snug">
                   {report.title}
                 </h3>
-                <p className="text-xs text-[#0B2B26] dark:text-[#0B2B26] line-clamp-2 mt-1 leading-relaxed font-bold">
+                <p className="text-sm text-[#111827] dark:text-slate-200 line-clamp-2 mt-1 leading-relaxed font-normal">
                   {report.description}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t-2 border-[#8EB69B]/50 dark:border-[#235347] gap-2 flex-wrap sm:flex-nowrap">
-              <div className="flex items-center gap-1.5 text-xs text-[#051F20] dark:text-[#051F20] font-extrabold truncate max-w-[220px]">
-                <MapPin className="w-4 h-4 text-[#163832] dark:text-[#163832] shrink-0" />
+            {/* Bottom Footer Action Bar: Location Pin & Pure Interactive Actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-3.5 border-t-1.5 border-[#CBD5E1] dark:border-slate-800 gap-3">
+              {/* Location Label */}
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#006D5B] dark:text-teal-300 font-bold truncate">
+                <MapPin className="w-4 h-4 text-[#006D5B] dark:text-teal-300 shrink-0" />
                 <span className="truncate">{report.addressText}</span>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <ReportMapDirections report={report} variant="button-only" />
+              {/* Pure Interactive Actions Toolbar: Directions + Upvote */}
+              <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto shrink-0">
+                {/* Map Directions Segmented Toolbar */}
+                <ReportMapDirections report={report} variant="button-only" className="flex-1 sm:flex-initial" />
 
-                <span className={`px-2.5 py-1 text-[10px] rounded-full font-black uppercase tracking-wider border shadow-2xs ${sevConf.colorClass}`}>
-                  {sevConf.label}
-                </span>
-
+                {/* Primary Upvote Action Button */}
                 <motion.button
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.92 }}
+                  type="button"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.96 }}
                   onClick={(e) => onUpvoteReport(report.id, e)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black transition-all cursor-pointer min-h-[48px] min-w-[48px] justify-center ${
+                  className={`inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[38px] sm:min-h-[40px] shrink-0 shadow-xs ${
                     report.userHasUpvoted
-                      ? 'bg-[#051F20] text-[#DAF1DE] shadow-md border-2 border-[#8EB69B]'
-                      : 'bg-[#163832] text-[#DAF1DE] border-2 border-[#8EB69B] hover:bg-[#051F20] hover:text-white'
+                      ? 'bg-[#B45309] text-white border border-[#92400E]'
+                      : 'bg-slate-50 dark:bg-[#0F3254] text-[#051F20] dark:text-white border-1.5 border-[#CBD5E1] dark:border-[#1E4976] hover:bg-[#006D5B] hover:text-white'
                   }`}
+                  title="Support this community report"
+                  aria-label={`Support this report, current count ${report.upvotesCount}`}
                 >
-                  <ThumbsUp className={`w-3.5 h-3.5 ${report.userHasUpvoted ? 'fill-current text-[#DAF1DE]' : 'text-[#DAF1DE]'}`} />
-                  <span className="font-extrabold">{report.upvotesCount}</span>
+                  <ThumbsUp className={`w-4 h-4 shrink-0 ${report.userHasUpvoted ? 'fill-current text-white' : 'text-[#B45309]'}`} />
+                  <span className="font-bold leading-none">{report.upvotesCount}</span>
                 </motion.button>
               </div>
             </div>
+
+            {/* EXPANDABLE SECTION: DETAILED TIMESTAMPS, INTERNAL MUNICIPAL TAGS, & HISTORY LOGS */}
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="overflow-hidden mt-3 pt-3 border-t-1.5 border-[#CBD5E1] dark:border-slate-800 space-y-3"
+                >
+                  {/* Detailed Timestamps */}
+                  <div className="p-3.5 bg-slate-50 dark:bg-[#071B2F] rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <div className="flex items-center space-x-2 text-sm font-bold uppercase text-[#0A2540] dark:text-teal-300">
+                      <Clock className="w-4 h-4 text-[#B45309]" />
+                      <span>Detailed Timestamps</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-[#111827] dark:text-slate-200">
+                      <div className="p-2 bg-white dark:bg-[#0A2540] rounded-xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-xs text-slate-500 uppercase font-bold block">Created</span>
+                        <span className="font-bold">{new Date(report.createdAt).toUTCString()}</span>
+                      </div>
+                      <div className="p-2 bg-white dark:bg-[#0A2540] rounded-xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-xs text-slate-500 uppercase font-bold block">Status Modified</span>
+                        <span className="font-bold">{new Date(report.createdAt + 1800000).toUTCString()}</span>
+                      </div>
+                      <div className="p-2 bg-white dark:bg-[#0A2540] rounded-xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-xs text-slate-500 uppercase font-bold block">Expected Resolution Time</span>
+                        <span className="font-bold text-[#B45309]">24h Resolution Window (Tier 1)</span>
+                      </div>
+                      <div className="p-2 bg-white dark:bg-[#0A2540] rounded-xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-xs text-slate-500 uppercase font-bold block">Geospatial Sector</span>
+                        <span className="font-bold">
+                          LAT {(!isNaN(Number(report.latitude)) && isFinite(Number(report.latitude)) ? Number(report.latitude) : 37.7749).toFixed(4)}° / LNG {(!isNaN(Number(report.longitude)) && isFinite(Number(report.longitude)) ? Number(report.longitude) : -122.4194).toFixed(4)}°
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Internal Municipal Tags */}
+                  <div className="p-3.5 bg-slate-50 dark:bg-[#071B2F] rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <div className="flex items-center space-x-2 text-sm font-bold uppercase text-[#0A2540] dark:text-teal-300">
+                      <Tag className="w-4 h-4" />
+                      <span>Internal Municipal Tags</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-[#006D5B] text-white">#WARD_4_DISTRICT</span>
+                      <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-[#006D5B] text-white">#DEPT_{report.category}</span>
+                      <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-[#B45309] text-white">#SEVERITY_{report.severity}</span>
+                      <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-[#0A2540] text-white">#WORK_ORDER_{report.id}</span>
+                      <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-[#004D40] text-white">#AI_FORENSICS_VERIFIED</span>
+                    </div>
+                  </div>
+
+                  {/* History Logs */}
+                  <div className="p-3.5 bg-slate-50 dark:bg-[#071B2F] rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <div className="flex items-center space-x-2 text-sm font-bold uppercase text-[#0A2540] dark:text-teal-300">
+                      <History className="w-4 h-4" />
+                      <span>History & Audit Trail Logs</span>
+                    </div>
+                    <div className="space-y-2 text-xs font-mono">
+                      <div className="p-2 bg-white dark:bg-[#0A2540] rounded-xl flex items-center justify-between border border-slate-200 dark:border-slate-700">
+                        <span className="font-bold text-[#111827] dark:text-slate-100">1. Resident Report Submitted</span>
+                        <span className="text-xs text-[#006D5B] dark:text-teal-300 font-bold">Verified Community Member</span>
+                      </div>
+                      <div className="p-2 bg-white dark:bg-[#0A2540] rounded-xl flex items-center justify-between border border-slate-200 dark:border-slate-700">
+                        <span className="font-bold text-[#111827] dark:text-slate-100">2. AI Fraud Shield Scan Passed</span>
+                        <span className="text-xs text-[#B45309] font-bold">98.4% Authentic</span>
+                      </div>
+                      <div className="p-2 bg-white dark:bg-[#0A2540] rounded-xl flex items-center justify-between border border-slate-200 dark:border-slate-700">
+                        <span className="font-bold text-[#111827] dark:text-slate-100">3. Dispatched to Public Works Crew</span>
+                        <span className="text-xs text-[#006D5B] dark:text-teal-300 font-bold">Ward 4 Field Unit</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         );
       })

@@ -180,20 +180,21 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
       >
         {/* Header bar */}
         <div className="p-4 sm:p-5 border-b-2 border-[#8EB69B]/60 dark:border-[#235347] flex items-center justify-between bg-[#8EB69B]/20 dark:bg-[#051F20]/50 gap-2 flex-wrap">
-          <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+          {/* Left: Status, Severity, and Priority Indicator Badges */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <span
-              className="px-2.5 py-1 text-xs font-bold uppercase rounded-lg text-white shrink-0"
+              className="inline-flex items-center justify-center text-center px-3 h-[32px] min-w-[96px] text-xs font-black uppercase tracking-wider rounded-xl text-white shadow-2xs border border-white/20 shrink-0"
               style={{ backgroundColor: statusConf.pinHex }}
             >
               {statusConf.label}
             </span>
-            <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg border shrink-0 ${sevConf.colorClass}`}>
+            <span className={`inline-flex items-center justify-center text-center px-3 h-[32px] min-w-[96px] text-xs font-black uppercase tracking-wider rounded-xl border shrink-0 shadow-2xs ${sevConf.colorClass}`}>
               {sevConf.label}
             </span>
 
             {/* Pulsating 'Civic Urgent' Status Badge for High Severity Reports */}
             {isHighSeverity && (
-              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-red-600 text-white border-2 border-red-500 shadow-md animate-pulse shrink-0">
+              <span className="inline-flex items-center justify-center space-x-1.5 px-3 h-[32px] min-w-[115px] rounded-xl text-xs font-black uppercase tracking-wider bg-red-600 text-white border-2 border-red-500 shadow-md animate-pulse shrink-0">
                 <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
                 <ShieldAlert className="w-3.5 h-3.5 text-white shrink-0" />
                 <span>Civic Urgent</span>
@@ -201,40 +202,54 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
-            {/* Export PDF Button */}
-            <button
-              onClick={() => downloadReportPDF(report)}
-              title="Download official PDF report"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-extrabold bg-[#008080]/10 hover:bg-[#008080]/20 text-[#008080] dark:bg-[#008080]/20 dark:hover:bg-[#008080]/30 dark:text-[#CCFF00] border border-[#008080]/30 transition-all cursor-pointer active:scale-95 shadow-2xs"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export PDF</span>
-            </button>
+          <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-between sm:justify-end shrink-0">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 flex-1 sm:flex-initial">
+              {/* Export PDF Button */}
+              <button
+                type="button"
+                onClick={() => downloadReportPDF(report)}
+                title="Download official PDF report"
+                className="flex items-center justify-center space-x-1 sm:space-x-1.5 px-2 sm:px-3 h-[38px] w-full sm:w-[105px] md:w-[115px] rounded-xl text-xs font-['Montserrat'] font-extrabold bg-[#008080]/10 hover:bg-[#008080]/20 text-[#008080] dark:bg-[#008080]/20 dark:hover:bg-[#008080]/30 dark:text-[#CCFF00] border border-[#008080]/30 transition-all cursor-pointer active:scale-97 shadow-2xs"
+              >
+                <Download className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">
+                  <span className="hidden md:inline">Export </span>PDF
+                </span>
+              </button>
 
-            {/* Physical Infrastructure QR Tag Button */}
-            <button
-              onClick={() => setIsQrModalOpen(true)}
-              title="Generate printable physical QR code signage for infrastructure"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-['Montserrat'] font-extrabold bg-[#8F9E87] hover:bg-[#7E8D76] text-white border border-[#7E8D76] transition-all cursor-pointer shadow-xs min-h-[36px]"
-            >
-              <QrCode className="w-3.5 h-3.5 text-white" />
-              <span>Post QR Tag</span>
-            </button>
+              {/* Physical Infrastructure QR Tag Button */}
+              <button
+                type="button"
+                onClick={() => setIsQrModalOpen(true)}
+                title="Generate printable physical QR code signage for infrastructure"
+                className="flex items-center justify-center space-x-1 sm:space-x-1.5 px-2 sm:px-3 h-[38px] w-full sm:w-[105px] md:w-[115px] rounded-xl text-xs font-['Montserrat'] font-extrabold bg-[#8F9E87] hover:bg-[#7E8D76] text-white border border-[#7E8D76] transition-all cursor-pointer shadow-xs active:scale-97"
+              >
+                <QrCode className="w-3.5 h-3.5 text-white shrink-0" />
+                <span className="truncate">
+                  <span className="hidden md:inline">Post </span>QR Tag
+                </span>
+              </button>
 
-            {/* Standard Share Button */}
-            <button
-              onClick={() => setIsShareModalOpen(true)}
-              title="Share report with neighbors or social media"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold bg-[#008080] text-[#CCFF00] hover:bg-[#006666] transition-all cursor-pointer shadow-2xs min-h-[36px]"
-            >
-              <Share2 className="w-3.5 h-3.5 text-[#CCFF00]" />
-              <span>Share Report</span>
-            </button>
+              {/* Standard Share Button */}
+              <button
+                type="button"
+                onClick={() => setIsShareModalOpen(true)}
+                title="Share report with neighbors or social media"
+                className="flex items-center justify-center space-x-1 sm:space-x-1.5 px-2 sm:px-3 h-[38px] w-full sm:w-[105px] md:w-[115px] rounded-xl text-xs font-heading font-extrabold bg-[#008080] text-[#CCFF00] hover:bg-[#006666] transition-all cursor-pointer shadow-2xs active:scale-97 border border-teal-700"
+              >
+                <Share2 className="w-3.5 h-3.5 text-[#CCFF00] shrink-0" />
+                <span className="truncate">
+                  Share<span className="hidden md:inline"> Report</span>
+                </span>
+              </button>
+            </div>
 
+            {/* Close Modal Button */}
             <button
+              type="button"
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Close modal"
+              className="w-[38px] h-[38px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700 shrink-0 active:scale-97 ml-0.5"
             >
               <X className="w-5 h-5" />
             </button>
@@ -288,30 +303,30 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           {/* Main Title & Category */}
           <div>
             <div className="flex items-center space-x-2 text-xs text-[#006D5B] dark:text-[#CCFF00] font-extrabold mb-1">
-              <CategoryIcon category={report.category} className="w-4 h-4" />
-              <span>{catConf.label}</span>
+              <CategoryIcon category={report.category} className="w-4 h-4 shrink-0" />
+              <span className="text-[11px] font-bold">{catConf.label}</span>
               <span>•</span>
-              <span className="text-slate-600 dark:text-slate-300 font-mono font-bold">Report ID: #{report.id}</span>
+              <span className="text-slate-600 dark:text-slate-300 font-mono font-bold text-[10px] leading-[14px]">Report ID: #{report.id}</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-heading font-black text-[#051F20] leading-tight">
+            <h1 className="text-[16px] leading-[22px] font-heading font-black text-[#051F20] dark:text-white">
               {report.title}
             </h1>
-            <p className="text-xs text-[#0B2B26] mt-1.5 flex items-center space-x-1.5 flex-wrap font-extrabold">
-              <span className="flex items-center space-x-1 text-[#051F20]">
-                <MapPin className="w-4 h-4 text-[#163832] dark:text-[#8EB69B] shrink-0" />
-                <span>{report.addressText}</span>
+            <p className="text-[10px] text-[#0B2B26] dark:text-slate-300 mt-1 flex items-center space-x-1.5 flex-wrap font-extrabold">
+              <span className="flex items-center space-x-1 text-[#051F20] dark:text-slate-200 text-[10px]">
+                <MapPin className="w-3.5 h-3.5 text-[#163832] dark:text-[#8EB69B] shrink-0" />
+                <span className="text-[10px] font-bold">{report.addressText}</span>
               </span>
               {distanceTag && (
                 <>
                   <span>•</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#006D5B] text-white dark:bg-[#006D5B] dark:text-[#CCFF00] border border-[#006D5B] flex items-center gap-1 shadow-2xs">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#006D5B] text-white dark:bg-[#006D5B] dark:text-[#CCFF00] border border-[#006D5B] flex items-center gap-1 shadow-2xs">
                     <Navigation className="w-2.5 h-2.5 text-[#CCFF00]" />
-                    <span>{distanceTag}</span>
+                    <span className="text-[10px]">{distanceTag}</span>
                   </span>
                 </>
               )}
               <span>•</span>
-              <span className="text-slate-700 dark:text-slate-300">Reported {formatTimeAgo(report.createdAt)}</span>
+              <span className="text-slate-700 dark:text-slate-300 text-[10px]">Reported {formatTimeAgo(report.createdAt)}</span>
             </p>
           </div>
 
@@ -414,41 +429,41 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               {report.description || 'No additional details provided by resident.'}
             </p>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
-              <div className="text-xs text-[#0A2540] dark:text-slate-200 font-bold">
-                Filed by <strong className="text-[#006D5B] dark:text-[#CCFF00] font-black">{report.userName}</strong> ({report.isGuest ? 'Guest Resident' : 'Verified Citizen'})
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+              <div className="text-xs text-[#051F20] dark:text-slate-200 font-bold">
+                Filed by <strong className="text-[#006D5B] dark:text-teal-300 font-black">{report.userName}</strong> ({report.isGuest ? 'Guest Resident' : 'Verified Citizen'})
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {onOpenVerificationModal && (
                   <button
                     onClick={() => onOpenVerificationModal(report)}
-                    className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-black bg-emerald-600 text-white shadow-xs hover:bg-emerald-700 transition-all cursor-pointer"
+                    className="flex-1 sm:flex-initial flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all cursor-pointer min-h-[44px]"
                   >
                     <ShieldCheck className="w-4 h-4 text-emerald-100" />
-                    <span>Ground Check (+15 Karma)</span>
+                    <span>Ground Check</span>
                   </button>
                 )}
 
                 {/* Share Button */}
                 <button
                   onClick={() => setIsShareModalOpen(true)}
-                  className="flex items-center space-x-1.5 px-3.5 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer border btn-soft-tactile min-h-[44px]"
+                  className="flex-1 sm:flex-initial flex items-center justify-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-[#051F20] dark:text-white hover:bg-[#006D5B] hover:text-white min-h-[44px]"
                 >
-                  <Share2 className="w-4 h-4 text-[#008080]" />
+                  <Share2 className="w-4 h-4 text-[#006D5B]" />
                   <span>Share Issue</span>
                 </button>
 
                 {/* Endorse Button */}
                 <button
                   onClick={(e) => onUpvote(report.id, e)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                  className={`flex-1 sm:flex-initial flex items-center justify-center space-x-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer min-h-[44px] ${
                     report.userHasUpvoted
-                      ? 'btn-primary-designer'
-                      : 'btn-soft-tactile'
+                      ? 'bg-[#B45309] text-white shadow-md'
+                      : 'bg-[#006D5B] hover:bg-[#0A2540] text-white shadow-sm'
                   }`}
                 >
-                  <ThumbsUp className={`w-4 h-4 ${report.userHasUpvoted ? 'fill-current text-[#CCFF00]' : ''}`} />
+                  <ThumbsUp className={`w-4 h-4 ${report.userHasUpvoted ? 'fill-current text-white' : 'text-teal-200'}`} />
                   <span>{report.upvotesCount} Endorsements</span>
                 </button>
               </div>
@@ -456,176 +471,201 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           </div>
 
           {/* DEDICATED DEEP-LINK & SOCIAL MEDIA SHARING BAR */}
-          <div className="p-4 bg-white text-black rounded-2xl border-2 border-[#006D5B] shadow-lg space-y-3 font-['Montserrat']">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-xl bg-[#006D5B] text-white flex items-center justify-center shrink-0 border border-[#006D5B]">
+          <div className="p-4 bg-white dark:bg-[#071B2F] text-black dark:text-white rounded-2xl border-2 border-[#006D5B] shadow-lg space-y-3 font-['Montserrat']">
+            {/* Top Line: Heading and Descriptive Text Justified */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2.5 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#006D5B] text-white flex items-center justify-center shrink-0 shadow-xs border border-teal-600">
                   <Link2 className="w-4 h-4" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-black">Share Deep Link & Spread the Word</h4>
-                  <p className="text-[11px] text-slate-700 font-bold">Direct report link for neighbors, ward reps, or social media</p>
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-[#0A2540] dark:text-white">
+                    Share Deep Link & Spread the Word
+                  </h4>
+                  <span className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
+                    • Direct link for neighbors, ward representatives, and social channels
+                  </span>
                 </div>
               </div>
-
-              <button
-                onClick={() => setIsShareModalOpen(true)}
-                className="px-3 py-1.5 bg-[#006D5B] hover:bg-[#004d40] text-white text-xs font-black rounded-xl transition-all cursor-pointer shadow-xs shrink-0 flex items-center space-x-1 min-h-[36px]"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>All Share Options</span>
-              </button>
             </div>
 
-            {/* Deep Link URL input & Copy Button */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
+            {/* Second Line: Deep Link Input, Copy Button, and All Share Options Button */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+              {/* Deep Link URL input */}
+              <div className="sm:col-span-6 relative">
+                <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                  <Link2 className="w-3.5 h-3.5" />
+                </div>
                 <input
                   type="text"
                   readOnly
                   value={sharePayload.url}
-                  className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs font-mono font-bold text-black focus:outline-none pr-8"
+                  className="w-full pl-8 pr-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono font-bold text-[#111827] dark:text-slate-100 focus:outline-none h-[40px] truncate"
+                  title="Direct Shareable Link URL"
                 />
               </div>
 
-              <button
-                onClick={handleCopyLink}
-                className={`px-4 py-2.5 rounded-xl text-xs font-black flex items-center space-x-1.5 transition-all cursor-pointer min-h-[42px] shrink-0 border ${
-                  copiedLink
-                    ? 'bg-emerald-600 text-white border-emerald-400'
-                    : 'bg-[#B45309] hover:bg-amber-600 text-white border-amber-400/40'
-                }`}
-              >
-                {copiedLink ? (
-                  <>
-                    <Check className="w-4 h-4 text-white" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>Copy Link</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* PHYSICAL ON-SITE INFRASTRUCTURE QR TAG & POSTER MODULE */}
-            <div className="p-3.5 bg-[#FAF6F0] rounded-xl border-2 border-[#8F9E87] text-[#2E2A26] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
-              <div className="flex items-center space-x-3 w-full sm:w-auto">
-                <div className="w-14 h-14 bg-white border-2 border-[#8F9E87] rounded-xl p-1 shrink-0 flex items-center justify-center shadow-xs">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(sharePayload.url)}`}
-                    alt="Physical Infrastructure QR Tag"
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-1.5">
-                    <span className="font-black text-xs text-[#2E2A26] uppercase">Physical Infrastructure QR Tag</span>
-                    <span className="px-1.5 py-0.5 bg-[#8F9E87] text-white text-[9px] font-black rounded uppercase">
-                      Printable Signage
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-stone-600 font-semibold leading-tight mt-0.5">
-                    Post on damaged infrastructure so neighbors can scan to report or endorse instantly
-                  </p>
-                </div>
+              {/* Copy Link Button (Equal width column) */}
+              <div className="sm:col-span-3">
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className={`w-full px-3 py-2 rounded-xl text-xs font-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer h-[40px] border shadow-xs active:scale-97 ${
+                    copiedLink
+                      ? 'bg-emerald-600 text-white border-emerald-400'
+                      : 'bg-[#B45309] hover:bg-amber-600 text-white border-amber-400/40'
+                  }`}
+                >
+                  {copiedLink ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                      <span className="truncate font-black">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate font-black">Copy Link</span>
+                    </>
+                  )}
+                </button>
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
-                <a
-                  href={`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(sharePayload.url)}`}
-                  download={`Cityscape-QR-${report.id.slice(0, 8)}.png`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-2 bg-[#F5EFE6] hover:bg-stone-200 text-[#2E2A26] text-xs font-black rounded-xl border border-[#E3DDD3] transition-all cursor-pointer flex items-center gap-1.5 min-h-[40px]"
-                  title="Download High-Res QR Code Image PNG"
-                >
-                  <Download className="w-3.5 h-3.5 text-[#8F9E87]" />
-                  <span>QR PNG</span>
-                </a>
-
+              {/* All Share Options Button (Equal width column with deep link / share icon) */}
+              <div className="sm:col-span-3">
                 <button
-                  onClick={() => setIsQrModalOpen(true)}
-                  className="px-3.5 py-2 bg-[#8F9E87] hover:bg-[#7E8D76] text-white text-xs font-black rounded-xl transition-all cursor-pointer shadow-xs flex items-center gap-1.5 min-h-[40px]"
+                  type="button"
+                  onClick={() => setIsShareModalOpen(true)}
+                  className="w-full px-3 py-2 bg-[#006D5B] hover:bg-[#004d40] text-white text-xs font-black rounded-xl transition-all cursor-pointer shadow-xs flex items-center justify-center space-x-1.5 h-[40px] border border-teal-600 active:scale-97"
+                  title="Open all sharing channels and options"
                 >
-                  <Printer className="w-3.5 h-3.5 text-white" />
-                  <span>Print Poster</span>
+                  <Share2 className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate font-black">All Share Options</span>
                 </button>
               </div>
             </div>
 
-            {/* Open Graph Social Media Preview Badge */}
-            <div className="flex items-center gap-2.5 p-2 bg-slate-900/70 rounded-xl border border-slate-700/80 text-[11px] text-slate-300">
-              <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-[#006D5B] bg-slate-800">
-                <img
-                  src={report.imageUrls?.[0] || report.resolutionImageUrl || 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=400&q=80'}
-                  alt={report.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center space-x-1.5">
-                  <span className="font-bold text-white truncate text-xs">{report.title}</span>
-                  <span className="px-1.5 py-0.5 bg-[#006D5B] text-[#CCFF00] text-[9px] font-mono font-black rounded border border-[#CCFF00]/30 shrink-0">
-                    OG Card Active
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-300 truncate">
-                  Social media platforms will auto-render this image, title & deep-link summary
-                </p>
-              </div>
-            </div>
-
-            {/* Direct Messaging & Social Shortcuts */}
+            {/* Direct Messaging & Social Shortcuts Grid with Equal-Width Buttons */}
             {(() => {
               const socialLinks = getSocialShareLinks(sharePayload);
               return (
-                <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-white/10">
-                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider hidden sm:inline">Quick Send:</span>
-                  <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="space-y-1.5 pt-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <a
                       href={socialLinks.whatsapp}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 sm:flex-initial px-3 py-1.5 bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 hover:text-white rounded-xl text-xs font-bold border border-emerald-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                      className="w-full px-3 py-2 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-600 text-emerald-800 dark:text-emerald-300 hover:text-white rounded-xl text-xs font-bold border border-emerald-300 dark:border-emerald-700/60 flex items-center justify-center gap-1.5 transition-all cursor-pointer h-[38px] shadow-xs active:scale-97"
+                      title="Share on WhatsApp"
                     >
-                      <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>WhatsApp</span>
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 group-hover:text-white shrink-0" />
+                      <span className="truncate font-black">WhatsApp</span>
                     </a>
 
                     <a
                       href={socialLinks.twitter}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 sm:flex-initial px-3 py-1.5 bg-sky-600/30 hover:bg-sky-600 text-sky-200 hover:text-white rounded-xl text-xs font-bold border border-sky-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                      className="w-full px-3 py-2 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-600 text-sky-800 dark:text-sky-300 hover:text-white rounded-xl text-xs font-bold border border-sky-300 dark:border-sky-700/60 flex items-center justify-center gap-1.5 transition-all cursor-pointer h-[38px] shadow-xs active:scale-97"
+                      title="Share on X (Twitter)"
                     >
-                      <Twitter className="w-3.5 h-3.5 text-sky-400" />
-                      <span>X</span>
+                      <Twitter className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 group-hover:text-white shrink-0" />
+                      <span className="truncate font-black">X / Twitter</span>
                     </a>
 
                     <a
                       href={socialLinks.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 sm:flex-initial px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white rounded-xl text-xs font-bold border border-blue-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                      className="w-full px-3 py-2 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-800 dark:text-blue-300 hover:text-white rounded-xl text-xs font-bold border border-blue-300 dark:border-blue-700/60 flex items-center justify-center gap-1.5 transition-all cursor-pointer h-[38px] shadow-xs active:scale-97"
+                      title="Share on Facebook"
                     >
-                      <Facebook className="w-3.5 h-3.5 text-blue-400" />
-                      <span>Facebook</span>
+                      <Facebook className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:text-white shrink-0" />
+                      <span className="truncate font-black">Facebook</span>
                     </a>
 
                     <a
                       href={socialLinks.email}
-                      className="flex-1 sm:flex-initial px-3 py-1.5 bg-amber-600/30 hover:bg-amber-600 text-amber-200 hover:text-white rounded-xl text-xs font-bold border border-amber-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[36px]"
+                      className="w-full px-3 py-2 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-600 text-amber-900 dark:text-amber-300 hover:text-white rounded-xl text-xs font-bold border border-amber-300 dark:border-amber-700/60 flex items-center justify-center gap-1.5 transition-all cursor-pointer h-[38px] shadow-xs active:scale-97"
+                      title="Share via Email"
                     >
-                      <Mail className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Email</span>
+                      <Mail className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:text-white shrink-0" />
+                      <span className="truncate font-black">Email</span>
                     </a>
                   </div>
                 </div>
               );
             })()}
+
+            {/* PHYSICAL ON-SITE INFRASTRUCTURE QR TAG & POSTER MODULE */}
+            <div className="p-3.5 sm:p-4 bg-[#FAF6F0] dark:bg-slate-800/80 rounded-xl border-2 border-[#8F9E87] dark:border-slate-700 text-[#2E2A26] dark:text-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3.5 shadow-xs">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-14 h-14 bg-white rounded-xl p-1 shrink-0 flex items-center justify-center shadow-xs border border-[#8F9E87]">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(sharePayload.url)}`}
+                    alt="Physical Infrastructure QR Tag"
+                    className="w-12 h-12 object-contain"
+                  />
+                </div>
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="font-black text-xs sm:text-sm text-[#2E2A26] dark:text-white uppercase tracking-tight">
+                      Physical Infrastructure QR Tag
+                    </span>
+                    <span className="px-2 py-0.5 bg-[#8F9E87] text-white text-[10px] font-black rounded-md uppercase tracking-wider shrink-0 shadow-xs">
+                      Printable Signage
+                    </span>
+                  </div>
+                  <p className="text-xs text-stone-600 dark:text-slate-300 font-medium leading-relaxed max-w-2xl">
+                    Post on damaged infrastructure for quick neighbor scan, live verification & civic endorsement.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 w-full md:w-auto shrink-0">
+                <a
+                  href={`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(sharePayload.url)}`}
+                  download={`Cityscape-QR-${report.id.slice(0, 8)}.png`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2 bg-[#F5EFE6] hover:bg-stone-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-[#2E2A26] dark:text-white text-xs font-black rounded-xl border border-[#E3DDD3] dark:border-slate-600 transition-all cursor-pointer flex items-center justify-center gap-1.5 h-[40px] w-full min-w-[110px] shadow-xs active:scale-97"
+                  title="Download High-Res QR Code Image PNG"
+                >
+                  <Download className="w-4 h-4 text-[#8F9E87] dark:text-teal-300 shrink-0" />
+                  <span className="truncate font-black">QR PNG</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setIsQrModalOpen(true)}
+                  className="px-4 py-2 bg-[#8F9E87] hover:bg-[#7E8D76] text-white text-xs font-black rounded-xl transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5 h-[40px] w-full min-w-[110px] active:scale-97"
+                >
+                  <Printer className="w-4 h-4 text-white shrink-0" />
+                  <span className="truncate font-black">Print Poster</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Open Graph Social Media Preview Badge */}
+            <div className="flex items-center gap-3 p-3 bg-slate-900/80 rounded-xl border border-slate-700/80 text-xs text-slate-300">
+              <div className="w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-[#006D5B] bg-slate-800 shadow-xs">
+                <img
+                  src={report.imageUrls?.[0] || report.resolutionImageUrl || 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=400&q=80'}
+                  alt={report.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-bold text-white text-xs sm:text-sm truncate max-w-md">{report.title}</span>
+                  <span className="px-1.5 py-0.5 bg-[#006D5B] text-[#CCFF00] text-[9px] font-mono font-black rounded border border-[#CCFF00]/30 shrink-0">
+                    OG Card Active
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300 font-medium leading-normal">
+                  Social media platforms will auto-render this image preview, title, and direct report link.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Official Municipal Work Order Status */}
@@ -646,9 +686,9 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
           {/* Community Discussion Feed */}
           <div className="space-y-4 pt-2">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-              <MessageSquare className="w-4 h-4 text-[#008080]" />
-              <span>Community Discussion & Updates ({comments.length})</span>
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-2 whitespace-nowrap">
+              <MessageSquare className="w-3.5 h-3.5 text-[#008080] shrink-0" />
+              <span className="text-xs font-bold whitespace-nowrap truncate">Community Discussion & Updates ({comments.length})</span>
             </h3>
 
             <div className="space-y-3">
@@ -711,10 +751,10 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 <button
                   type="submit"
                   disabled={isPosting || !newCommentText.trim()}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#008080] hover:bg-[#006666] text-[#CCFF00] rounded-xl text-xs font-bold shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#CCFF00] hover:bg-[#b8e600] text-black rounded-xl text-xs font-black shadow-xs transition-all disabled:opacity-50 cursor-pointer active:scale-97 border border-lime-400"
                 >
-                  <Send className="w-3.5 h-3.5 text-[#CCFF00]" />
-                  <span>Post Comment</span>
+                  <Send className="w-3.5 h-3.5 text-black" />
+                  <span className="text-black font-black">{isPosting ? 'Posting...' : 'Post Comment'}</span>
                 </button>
               </div>
             </form>

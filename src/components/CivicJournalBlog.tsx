@@ -383,7 +383,7 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
 
                 {/* Title & Excerpt */}
                 <div>
-                  <div className="flex items-center space-x-2 text-[10px] text-slate-400 mb-1">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-[#006D5B] dark:text-teal-300 mb-1">
                     <span>{post.publishedAt}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
@@ -392,41 +392,41 @@ export const CivicJournalBlog: React.FC<CivicJournalBlogProps> = ({ onAwardKarma
                     </span>
                   </div>
 
-                  <h3 className="font-['Montserrat'] font-extrabold text-base text-[#1A1A1A] dark:text-white group-hover:text-[#008080] transition-colors line-clamp-2">
+                  <h3 className="font-['Montserrat'] font-extrabold text-base text-[#051F20] dark:text-white group-hover:text-[#006D5B] transition-colors line-clamp-2">
                     {post.title}
                   </h3>
 
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5">
+                  <p className="text-xs text-[#111827] dark:text-slate-200 line-clamp-2 mt-1.5 font-medium">
                     {post.excerpt}
                   </p>
                 </div>
               </div>
 
               {/* Author & Interactions */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                <div className="flex items-center space-x-2 min-w-0 flex-1">
                   <img
                     src={post.authorAvatar}
                     alt={post.authorName}
-                    className="w-7 h-7 rounded-full object-cover"
+                    className="w-7 h-7 rounded-full object-cover shrink-0"
                   />
-                  <div>
-                    <p className="text-[11px] font-bold text-[#1A1A1A] dark:text-white line-clamp-1">
+                  <div className="min-w-0">
+                    <p className="text-xs font-extrabold text-[#051F20] dark:text-white line-clamp-1">
                       {post.authorName}
                     </p>
-                    <p className="text-[9px] text-slate-400 line-clamp-1">{post.authorTitle}</p>
+                    <p className="text-[10px] font-bold text-[#006D5B] dark:text-teal-300 line-clamp-1">{post.authorTitle}</p>
                   </div>
                 </div>
 
                 <button
                   onClick={(e) => handleLikePost(post.id, e)}
-                  className={`flex items-center space-x-1 px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center space-x-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all min-h-[34px] shrink-0 border cursor-pointer ${
                     post.userHasLiked
-                      ? 'bg-[#008080]/10 text-[#008080] dark:bg-[#008080]/20 dark:text-[#CCFF00]'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                      ? 'bg-[#006D5B] text-white border-[#004D40]'
+                      : 'bg-slate-100 dark:bg-slate-800 text-[#051F20] dark:text-slate-200 border-slate-300 dark:border-slate-700 hover:bg-[#006D5B] hover:text-white'
                   }`}
                 >
-                  <ThumbsUp className={`w-3.5 h-3.5 ${post.userHasLiked ? 'fill-[#008080] text-[#008080] dark:fill-[#CCFF00] dark:text-[#CCFF00]' : ''}`} />
+                  <ThumbsUp className={`w-3.5 h-3.5 ${post.userHasLiked ? 'fill-current text-white' : 'text-[#006D5B]'}`} />
                   <span>{post.likesCount}</span>
                 </button>
               </div>

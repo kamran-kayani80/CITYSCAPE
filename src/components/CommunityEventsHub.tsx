@@ -319,21 +319,21 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                   </div>
 
                   <div className="sm:col-span-7 space-y-2">
-                    <h3 className="font-heading font-black text-base text-black leading-snug line-clamp-2">
+                    <h3 className="font-heading font-black text-base text-[#051F20] leading-snug line-clamp-2">
                       {evt.title}
                     </h3>
 
-                    <p className="text-xs text-slate-800 line-clamp-2 leading-relaxed font-medium">
+                    <p className="text-xs text-[#111827] line-clamp-2 leading-relaxed font-medium">
                       {evt.description}
                     </p>
 
-                    <div className="text-[11px] text-amber-200/90 space-y-0.5 font-medium">
+                    <div className="text-[11px] text-[#006D5B] space-y-0.5 font-bold">
                       <p className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-amber-400 shrink-0" />
+                        <Calendar className="w-3 h-3 text-[#006D5B] shrink-0" />
                         <span>{evt.date} • {evt.time}</span>
                       </p>
                       <p className="flex items-center gap-1 line-clamp-1">
-                        <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
+                        <MapPin className="w-3 h-3 text-[#006D5B] shrink-0" />
                         <span>{evt.location}</span>
                       </p>
                     </div>
@@ -341,13 +341,13 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                 </div>
 
                 {/* Footer Controls */}
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                  <div className="flex items-center space-x-1.5 text-xs text-slate-300">
-                    <Users className="w-3.5 h-3.5 text-amber-300" />
+                <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                  <div className="flex items-center space-x-1.5 text-xs text-[#051F20] font-bold">
+                    <Users className="w-3.5 h-3.5 text-[#006D5B]" />
                     <span><strong>{evt.rsvpsCount}</strong> Attending</span>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 shrink-0">
                     <button
                       onClick={() => {
                         setShareData({
@@ -361,8 +361,9 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                         });
                         setIsShareModalOpen(true);
                       }}
-                      className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all cursor-pointer"
+                      className="p-2 bg-slate-100 hover:bg-[#006D5B] text-slate-700 hover:text-white rounded-xl transition-all cursor-pointer border border-slate-300 min-h-[38px] min-w-[38px] flex items-center justify-center"
                       title="Share Event"
+                      aria-label="Share Event"
                     >
                       <Share2 className="w-3.5 h-3.5" />
                     </button>
@@ -372,22 +373,22 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                         href={evt.externalLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1"
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-[#006D5B] text-[#051F20] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 border border-slate-300 min-h-[38px]"
                       >
-                        <span>Visit Website</span>
+                        <span>Website</span>
                         <ArrowUpRight className="w-3 h-3" />
                       </a>
                     )}
 
                     <button
                       onClick={() => handleToggleRsvp(evt.id)}
-                      className={`px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                      className={`px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer min-h-[38px] shadow-sm ${
                         evt.userHasRsvped
-                          ? 'bg-emerald-500 text-white shadow-md'
-                          : 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md'
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-[#006D5B] hover:bg-[#0A2540] text-white'
                       }`}
                     >
-                      {evt.userHasRsvped ? '✓ Going' : 'RSVP Now'}
+                      {evt.userHasRsvped ? '✓ Going' : 'RSVP'}
                     </button>
                   </div>
                 </div>
@@ -456,36 +457,36 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
 
               {/* Event Meta */}
               <div>
-                <div className="flex items-center space-x-2 text-[10px] font-bold text-[#008080] dark:text-[#CCFF00] mb-1">
+                <div className="flex items-center space-x-2 text-xs font-bold text-[#006D5B] dark:text-teal-300 mb-1">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{evt.date} • {evt.time}</span>
                 </div>
 
-                <h3 className="font-['Montserrat'] font-extrabold text-base text-[#1A1A1A] dark:text-white line-clamp-2">
+                <h3 className="font-['Montserrat'] font-extrabold text-base text-[#051F20] dark:text-white line-clamp-2">
                   {evt.title}
                 </h3>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5">
+                <p className="text-xs text-[#111827] dark:text-slate-200 line-clamp-2 mt-1.5 font-medium">
                   {evt.description}
                 </p>
 
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-2 line-clamp-1">
-                  <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                <p className="text-xs text-[#006D5B] dark:text-teal-300 flex items-center gap-1 mt-2 line-clamp-1 font-bold">
+                  <MapPin className="w-3.5 h-3.5 text-[#006D5B] dark:text-teal-300 shrink-0" />
                   <span>{evt.location}</span>
                 </p>
               </div>
             </div>
 
             {/* Organizer & RSVP */}
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <div className="space-y-0.5">
-                <p className="text-[11px] font-bold text-[#1A1A1A] dark:text-white line-clamp-1">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <p className="text-xs font-extrabold text-[#051F20] dark:text-white line-clamp-1">
                   {evt.organizerName}
                 </p>
-                <p className="text-[9px] font-semibold text-slate-400">{evt.organizerType}</p>
+                <p className="text-[10px] font-bold text-[#006D5B] dark:text-teal-300">{evt.organizerType}</p>
               </div>
 
-              <div className="flex items-center space-x-1.5">
+              <div className="flex items-center space-x-1.5 shrink-0">
                 <button
                   onClick={() => {
                     setShareData({
@@ -499,18 +500,19 @@ export const CommunityEventsHub: React.FC<CommunityEventsHubProps> = ({ onAwardK
                     });
                     setIsShareModalOpen(true);
                   }}
-                  className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-[#008080] dark:hover:text-[#CCFF00] rounded-xl transition-all cursor-pointer"
+                  className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#006D5B] hover:text-white rounded-xl transition-all cursor-pointer border border-slate-300 dark:border-slate-700 min-h-[36px] min-w-[36px] flex items-center justify-center"
                   title="Share Event"
+                  aria-label="Share Event"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                 </button>
 
                 <button
                   onClick={() => handleToggleRsvp(evt.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer min-h-[36px] shadow-xs ${
                     evt.userHasRsvped
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-[#008080] hover:bg-[#006666] text-[#CCFF00] shadow-xs'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-[#006D5B] hover:bg-[#0A2540] text-white'
                   }`}
                 >
                   {evt.userHasRsvped ? '✓ Going' : 'RSVP'}

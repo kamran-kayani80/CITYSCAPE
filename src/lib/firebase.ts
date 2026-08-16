@@ -1,5 +1,15 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  User,
+} from 'firebase/auth';
 import {
   initializeFirestore,
   persistentLocalCache,
@@ -28,6 +38,7 @@ export const db = initializeFirestore(
 // Initialize Auth
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // Error Handling Infrastructure according to Firebase Integration Skill
 export enum OperationType {
@@ -95,6 +106,30 @@ export async function testConnection() {
 
 // Run connection check
 testConnection();
+
+// Email & Password Auth Helpers
+export async function registerWithEmail(email: string, pass: string, name?: string) {
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    if (name && cred.user) {
+      await updateProfile(cred.user, { displayName: name });
+    }
+    return cred.user;
+  } catch (error) {
+    console.error('Email Registration Error:', error);
+    throw error;
+  }
+}
+
+export async function loginWithEmail(email: string, pass: string) {
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    return cred.user;
+  } catch (error) {
+    console.error('Email Login Error:', error);
+    throw error;
+  }
+}
 
 // Google Auth Helpers
 export async function loginWithGoogle() {

@@ -153,7 +153,7 @@ export const AccessibilityToolbar: React.FC = () => {
   return (
     <>
       {/* Top Fixed News Bulletin Tape & Compact Accessibility Bar */}
-      <div className="relative z-40 w-full font-['Montserrat']">
+      <div className="relative z-40 w-full">
         <motion.div
           initial={false}
           animate={{
@@ -161,42 +161,26 @@ export const AccessibilityToolbar: React.FC = () => {
             opacity: isCollapsed ? 0 : 1,
           }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full bg-[#0A2540] text-white py-1.5 px-3 sm:px-6 border-b-2 border-[#006D5B] flex items-center justify-between gap-3 sticky top-0 shadow-md"
+          className="w-full bg-[#0A2540] text-white py-2 px-3 sm:px-6 border-b-1.5 border-[#006D5B] flex items-center justify-between gap-3 sticky top-0 shadow-md min-h-[48px]"
         >
           {/* Main Bulletin Area - Maximized Space */}
-          <div className="flex items-center space-x-2 flex-1 min-w-0 py-0.5">
-            <div className="flex items-center space-x-1.5 shrink-0 bg-[#006D5B] text-white px-2.5 py-1 rounded-md text-[10px] font-black border border-[#CCFF00]/40">
-              <Megaphone className="w-3.5 h-3.5 text-[#CCFF00] animate-pulse" />
-              <span className="hidden xs:inline uppercase tracking-wider text-[9px] text-[#CCFF00]">
-                CITY BULLETIN
-              </span>
-            </div>
-
+          <div className="flex items-center space-x-2.5 flex-1 min-w-0 py-0.5">
             {/* Play / Pause News Tape Control */}
             <button
               onClick={() => setIsTapePlaying(!isTapePlaying)}
-              className="p-1.5 bg-[#07192c] hover:bg-[#006D5B] text-[#CCFF00] rounded-md transition-colors border border-[#006D5B] shrink-0 cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
+              className="p-2 bg-[#071B2F] hover:bg-[#006D5B] text-white rounded-lg transition-colors border border-slate-700 shrink-0 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
               title={isTapePlaying ? 'Pause News Bulletin Tape' : 'Play News Bulletin Tape'}
+              aria-label={isTapePlaying ? 'Pause News Bulletin Tape' : 'Play News Bulletin Tape'}
             >
               {isTapePlaying ? (
-                <Pause className="w-3.5 h-3.5 text-[#CCFF00]" />
+                <Pause className="w-4 h-4 text-white" />
               ) : (
-                <Play className="w-3.5 h-3.5 text-[#CCFF00] fill-current" />
+                <Play className="w-4 h-4 text-white fill-current" />
               )}
             </button>
 
-            {/* Refresh Button */}
-            <button
-              onClick={() => fetchLiveNews(currentCity, true)}
-              disabled={isRefreshingNews}
-              className="p-1.5 bg-[#07192c] hover:bg-[#006D5B] text-[#CCFF00] rounded-md transition-colors border border-[#006D5B] shrink-0 cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
-              title="Refresh City Infrastructure News via Gemini Grounded Search"
-            >
-              <Sparkles className={`w-3.5 h-3.5 text-[#CCFF00] ${isRefreshingNews ? 'animate-spin' : ''}`} />
-            </button>
-
             {/* TV Channel Scrolling News Tape Content - Continuous Right-to-Left Scroll */}
-            <div className="flex-1 overflow-hidden relative h-7 flex items-center text-xs text-slate-100 font-medium min-w-0 bg-[#07192c]/70 rounded-md border border-[#006D5B]/60 px-2">
+            <div className="flex-1 overflow-hidden relative h-8 flex items-center text-xs text-white font-medium min-w-0 bg-[#071B2F]/80 rounded-lg border border-slate-700 px-3">
               <div
                 className="animate-ticker-scroll items-center gap-6 py-0.5"
                 style={{
@@ -208,12 +192,12 @@ export const AccessibilityToolbar: React.FC = () => {
                   ...(bulletins.length > 0 ? bulletins : ['Loading city infrastructure news...']),
                   ...(bulletins.length > 0 ? bulletins : ['Loading city infrastructure news...']),
                 ].map((bulletinText, idx) => (
-                  <div key={idx} className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-semibold text-slate-100 shrink-0">
-                    <span className="text-[#CCFF00] font-black text-[10px] uppercase font-mono bg-[#006D5B] px-1.5 py-0.5 rounded border border-[#CCFF00]/40 shrink-0">
+                  <div key={idx} className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-white shrink-0">
+                    <span className="text-white font-bold text-xs uppercase font-mono bg-[#006D5B] px-2 py-0.5 rounded shadow-xs shrink-0">
                       📍 {currentCity}
                     </span>
                     <span className="whitespace-nowrap font-medium text-slate-100 tracking-wide">{bulletinText}</span>
-                    <span className="text-[#CCFF00] font-black font-mono text-xs px-2 opacity-80">✦</span>
+                    <span className="text-teal-300 font-bold font-mono text-xs px-2 opacity-80">✦</span>
                   </div>
                 ))}
               </div>
@@ -222,10 +206,11 @@ export const AccessibilityToolbar: React.FC = () => {
             {/* Next Bulletin Quick Skip */}
             <button
               onClick={() => setBulletinIndex((prev) => (prev + 1) % (bulletins.length || 1))}
-              className="p-1.5 bg-[#07192c] hover:bg-[#006D5B] text-[#CCFF00] rounded-md transition-colors border border-[#006D5B]/60 shrink-0 cursor-pointer hidden sm:flex items-center justify-center"
+              className="p-2 bg-[#071B2F] hover:bg-[#006D5B] text-white rounded-lg transition-colors border border-slate-700 shrink-0 cursor-pointer hidden sm:flex items-center justify-center min-h-[36px] min-w-[36px]"
               title="Next Bulletin"
+              aria-label="Next Bulletin"
             >
-              <ChevronRight className="w-3.5 h-3.5 text-[#CCFF00]" />
+              <ChevronRight className="w-4 h-4 text-white" />
             </button>
           </div>
 
@@ -233,21 +218,22 @@ export const AccessibilityToolbar: React.FC = () => {
           <div className="relative shrink-0" ref={aaaMenuRef}>
             <button
               onClick={() => setIsAaaMenuOpen(!isAaaMenuOpen)}
-              className={`px-2.5 py-1.5 rounded-lg font-black transition-all cursor-pointer min-h-[34px] flex items-center space-x-1.5 border shadow-sm ${
+              className={`px-3 py-2 rounded-xl font-bold transition-all cursor-pointer min-h-[44px] flex items-center space-x-1.5 border shadow-sm ${
                 isAaaMenuOpen || highContrast || fontScale !== 100 || speechEnabled
-                  ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] ring-2 ring-[#CCFF00]/40'
-                  : 'bg-[#006D5B] hover:bg-[#005244] text-white border-[#006D5B]'
+                  ? 'bg-[#B45309] text-white border-[#B45309] ring-2 ring-amber-400/40'
+                  : 'bg-[#006D5B] hover:bg-[#005244] text-white border-teal-500/40'
               }`}
               title="Accessibility & Display Settings (Aaa)"
+              aria-label="Accessibility & Display Settings"
             >
-              <Accessibility className={`w-4 h-4 ${isAaaMenuOpen || highContrast || fontScale !== 100 || speechEnabled ? 'text-[#0A2540]' : 'text-[#CCFF00]'}`} />
-              <span className="text-xs font-black tracking-tight font-mono">Aaa</span>
+              <Accessibility className="w-5 h-5 text-white" />
+              <span className="text-sm font-bold tracking-tight font-mono">Aaa</span>
               {fontScale !== 100 && (
-                <span className="text-[9px] px-1 bg-[#0A2540] text-[#CCFF00] rounded font-mono font-bold">
+                <span className="text-xs px-1.5 py-0.5 bg-black/30 text-white rounded font-mono font-bold">
                   {fontScale}%
                 </span>
               )}
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isAaaMenuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-4 h-4 text-white transition-transform duration-200 ${isAaaMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Accessibility Dropdown Menu Popover */}
@@ -258,45 +244,46 @@ export const AccessibilityToolbar: React.FC = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.96 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#0A2540] text-white rounded-2xl p-4 shadow-2xl border-2 border-[#006D5B] z-50 space-y-3.5 font-['Montserrat']"
+                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#0A2540] text-white rounded-xl p-4 sm:p-5 shadow-2xl border-1.5 border-[#006D5B] z-50 space-y-4"
                 >
-                  <div className="flex items-center justify-between border-b border-[#006D5B]/60 pb-2.5">
-                    <div className="flex items-center space-x-2">
-                      <div className="p-1.5 bg-[#CCFF00] text-[#0A2540] rounded-lg">
-                        <Type className="w-4 h-4 font-black" />
+                  <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="p-2 bg-[#006D5B] text-white rounded-lg">
+                        <Type className="w-5 h-5 font-bold" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-black text-[#CCFF00] uppercase tracking-wider">
+                        <h4 className="text-sm font-bold text-white uppercase tracking-wider">
                           Accessibility (Aaa)
                         </h4>
-                        <p className="text-[10px] text-slate-300">
+                        <p className="text-xs text-slate-300">
                           Senior & visual preferences
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => setIsAaaMenuOpen(false)}
-                      className="p-1 hover:bg-[#006D5B] text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                      className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                      aria-label="Close accessibility menu"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
                   {/* 1. Font Scale Selector */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-200 flex items-center justify-between">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
                       <span>Text Zoom Level:</span>
-                      <span className="font-mono text-[#CCFF00]">{fontScale}%</span>
+                      <span className="font-mono text-teal-300 font-bold">{fontScale}%</span>
                     </label>
-                    <div className="grid grid-cols-3 gap-1.5">
+                    <div className="grid grid-cols-3 gap-2">
                       {([100, 125, 150] as FontScale[]).map((scale) => (
                         <button
                           key={scale}
                           onClick={() => handleSetScale(scale)}
-                          className={`py-1.5 px-2 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                          className={`py-2 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer border min-h-[44px] ${
                             fontScale === scale
-                              ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00] shadow-sm'
-                              : 'bg-[#07192c] hover:bg-[#006D5B] text-slate-200 border-[#006D5B]/60'
+                              ? 'bg-[#B45309] text-white border-[#B45309] shadow-sm'
+                              : 'bg-[#071B2F] hover:bg-[#006D5B] text-slate-200 border-slate-700'
                           }`}
                         >
                           {scale}%
@@ -306,23 +293,23 @@ export const AccessibilityToolbar: React.FC = () => {
                   </div>
 
                   {/* 2. High Contrast Toggle */}
-                  <div className="flex items-center justify-between p-2.5 bg-[#07192c] rounded-xl border border-[#006D5B]/60">
-                    <div className="flex items-center space-x-2">
-                      <Eye className="w-4 h-4 text-[#CCFF00]" />
-                      <span className="text-xs font-bold text-slate-100">High Contrast Mode</span>
+                  <div className="flex items-center justify-between p-3 bg-[#071B2F] rounded-xl border border-slate-700">
+                    <div className="flex items-center space-x-2.5">
+                      <Eye className="w-5 h-5 text-teal-300" />
+                      <span className="text-sm font-semibold text-white">High Contrast</span>
                     </div>
                     <button
                       onClick={() => {
                         setHighContrast((prev) => !prev);
                         if (!highContrast) {
-                          speakText('High contrast pitch-black mode enabled.');
+                          speakText('High contrast mode enabled.');
                         } else {
                           speakText('Standard color mode restored.');
                         }
                       }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-extrabold cursor-pointer transition-colors border ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors border min-h-[38px] ${
                         highContrast
-                          ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00]'
+                          ? 'bg-[#B45309] text-white border-[#B45309]'
                           : 'bg-[#006D5B] text-white border-[#006D5B]'
                       }`}
                     >
@@ -331,20 +318,20 @@ export const AccessibilityToolbar: React.FC = () => {
                   </div>
 
                   {/* 3. Voice Guidance Read Aloud Toggle */}
-                  <div className="flex items-center justify-between p-2.5 bg-[#07192c] rounded-xl border border-[#006D5B]/60">
-                    <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-between p-3 bg-[#071B2F] rounded-xl border border-slate-700">
+                    <div className="flex items-center space-x-2.5">
                       {speechEnabled ? (
-                        <Volume2 className="w-4 h-4 text-[#CCFF00] animate-pulse" />
+                        <Volume2 className="w-5 h-5 text-teal-300 animate-pulse" />
                       ) : (
-                        <VolumeX className="w-4 h-4 text-slate-400" />
+                        <VolumeX className="w-5 h-5 text-slate-400" />
                       )}
-                      <span className="text-xs font-bold text-slate-100">Voice Guidance</span>
+                      <span className="text-sm font-semibold text-white">Voice Guidance</span>
                     </div>
                     <button
                       onClick={handleToggleVoice}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-extrabold cursor-pointer transition-colors border ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors border min-h-[38px] ${
                         speechEnabled
-                          ? 'bg-[#CCFF00] text-[#0A2540] border-[#CCFF00]'
+                          ? 'bg-[#B45309] text-white border-[#B45309]'
                           : 'bg-[#006D5B] text-white border-[#006D5B]'
                       }`}
                     >
@@ -358,9 +345,9 @@ export const AccessibilityToolbar: React.FC = () => {
                       setIsAaaMenuOpen(false);
                       setIsOpenGuide(true);
                     }}
-                    className="w-full py-2 px-3 bg-[#006D5B] hover:bg-[#00584a] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 cursor-pointer border border-[#CCFF00]/30 transition-colors"
+                    className="w-full py-2.5 px-3 bg-[#006D5B] hover:bg-[#00584a] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 cursor-pointer border border-teal-500/40 transition-colors min-h-[44px]"
                   >
-                    <HelpCircle className="w-4 h-4 text-[#CCFF00]" />
+                    <HelpCircle className="w-4 h-4 text-white" />
                     <span>Senior Accessibility Guide</span>
                   </button>
 
@@ -370,9 +357,9 @@ export const AccessibilityToolbar: React.FC = () => {
                       setIsAaaMenuOpen(false);
                       setIsCollapsed(true);
                     }}
-                    className="w-full py-1.5 px-2 bg-[#07192c] hover:bg-[#006D5B] text-slate-300 hover:text-white rounded-xl text-[11px] font-semibold flex items-center justify-center space-x-1.5 cursor-pointer border border-[#006D5B]/40 transition-colors"
+                    className="w-full py-2 px-2 bg-[#071B2F] hover:bg-[#006D5B] text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer border border-slate-700 transition-colors min-h-[40px]"
                   >
-                    <ChevronUp className="w-3.5 h-3.5 text-[#CCFF00]" />
+                    <ChevronUp className="w-4 h-4 text-teal-300" />
                     <span>Minimize Top Bar</span>
                   </button>
                 </motion.div>

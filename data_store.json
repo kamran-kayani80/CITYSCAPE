@@ -1,0 +1,39 @@
+{
+  "reports": [],
+  "comments": [],
+  "userProfile": {
+    "id": "usr-neighbor",
+    "username": "neighbor",
+    "fullName": "Community Member",
+    "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "neighborhoodId": "zone-general",
+    "neighborhoodName": "Local Community Ward",
+    "title": "Resident Citizen",
+    "unlockedTitles": [
+      "Resident Citizen",
+      "Community Sentinel",
+      "Block Captain",
+      "Civic Guardian",
+      "Infrastructure Steward"
+    ],
+    "civicKarma": 120,
+    "trustScore": 100,
+    "joinedDate": "New Member",
+    "impactStats": {
+      "reportsSubmitted": 0,
+      "reportsResolved": 0,
+      "verificationsCount": 0,
+      "upvotesReceived": 0,
+      "upvotesGiven": 0,
+      "estHoursSaved": 0,
+      "civicValueCreatedUsd": 0
+    },
+    "adoptedZones": []
+  },
+  "userBadges": {},
+  "verifications": [],
+  "adoptedZones": [],
+  "estateCommunities": [],
+  "cityBulletins": [],
+  "updatedAt": "2026-08-15T00:00:00.000Z"
+}

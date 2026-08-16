@@ -7,10 +7,12 @@ export type AppViewMode =
   | 'blog'
   | 'events'
   | 'bulletin'
+  | 'attractions'
   | 'sla'
   | 'brand'
   | 'strategic'
-  | 'estate';
+  | 'estate'
+  | 'hashtag';
 
 export type ReportCategory =
   | 'EMERGENCY'
@@ -55,6 +57,8 @@ export interface Report {
   latitude: number;
   longitude: number;
   addressText: string;
+  cityName?: string;
+  municipality?: string;
   imageUrls: string[];
   resolutionImageUrl?: string;
   upvotesCount: number;
@@ -296,6 +300,38 @@ export interface EstateStaffMember {
   sectorAssigned: string;
   activeWorkOrdersCount: number;
   avatarUrl?: string;
+}
+
+export interface PredictiveMilestone {
+  step: string;
+  estimatedHoursFromStart: number;
+  description: string;
+}
+
+export interface PredictiveCompletionAnalysis {
+  reportId?: string;
+  category: ReportCategory;
+  severity: SeverityLevel;
+  wardZone?: string;
+  estimatedHours: number;
+  estimatedCompletionDate: string;
+  standardSlaHours: number;
+  hoursVarianceVsSla: number;
+  isAheadOfSla: boolean;
+  confidenceScore: number;
+  confidenceLabel: 'HIGH' | 'MEDIUM' | 'MODERATE';
+  historicalSampleCount: number;
+  historicalAverageHours: number;
+  historicalMedianHours: number;
+  historicalBasisSummary: string;
+  keyVarianceFactors: string[];
+  recommendedCrewSize: string;
+  riskOfSlaBreach: 'LOW' | 'MEDIUM' | 'HIGH';
+  riskExplanation: string;
+  milestones: PredictiveMilestone[];
+  proactiveResidentAdvice: string;
+  generatedAt: string;
+  isAiGroundTruth: boolean;
 }
 
 

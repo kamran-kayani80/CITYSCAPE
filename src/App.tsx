@@ -5,7 +5,8 @@ import { CommunityMap } from './components/CommunityMap';
 import { IssueList } from './components/IssueList';
 import { ReportModal } from './components/ReportModal';
 import { ReportDetailModal } from './components/ReportDetailModal';
-import { AdminDashboard } from './components/AdminDashboard';
+import { HashtagLandingView } from './components/HashtagLandingView';
+import { HashtagArchitectureModal } from './components/HashtagArchitectureModal';
 import { MunicipalDeskPortal } from './components/MunicipalDeskPortal';
 import { AnalyticsView } from './components/AnalyticsView';
 import { CommunityGratitudeFeed } from './components/CommunityGratitudeFeed';
@@ -17,18 +18,23 @@ import { AccessibilityToolbar } from './components/AccessibilityToolbar';
 import { CivicBulletinHub } from './components/CivicBulletinHub';
 import { SlaDashboard } from './components/SlaDashboard';
 import { CitizenPrideBanner } from './components/CitizenPrideBanner';
+import { TrialEcosystemNotificationBanner } from './components/TrialEcosystemNotificationBanner';
+import { AppDownloadShareModal } from './components/AppDownloadShareModal';
 import { BrandIdentitySystem } from './components/BrandIdentitySystem';
 import { StrategicArchitectureView } from './components/StrategicArchitectureView';
 import { EstatePortalView } from './components/EstatePortalView';
+import { CityAttractionsView } from './components/CityAttractionsView';
 import { MobileNavigation } from './components/MobileNavigation';
 import { SEOHead } from './components/SEOHead';
 import { UndoSnackbar, UndoUpvoteState } from './components/UndoSnackbar';
+import { AdminControlPanel } from './components/AdminControlPanel';
 import { INITIAL_REPORTS } from './data/seedData';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
 import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map as MapIcon, List } from 'lucide-react';
 import { useOfflineSync } from './hooks/useOfflineSync';
 import { OfflineSyncBanner } from './components/OfflineSyncBanner';
+import { auth, onAuthStateChanged } from './lib/firebase';
 import {
   getCachedReports,
   saveCachedReports,
@@ -45,12 +51,59 @@ export default function App() {
 
   const [activeView, setActiveView] = useState<AppViewMode>('map');
   const [mobileTab, setMobileTab] = useState<'map' | 'list'>('map');
+  const [activeHashtag, setActiveHashtag] = useState<string>('potholefix');
+  const [isHashtagArchOpen, setIsHashtagArchOpen] = useState<boolean>(false);
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isDownloadShareModalOpen, setIsDownloadShareModalOpen] = useState(false);
+  const [downloadShareModalTab, setDownloadShareModalTab] = useState<'download' | 'invite' | 'share'>('download');
   const [verificationReport, setVerificationReport] = useState<Report | null>(null);
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isAdminControlPanelOpen, setIsAdminControlPanelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userKarma, setUserKarma] = useState(840);
+
+  // Global event listener for hashtag navigation & arch modal across all components
+  useEffect(() => {
+    const handleNavigateHashtag = (e: Event) => {
+      const customEv = e as CustomEvent<{ tag: string }>;
+      if (customEv.detail?.tag) {
+        setActiveHashtag(customEv.detail.tag);
+        setActiveView('hashtag');
+      }
+    };
+    const handleOpenArchModal = () => {
+      setIsHashtagArchOpen(true);
+    };
+    const handleOpenAdminCustomizer = () => {
+      setIsAdminControlPanelOpen(true);
+    };
+    const handleOpenReportModal = () => {
+      setIsReportModalOpen(true);
+    };
+    const handleOpenDownloadModal = (e: Event) => {
+      const customEv = e as CustomEvent<{ tab?: 'download' | 'invite' | 'share' }>;
+      if (customEv.detail?.tab) {
+        setDownloadShareModalTab(customEv.detail.tab);
+      } else {
+        setDownloadShareModalTab('download');
+      }
+      setIsDownloadShareModalOpen(true);
+    };
+
+    window.addEventListener('cityscape:navigate-hashtag', handleNavigateHashtag);
+    window.addEventListener('cityscape:open-arch-modal', handleOpenArchModal);
+    window.addEventListener('cityscape:open-admin-customizer', handleOpenAdminCustomizer);
+    window.addEventListener('cityscape:open-report-modal', handleOpenReportModal);
+    window.addEventListener('cityscape:open-download-modal', handleOpenDownloadModal);
+    return () => {
+      window.removeEventListener('cityscape:navigate-hashtag', handleNavigateHashtag);
+      window.removeEventListener('cityscape:open-arch-modal', handleOpenArchModal);
+      window.removeEventListener('cityscape:open-admin-customizer', handleOpenAdminCustomizer);
+      window.removeEventListener('cityscape:open-report-modal', handleOpenReportModal);
+      window.removeEventListener('cityscape:open-download-modal', handleOpenDownloadModal);
+    };
+  }, []);
 
   // Toast Notification & 5-second Undo Upvote State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -129,6 +182,34 @@ export default function App() {
 
   useEffect(() => {
     fetchProfile();
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser && firebaseUser.email) {
+        try {
+          const res = await fetch('/api/auth/google/connect-demo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: firebaseUser.email,
+              name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+              picture: firebaseUser.photoURL || undefined,
+              id: firebaseUser.uid,
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.profile) {
+              setUserProfile(data.profile);
+              setUserKarma(data.profile.civicKarma);
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to sync auth state to profile:', err);
+        }
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const fetchProfile = async () => {
@@ -635,6 +716,10 @@ export default function App() {
           filter={filter}
           setFilter={setFilter}
           onOpenReportModal={() => setIsReportModalOpen(true)}
+          onOpenDownloadShareModal={(tab) => {
+            setDownloadShareModalTab(tab || 'download');
+            setIsDownloadShareModalOpen(true);
+          }}
           isAdminMode={isAdminMode}
           setIsAdminMode={setIsAdminMode}
           totalReportsCount={reports.length}
@@ -648,8 +733,22 @@ export default function App() {
 
         {/* Main View Container */}
         <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 pb-28 lg:pb-8 space-y-6">
+          {/* Free Community Trial Run & Ecosystem Notification Banner (Red Themed with Audio Sync) */}
+          {activeView !== 'bulletin' && (
+            <TrialEcosystemNotificationBanner
+              onNavigateToView={(view) => setActiveView(view as any)}
+              onOpenReportModal={() => setIsReportModalOpen(true)}
+              onOpenDownloadShareModal={(tab) => {
+                setDownloadShareModalTab(tab || 'download');
+                setIsDownloadShareModalOpen(true);
+              }}
+            />
+          )}
+
           {/* Dynamic Citizen Pride Banner - Only on Home Screen */}
-          {activeView === 'map' && <CitizenPrideBanner />}
+          {activeView === 'map' && (
+            <CitizenPrideBanner onOpenReportModal={() => setIsReportModalOpen(true)} />
+          )}
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -662,40 +761,10 @@ export default function App() {
               {/* VIEW 1: DUAL MAP & LIST SPLIT VIEW */}
               {activeView === 'map' && (
                 <div className="space-y-4">
-                  {/* Mobile View Switcher Pill */}
-                  <div className="flex md:hidden items-center justify-center p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl max-w-sm mx-auto border-2 border-slate-300 dark:border-slate-700 shadow-sm">
-                    <button
-                      onClick={() => setMobileTab('map')}
-                      className={`flex-1 flex items-center justify-center space-x-1.5 py-3 px-4 rounded-xl text-xs font-black transition-all active:scale-[0.96] cursor-pointer min-h-[52px] ${
-                        mobileTab === 'map'
-                          ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-2 border-[#006D5B]'
-                          : 'text-[#111827] dark:text-slate-100 font-extrabold hover:bg-slate-300/50'
-                      }`}
-                    >
-                      <MapIcon className="w-4 h-4 text-[#CCFF00]" />
-                      <span>Map View</span>
-                    </button>
-                    <button
-                      onClick={() => setMobileTab('list')}
-                      className={`flex-1 flex items-center justify-center space-x-1.5 py-3 px-4 rounded-xl text-xs font-black transition-all active:scale-[0.96] cursor-pointer min-h-[52px] ${
-                        mobileTab === 'list'
-                          ? 'bg-[#0A2540] text-[#CCFF00] dark:bg-[#006D5B] shadow-md border-2 border-[#006D5B]'
-                          : 'text-[#111827] dark:text-slate-100 font-extrabold hover:bg-slate-300/50'
-                      }`}
-                    >
-                      <List className="w-4 h-4 text-[#CCFF00]" />
-                      <span>Issue List ({reports.length})</span>
-                    </button>
-                  </div>
-
                   {/* Split Screen Layout */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-5 h-auto md:h-[calc(100vh-180px)] md:min-h-[520px]">
                     {/* Interactive Map Side */}
-                    <div
-                      className={`md:col-span-7 lg:col-span-8 h-[380px] sm:h-[480px] md:h-full rounded-3xl overflow-hidden shadow-sm border-2 border-slate-300 dark:border-slate-700 ${
-                        mobileTab === 'list' ? 'hidden md:block' : 'block'
-                      }`}
-                    >
+                    <div className="md:col-span-7 lg:col-span-8 h-[320px] sm:h-[420px] md:h-full rounded-3xl overflow-hidden shadow-sm border-2 border-slate-300 dark:border-slate-700">
                       <CommunityMap
                         reports={reports}
                         selectedReportId={selectedReport?.id}
@@ -708,11 +777,7 @@ export default function App() {
                     </div>
 
                     {/* Reported Issues Feed Side */}
-                    <div
-                      className={`md:col-span-5 lg:col-span-4 h-auto md:h-full overflow-y-auto pr-1 ${
-                        mobileTab === 'map' ? 'hidden md:block' : 'block'
-                      }`}
-                    >
+                    <div className="md:col-span-5 lg:col-span-4 h-auto md:h-full overflow-y-auto pr-1">
                       <IssueList
                         reports={reports}
                         selectedReportId={selectedReport?.id}
@@ -729,11 +794,6 @@ export default function App() {
 
               {/* VIEW 2: CIVIC BULLETIN & ANNOUNCEMENTS */}
               {activeView === 'bulletin' && <CivicBulletinHub />}
-
-              {/* VIEW 3: AUTOMATED SLA RESOLUTION ENGINE */}
-              {activeView === 'sla' && (
-                <SlaDashboard reports={reports} onConfirmResolution={handleConfirmResolution} />
-              )}
 
               {/* VIEW 4: COMMUNITY GRATITUDE & WALL OF FAME */}
               {activeView === 'gratitude' && (
@@ -761,14 +821,25 @@ export default function App() {
                 />
               )}
 
-              {/* VIEW 6: SEPARATE PASSWORD-PROTECTED & SAAS-SUBSCRIBED MUNICIPAL DESK */}
-              {activeView === 'admin' && (
+              {/* VIEW 6: UNIFIED MUNICIPAL OPERATIONS & GOV DESK (Work Orders, SLAs, Analytics, Strategic AI, Gated Oversight) */}
+              {(activeView === 'admin' || activeView === 'sla' || activeView === 'analytics' || activeView === 'strategic') && (
                 <MunicipalDeskPortal
                   reports={reports}
+                  stats={cityStats}
                   onUpdateStatus={handleUpdateStatus}
                   onSelectReport={handleSelectReport}
+                  onConfirmResolution={handleConfirmResolution}
                   isAdminMode={isAdminMode}
                   setIsAdminMode={setIsAdminMode}
+                  initialSubTab={
+                    activeView === 'sla'
+                      ? 'sla'
+                      : activeView === 'analytics'
+                      ? 'analytics'
+                      : activeView === 'strategic'
+                      ? 'strategic'
+                      : 'board'
+                  }
                 />
               )}
 
@@ -792,8 +863,17 @@ export default function App() {
                 />
               )}
 
-              {/* VIEW 9: CITY INSIGHTS & ANALYTICS */}
-              {activeView === 'analytics' && <AnalyticsView stats={cityStats} reports={reports} />}
+              {/* VIEW 9: CITY TOURIST ATTRACTIONS, HERITAGE & PICTORIAL LIBRARY */}
+              {activeView === 'attractions' && (
+                <CityAttractionsView
+                  initialCityName="Rawalpindi"
+                  onAwardKarma={(amount, reason) => {
+                    setUserKarma((prev) => prev + amount);
+                    showToast(`+${amount} Karma Earned! ${reason}`);
+                  }}
+                  onNavigateToMap={() => setActiveView('map')}
+                />
+              )}
 
               {/* VIEW 10: OFFICIAL BRAND IDENTITY SYSTEM & GUIDELINES */}
               {activeView === 'brand' && <BrandIdentitySystem />}
@@ -806,11 +886,30 @@ export default function App() {
                 />
               )}
 
-              {/* VIEW 11: STRATEGIC AI & GOVERNANCE ROADMAP ARCHITECTURE */}
-              {activeView === 'strategic' && <StrategicArchitectureView />}
+              {/* VIEW 13: HASHTAG LANDING & VELOCITY FEED */}
+              {activeView === 'hashtag' && (
+                <HashtagLandingView
+                  tag={activeHashtag}
+                  reports={reports}
+                  onBack={() => setActiveView('map')}
+                  onSelectReport={handleSelectReport}
+                  onUpvoteReport={handleUpvoteReport}
+                  onOpenReportModalWithTag={(tag) => setIsReportModalOpen(true)}
+                  onHashtagClick={(tag) => {
+                    setActiveHashtag(tag);
+                    setActiveView('hashtag');
+                  }}
+                />
+              )}
             </motion.div>
           </AnimatePresence>
         </main>
+
+      {/* SQL & Velocity Algorithm Architecture Modal */}
+      <HashtagArchitectureModal
+        isOpen={isHashtagArchOpen}
+        onClose={() => setIsHashtagArchOpen(false)}
+      />
 
       {/* Multi-Step Issue Reporting Modal */}
       <ReportModal
@@ -856,16 +955,40 @@ export default function App() {
         onDismiss={() => setUndoUpvoteState(null)}
       />
 
+      {/* Website Administrator Global Theme & CSS Control Panel */}
+      <AdminControlPanel
+        isOpen={isAdminControlPanelOpen}
+        onClose={() => setIsAdminControlPanelOpen(false)}
+        userRole={isAdminMode ? 'admin' : 'citizen'}
+        isWebsiteAdmin={isAdminMode}
+      />
+
       {/* Mobile Fixed Dock Navigation & Sheet Menu */}
       <MobileNavigation
         activeView={activeView}
         setActiveView={setActiveView}
         onOpenReportModal={() => setIsReportModalOpen(true)}
+        onOpenDownloadShareModal={(tab) => {
+          setDownloadShareModalTab(tab || 'download');
+          setIsDownloadShareModalOpen(true);
+        }}
         totalReportsCount={reports.length}
         userKarma={userKarma}
         isAdminMode={isAdminMode}
         filter={filter}
         setFilter={setFilter}
+      />
+
+      {/* App Download, PWA Installation & Neighbor Trial Invitation Modal */}
+      <AppDownloadShareModal
+        isOpen={isDownloadShareModalOpen}
+        onClose={() => setIsDownloadShareModalOpen(false)}
+        initialTab={downloadShareModalTab}
+        userKarma={userKarma}
+        onKarmaReward={(bonus) => {
+          setUserKarma((prev) => prev + bonus);
+          showToast(`+${bonus} Civic Karma Earned! Trial Invitation Sent.`);
+        }}
       />
 
       {/* Toast Notification Popup with Spring Entrance */}

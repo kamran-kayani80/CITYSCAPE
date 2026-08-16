@@ -245,3 +245,74 @@ export function getWardsForCity(cityName: string): WardInfo[] {
   ];
 }
 
+/**
+ * Returns the formal name of the Municipal Corporation / Local Govt Authority responsible for a city.
+ */
+export function getMunicipalCorporationForCity(cityName: string): string {
+  const lower = (cityName || '').toLowerCase().trim();
+  if (lower.includes('islamabad')) return 'Metropolitan Corporation Islamabad (MCI) & CDA';
+  if (lower.includes('rawalpindi')) return 'Rawalpindi Municipal Corporation (RMC)';
+  if (lower.includes('lahore')) return 'Lahore Metropolitan Corporation (MCL)';
+  if (lower.includes('karachi')) return 'Karachi Metropolitan Corporation (KMC)';
+  if (lower.includes('peshawar')) return 'Peshawar Development Authority (PDA) & WSSP';
+  if (lower.includes('quetta')) return 'Metropolitan Corporation Quetta (MCQ)';
+  if (lower.includes('multan')) return 'Multan Municipal Corporation & MDA';
+  if (lower.includes('faisalabad')) return 'Faisalabad Municipal Corporation & FDA';
+  if (lower.includes('sialkot')) return 'Sialkot Municipal Corporation';
+  if (lower.includes('gujranwala')) return 'Gujranwala Municipal Corporation & GDA';
+  if (lower.includes('san francisco') || lower.includes('sf')) return 'San Francisco Public Works (DPW) & City Administration';
+  if (lower.includes('new york') || lower.includes('ny')) return 'New York City Department of Transportation (NYC DOT)';
+  if (lower.includes('london')) return 'Westminster City Council & Greater London Authority (GLA)';
+  if (lower.includes('paris')) return 'Mairie de Paris & Direction de la Propreté';
+  if (lower.includes('tokyo')) return 'Tokyo Metropolitan Government (TMG Urban Bureau)';
+  if (lower.includes('berlin')) return 'Senatsverwaltung für Stadtentwicklung Berlin';
+  if (lower.includes('sydney')) return 'City of Sydney Municipal Council';
+  if (lower.includes('chicago')) return 'City of Chicago Department of Transportation (CDOT)';
+  if (lower.includes('los angeles') || lower.includes('la')) return 'City of Los Angeles Bureau of Street Services (StreetsLA)';
+  if (lower.includes('toronto')) return 'City of Toronto Transportation Services & 311';
+  if (lower.includes('dubai')) return 'Dubai Municipality (DM)';
+
+  const capitalized = cityName ? cityName.charAt(0).toUpperCase() + cityName.slice(1) : 'Local';
+  return `${capitalized} Municipal Corporation & Public Works`;
+}
+
+/**
+ * Validates whether a specific report belongs to the selected/geotagged city.
+ */
+export function isReportInCity(report: any, cityName: string): boolean {
+  if (!cityName || !report) return true;
+  const targetCity = cityName.trim().toLowerCase();
+  if (targetCity === 'all' || targetCity === '') return true;
+
+  // 1. Explicit report.cityName property check
+  if (report.cityName && report.cityName.toLowerCase() === targetCity) {
+    return true;
+  }
+
+  // 2. Address text substring check
+  if (report.addressText && report.addressText.toLowerCase().includes(targetCity)) {
+    return true;
+  }
+
+  // 3. WardZone substring check
+  if (report.wardZone && report.wardZone.toLowerCase().includes(targetCity)) {
+    return true;
+  }
+
+  // 4. Spatial distance to known city coordinates within 50km radius
+  const known = KNOWN_CITIES.find(c => c.name.toLowerCase() === targetCity);
+  if (known && report.latitude !== undefined && report.longitude !== undefined) {
+    const lat = Number(report.latitude);
+    const lng = Number(report.longitude);
+    if (!isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng)) {
+      const dist = calculateDistanceKm(lat, lng, known.lat, known.lng);
+      if (dist <= 50) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+

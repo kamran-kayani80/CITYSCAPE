@@ -47,22 +47,22 @@ export const CATEGORY_CONFIG: Record<ReportCategory, CategoryMeta> = {
   WATER_LEAK: {
     label: 'Water & Drainage',
     iconName: 'Droplets',
-    badgeBg: 'bg-[#008080]/10 dark:bg-[#008080]/20',
-    badgeText: 'text-[#008080] dark:text-[#CCFF00] border-[#008080]/30',
+    badgeBg: 'bg-[#E6F4F1] dark:bg-[#004D40]',
+    badgeText: 'text-[#006D5B] dark:text-teal-200 border-[#006D5B]/30',
     description: 'Burst water mains, clogged storm drains, sewage backup'
   },
   ROADS_TRAFFIC: {
     label: 'Roads & Traffic Signs',
     iconName: 'TrafficCone',
-    badgeBg: 'bg-[#008080]/10 dark:bg-[#008080]/20',
-    badgeText: 'text-[#008080] dark:text-[#CCFF00] border-[#008080]/30',
+    badgeBg: 'bg-[#E6F4F1] dark:bg-[#004D40]',
+    badgeText: 'text-[#006D5B] dark:text-teal-200 border-[#006D5B]/30',
     description: 'Damaged stop signs, missing lane markers, obscured crosswalks'
   },
   OTHER: {
     label: 'General Infrastructure',
     iconName: 'HelpCircle',
     badgeBg: 'bg-slate-100 dark:bg-slate-800',
-    badgeText: 'text-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700',
+    badgeText: 'text-[#111827] dark:text-slate-200 border-slate-300 dark:border-slate-700',
     description: 'Damaged trees, public park issues, unspecified civic defects'
   }
 };
@@ -86,23 +86,23 @@ export const STATUS_CONFIG: Record<ReportStatus, { label: string; dotColor: stri
     label: 'Resolved / Closed',
     dotColor: 'bg-emerald-500',
     bgClass: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900',
-    textClass: 'text-emerald-700 dark:text-emerald-300',
-    pinHex: '#10B981' // Green
+    textClass: 'text-[#006D5B] dark:text-emerald-300',
+    pinHex: '#006D5B' // Warm Sage Teal
   },
   REJECTED: {
     label: 'Rejected / Duplicate',
     dotColor: 'bg-slate-400',
     bgClass: 'bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700',
-    textClass: 'text-slate-600 dark:text-slate-400',
+    textClass: 'text-slate-700 dark:text-slate-300',
     pinHex: '#64748B' // Slate Gray
   }
 };
 
 export const SEVERITY_CONFIG: Record<SeverityLevel, { label: string; colorClass: string }> = {
-  LOW: { label: 'Low Severity', colorClass: 'bg-slate-100 text-slate-700 border-slate-300' },
-  MEDIUM: { label: 'Moderate Hazard', colorClass: 'bg-[#008080]/10 text-[#008080] dark:text-[#CCFF00] border-[#008080]/30' },
-  HIGH: { label: 'High Priority', colorClass: 'bg-orange-50 text-orange-700 border-orange-300 font-semibold' },
-  CRITICAL: { label: 'Critical Safety Risk', colorClass: 'bg-red-100 text-red-800 border-red-300 font-bold' }
+  LOW: { label: 'Low Severity', colorClass: 'bg-slate-100 text-[#111827] dark:text-slate-200 border-slate-300 dark:border-slate-700 font-bold' },
+  MEDIUM: { label: 'Moderate Hazard', colorClass: 'bg-[#E6F4F1] dark:bg-[#004D40] text-[#006D5B] dark:text-teal-200 border-[#006D5B]/30 font-bold' },
+  HIGH: { label: 'High Priority', colorClass: 'bg-amber-50 dark:bg-amber-950/50 text-[#B45309] dark:text-amber-300 border-amber-300 dark:border-amber-800 font-bold' },
+  CRITICAL: { label: 'Critical Safety Risk', colorClass: 'bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-200 border-red-300 dark:border-red-800 font-bold' }
 };
 
 export const CATEGORY_SLA_HOURS: Record<ReportCategory, { hours: number; label: string }> = {
