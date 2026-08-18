@@ -3,13 +3,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helpers
+    // ----------------------------------------------------------------------
+    // GLOBAL SECURITY PRIMITIVES & IDENTITY HELPERS
+    // ----------------------------------------------------------------------
     function isSignedIn() {
       return request.auth != null;
-    }
-    
-    function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
     
     function incoming() {
@@ -20,110 +18,188 @@ service cloud.firestore {
       return resource.data;
     }
 
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isAdminOrWorker() {
-      return isSignedIn() && (request.auth.token.get('role', '') == 'admin' || request.auth.token.get('role', '') == 'municipal_worker');
+    // Hardened Admin check: Trusted admin document or verified bootstrap admin
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email_verified == true && request.auth.token.email == 'kaamikayani@gmail.com')
+      );
     }
 
+    function isMunicipalWorker() {
+      return isSignedIn() && (
+        isAdmin() ||
+        exists(/databases/$(database)/documents/workers/$(request.auth.uid))
+      );
+    }
+
+    // ----------------------------------------------------------------------
+    // DOMAIN VALUE VALIDATORS
+    // ----------------------------------------------------------------------
     function isValidStatus(status) {
       return status in ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'REJECTED'];
     }
 
     function isValidCategory(cat) {
-      return cat in ['POTHOLE', 'LIGHTING', 'SANITATION', 'VANDALISM', 'WATER_LEAK', 'ROADS_TRAFFIC', 'OTHER'];
+      return cat in ['POTHOLE', 'LIGHTING', 'SANITATION', 'VANDALISM', 'WATER_LEAK', 'ROADS_TRAFFIC', 'PARKS_RECREATION', 'STREET_SIGN', 'OTHER'];
     }
 
     function isValidSeverity(sev) {
       return sev in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
     }
 
+    // ----------------------------------------------------------------------
+    // ENTITY SCHEMAS & FIELD SIZE GUARDS
+    // ----------------------------------------------------------------------
     function isValidReport(data) {
       return data.title is string && data.title.size() > 0 && data.title.size() <= 150 &&
              data.description is string && data.description.size() <= 2000 &&
              data.category is string && isValidCategory(data.category) &&
              data.status is string && isValidStatus(data.status) &&
              data.severity is string && isValidSeverity(data.severity) &&
-             data.addressText is string && data.addressText.size() <= 300;
+             data.addressText is string && data.addressText.size() <= 300 &&
+             (!('upvotesCount' in data) || (data.upvotesCount is number && data.upvotesCount >= 0)) &&
+             (!('imageUrls' in data) || (data.imageUrls is list && data.imageUrls.size() <= 10)) &&
+             (!('userId' in data) || (data.userId is string && data.userId.size() <= 128));
     }
 
     function isValidComment(data) {
-      return data.reportId is string &&
-             data.userName is string && data.userName.size() <= 100 &&
+      return data.reportId is string && isValidId(data.reportId) &&
+             data.userName is string && data.userName.size() > 0 && data.userName.size() <= 100 &&
              data.content is string && data.content.size() > 0 && data.content.size() <= 1000 &&
-             data.userRole is string && data.userRole in ['citizen', 'admin', 'municipal_worker'];
+             (!('userRole' in data) || (data.userRole is string && data.userRole in ['citizen', 'admin', 'municipal_worker'])) &&
+             (!('userId' in data) || (data.userId is string && data.userId.size() <= 128));
     }
 
     function isValidVerification(data) {
-      return data.reportId is string &&
-             data.userName is string && data.userName.size() <= 100 &&
-             data.statusConfirmed is string && data.statusConfirmed in ['RESOLVED', 'STILL_BROKEN'];
+      return data.reportId is string && isValidId(data.reportId) &&
+             data.userName is string && data.userName.size() > 0 && data.userName.size() <= 100 &&
+             data.statusConfirmed is string && data.statusConfirmed in ['RESOLVED', 'STILL_BROKEN'] &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+             (!('userId' in data) || (data.userId is string && data.userId.size() <= 128));
     }
 
     function isValidUserProfile(data) {
-      return data.username is string && data.username.size() <= 50 &&
-             data.fullName is string && data.fullName.size() <= 100;
+      return data.username is string && data.username.size() > 0 && data.username.size() <= 50 &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 100 &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 200)) &&
+             (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 500)) &&
+             (!('civicKarma' in data) || data.civicKarma is number);
     }
 
     function isValidHashtag(data) {
-      return data.name is string && data.name.size() <= 100 &&
-             data.displayName is string && data.displayName.size() <= 100;
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100 &&
+             (!('usageCount' in data) || data.usageCount is number) &&
+             (!('recentCount' in data) || data.recentCount is number);
     }
 
-    // Default deny catch-all
+    // ----------------------------------------------------------------------
+    // DEFAULT-DENY GLOBAL CATCH-ALL
+    // ----------------------------------------------------------------------
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Connection test document
+    // ----------------------------------------------------------------------
+    // CONNECTION & HEALTH CHECK
+    // ----------------------------------------------------------------------
     match /test/connection {
       allow read: if true;
     }
 
-    // Reports collection
+    // ----------------------------------------------------------------------
+    // ADMINS & MUNICIPAL WORKERS ROSTER
+    // ----------------------------------------------------------------------
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /workers/{workerId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ----------------------------------------------------------------------
+    // REPORTS COLLECTION
+    // ----------------------------------------------------------------------
     match /reports/{reportId} {
       allow read: if true;
-      allow create: if isValidId(reportId) && isValidReport(incoming());
-      allow update: if isValidId(reportId) && (
-        (incoming().diff(existing()).affectedKeys().hasOnly(['upvotesCount', 'userHasUpvoted', 'updatedAt'])) ||
-        (isAdminOrWorker() && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'officialNote', 'resolvedAt', 'assignedWorker', 'updatedAt', 'resolutionImageUrl']) && isValidStatus(incoming().status)) ||
-        (incoming().diff(existing()).affectedKeys().hasOnly(['verificationsCount', 'updatedAt'])) ||
-        (isSignedIn() && existing().userId == request.auth.uid && isValidReport(incoming()))
+      allow create: if isValidId(reportId) && isValidReport(incoming()) && (
+        // Either guest submission or authenticated author
+        !('userId' in incoming()) || incoming().userId == request.auth.uid
       );
-      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+      
+      allow update: if isValidId(reportId) && (
+        // Action 1: Community Upvote / Karma increment
+        (incoming().diff(existing()).affectedKeys().hasOnly(['upvotesCount', 'userHasUpvoted', 'updatedAt']) &&
+         incoming().upvotesCount is number) ||
+        
+        // Action 2: Municipal Worker or Admin Status Progression & Dispatch Notes
+        (isMunicipalWorker() &&
+         incoming().diff(existing()).affectedKeys().hasOnly(['status', 'officialNote', 'resolvedAt', 'assignedWorker', 'updatedAt', 'resolutionImageUrl']) &&
+         isValidStatus(incoming().status)) ||
+        
+        // Action 3: Community Verification counter increment
+        (incoming().diff(existing()).affectedKeys().hasOnly(['verificationsCount', 'updatedAt']) &&
+         incoming().verificationsCount is number) ||
+        
+        // Action 4: Author editing their own report content
+        (isSignedIn() && existing().get('userId', '') == request.auth.uid &&
+         isValidReport(incoming()) &&
+         incoming().userId == existing().userId) ||
+        
+        // Admin override
+        isAdmin()
+      );
+      
+      allow delete: if (isSignedIn() && existing().get('userId', '') == request.auth.uid) || isAdmin();
 
-      // Comments subcollection
+      // Comments Subcollection
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isSignedIn() && isValidId(commentId) && isValidComment(incoming()) &&
-                       (!('userId' in incoming()) || incoming().userId == request.auth.uid);
-        allow update, delete: if false;
+        allow create: if isValidId(commentId) && isValidComment(incoming()) && (
+          !('userId' in incoming()) || (isSignedIn() && incoming().userId == request.auth.uid)
+        );
+        allow update, delete: if isAdmin();
       }
 
-      // Verifications subcollection
+      // Verifications Subcollection
       match /verifications/{verificationId} {
         allow read: if true;
-        allow create: if isSignedIn() && isValidId(verificationId) && isValidVerification(incoming()) &&
-                       (!('userId' in incoming()) || incoming().userId == request.auth.uid);
-        allow update, delete: if false;
+        allow create: if isValidId(verificationId) && isValidVerification(incoming()) && (
+          !('userId' in incoming()) || (isSignedIn() && incoming().userId == request.auth.uid)
+        );
+        allow update, delete: if isAdmin();
       }
     }
 
-    // User profiles - prevent blanket scraping by blocking list queries
+    // ----------------------------------------------------------------------
+    // USERS COLLECTION (PII ISOLATION & SCRAPING GUARD)
+    // ----------------------------------------------------------------------
     match /users/{userId} {
       allow get: if isSignedIn();
-      allow list: if false;
+      allow list: if false; // Prevents bulk database scraping
       allow create, update: if isValidId(userId) && isOwner(userId) && isValidUserProfile(incoming());
-      allow delete: if isOwner(userId);
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // Hashtags
+    // ----------------------------------------------------------------------
+    // CIVIC HASHTAGS INDEX
+    // ----------------------------------------------------------------------
     match /hashtags/{hashtagId} {
       allow read: if true;
-      allow create, update: if isSignedIn() && isValidId(hashtagId) && isValidHashtag(incoming());
-      allow delete: if false;
+      allow create, update: if isValidId(hashtagId) && isValidHashtag(incoming());
+      allow delete: if isAdmin();
     }
   }
 }
