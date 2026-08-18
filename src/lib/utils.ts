@@ -94,37 +94,110 @@ export function readFileAsBase64(file: File, maxDimension = 1200, quality = 0.82
   });
 }
 
-// Reverse geocode via OpenStreetMap Nominatim API
+// In-memory and sessionStorage cache for reverse geocoding to prevent Nominatim 429 Rate Limits
+const geocodeCache = new Map<string, { address: string; timestamp: number }>();
+let lastNominatimRequestTime = 0;
+const MIN_NOMINATIM_INTERVAL_MS = 1100; // Nominatim strictly enforces 1 req/sec max
+
+// Queue mechanism for rate-limiting consecutive reverse geocode requests
+let geocodeQueue: Promise<void> = Promise.resolve();
+
 export async function reverseGeocode(lat: number, lng: number): Promise<string> {
   if (isNaN(lat) || isNaN(lng) || !isFinite(lat) || !isFinite(lng)) {
     return 'San Francisco, CA';
   }
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-      {
-        headers: {
-          'User-Agent': 'CITYSCAPE-CommunityApp/1.0'
-        }
-      }
-    );
-    if (!res.ok) throw new Error('Geocoding failed');
-    const data = await res.json();
-    if (data && data.display_name) {
-      // Return shortened street address if available
-      const addr = data.address;
-      if (addr) {
-        const road = addr.road || addr.pedestrian || addr.suburb || '';
-        const houseNumber = addr.house_number || '';
-        const city = addr.city || addr.town || addr.village || addr.county || '';
-        const state = addr.state || '';
-        const parts = [houseNumber, road, city, state].filter(Boolean);
-        if (parts.length > 0) return parts.join(', ');
-      }
-      return data.display_name.split(',').slice(0, 3).join(',');
-    }
-  } catch (err) {
-    console.warn('Reverse geocode warning:', err);
+
+  // Quantize coordinates to 3 decimal places (~110m resolution) for aggressive caching
+  const quantKey = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+
+  // 1. Check in-memory cache
+  const cached = geocodeCache.get(quantKey);
+  if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour memory TTL
+    return cached.address;
   }
-  return `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+
+  // 2. Check browser sessionStorage
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      const stored = sessionStorage.getItem(`cityscape_geo_${quantKey}`);
+      if (stored) {
+        geocodeCache.set(quantKey, { address: stored, timestamp: Date.now() });
+        return stored;
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }
+
+  // Helper to store in cache
+  const setCache = (addr: string) => {
+    geocodeCache.set(quantKey, { address: addr, timestamp: Date.now() });
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(`cityscape_geo_${quantKey}`, addr);
+      }
+    } catch {
+      // Ignore storage quota
+    }
+    return addr;
+  };
+
+  // 3. Queue the request so we never violate the 1 request/second rule
+  return new Promise<string>((resolve) => {
+    geocodeQueue = geocodeQueue.then(async () => {
+      const now = Date.now();
+      const elapsed = now - lastNominatimRequestTime;
+      if (elapsed < MIN_NOMINATIM_INTERVAL_MS) {
+        await new Promise((r) => setTimeout(r, MIN_NOMINATIM_INTERVAL_MS - elapsed));
+      }
+      lastNominatimRequestTime = Date.now();
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+          {
+            headers: {
+              'User-Agent': 'CITYSCAPE-CommunityCivicPlatform/1.0',
+              'Accept-Language': 'en',
+            },
+            signal: controller.signal,
+          }
+        );
+        clearTimeout(timeoutId);
+
+        if (res.status === 429 || res.status === 403) {
+          console.warn('[Geocoding] Nominatim rate limit (429/403). Using coordinate fallback.');
+          resolve(setCache(`Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`));
+          return;
+        }
+
+        if (!res.ok) throw new Error(`Geocoding HTTP error: ${res.status}`);
+        const data = await res.json();
+        if (data && data.display_name) {
+          const addr = data.address;
+          if (addr) {
+            const road = addr.road || addr.pedestrian || addr.suburb || addr.neighbourhood || '';
+            const houseNumber = addr.house_number || '';
+            const city = addr.city || addr.town || addr.village || addr.municipality || addr.county || '';
+            const state = addr.state || '';
+            const parts = [houseNumber, road, city, state].filter(Boolean);
+            if (parts.length > 0) {
+              resolve(setCache(parts.join(', ')));
+              return;
+            }
+          }
+          const shortDisplay = data.display_name.split(',').slice(0, 3).join(', ');
+          resolve(setCache(shortDisplay));
+          return;
+        }
+      } catch (err) {
+        // Fallback gracefully on rate limit, timeout, or offline
+      }
+
+      resolve(setCache(`Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`));
+    });
+  });
 }

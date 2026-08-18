@@ -36,6 +36,7 @@ import {
   CityAttractionGroup,
   getAttractionsForCity,
 } from '../data/cityAttractionsData';
+import { CityHistoryCultureHub } from './CityHistoryCultureHub';
 
 interface CityAttractionsViewProps {
   initialCityName?: string;
@@ -441,6 +442,9 @@ Resident's Question: "${aiQuestion}"`,
           </div>
         </div>
       </section>
+
+      {/* Comprehensive City Genesis History, Famous Luminaries & Cultural Dossier */}
+      <CityHistoryCultureHub cityData={cityData} />
 
       {/* Search, Filter & Upvote Sort Toolbar */}
       <section className="bg-white dark:bg-[#0A2540] rounded-3xl p-4 sm:p-5 border-2 border-[#CBD5E1] dark:border-slate-800 shadow-sm space-y-3">
@@ -882,6 +886,61 @@ Resident's Question: "${aiQuestion}"`,
                   ))}
                 </div>
               </div>
+
+              {/* Cultural Lore & Legends */}
+              {selectedAttraction.culturalLoreAndLegends && (
+                <div className="p-5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/20 border-2 border-purple-200 dark:border-purple-900/50 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-xl bg-purple-700 text-white">
+                      <Scroll className="w-4 h-4 text-amber-300" />
+                    </div>
+                    <h4 className="text-sm font-extrabold text-purple-900 dark:text-purple-300 uppercase tracking-wider">
+                      Cultural Lore, Folk Legends & Proverbs
+                    </h4>
+                  </div>
+                  <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
+                    {selectedAttraction.culturalLoreAndLegends}
+                  </p>
+                </div>
+              )}
+
+              {/* Masonry & Craft Details */}
+              {selectedAttraction.masonryAndCraftDetails && (
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-1">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                    Structural Materials & Masonry Craft:
+                  </span>
+                  <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium">
+                    {selectedAttraction.masonryAndCraftDetails}
+                  </p>
+                </div>
+              )}
+
+              {/* Famous Historical Visitors */}
+              {selectedAttraction.famousHistoricalVisitors && selectedAttraction.famousHistoricalVisitors.length > 0 && (
+                <div className="space-y-2.5">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                    <History className="w-4 h-4 text-[#006D5B]" />
+                    <span>Famous Historical Visitors & Chroniclers</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {selectedAttraction.famousHistoricalVisitors.map((v, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-1"
+                      >
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-extrabold text-[#0A2540] dark:text-white">{v.name}</span>
+                          <span className="text-[#B45309] font-bold text-[11px]">{v.era}</span>
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                          {v.note}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Practical Visiting Info Matrix */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">

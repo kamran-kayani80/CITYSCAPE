@@ -22,7 +22,6 @@ import {
 import { useAccessibility } from '../context/AccessibilityContext';
 import { ShareModal } from './ShareModal';
 import { getShareableUrl, ShareDataPayload } from '../lib/shareUtils';
-import { TrialEcosystemNotificationBanner } from './TrialEcosystemNotificationBanner';
 import { civicAudio } from '../lib/chimeAudio';
 
 interface LiveBulletin {
@@ -139,14 +138,6 @@ export const CivicBulletinHub: React.FC = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 py-2 px-3 sm:px-6">
-      {/* 
-        ====================================================================
-        RED FREE TRIAL RUN NOTIFICATION & ECOSYSTEM AUDIO BROADCAST
-        Played along with the bulletin and announces sandbox trial terms
-        ====================================================================
-      */}
-      <TrialEcosystemNotificationBanner activeCityName={cityName} />
-
       {/* 
         ====================================================================
         CITYSCAPE BRAND GUIDE HEADER: CIVIC BULLETINS & NEIGHBORHOOD ADVISORIES

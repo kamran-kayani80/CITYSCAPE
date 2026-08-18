@@ -157,6 +157,10 @@ interface ThreeDWeatherWidgetProps {
   className?: string;
 }
 
+// Client-side cache for weather data to prevent Open-Meteo rate limits
+const weatherMemoryCache = new Map<string, { data: WeatherData; timestamp: number }>();
+const WEATHER_CACHE_TTL_MS = 15 * 60 * 1000; // 15 Minutes Cache TTL
+
 export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
   cityName,
   lat,
@@ -192,6 +196,34 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
   };
 
   const fetchWeather = async () => {
+    const cacheKey = `${cityName.toLowerCase().trim()}_${lat?.toFixed(2) || ''}_${lng?.toFixed(2) || ''}`;
+
+    // 1. Check in-memory cache
+    const cached = weatherMemoryCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < WEATHER_CACHE_TTL_MS) {
+      setWeather(cached.data);
+      setIsLoading(false);
+      return;
+    }
+
+    // 2. Check sessionStorage
+    if (typeof sessionStorage !== 'undefined') {
+      try {
+        const stored = sessionStorage.getItem(`cityscape_weather_${cacheKey}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.timestamp && Date.now() - parsed.timestamp < WEATHER_CACHE_TTL_MS) {
+            weatherMemoryCache.set(cacheKey, { data: parsed.data, timestamp: parsed.timestamp });
+            setWeather(parsed.data);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // Ignore JSON or storage errors
+      }
+    }
+
     setIsLoading(true);
     let targetLat = lat;
     let targetLng = lng;
@@ -205,9 +237,13 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
     // Dynamic Geocoding lookup if coords still missing
     if (targetLat === undefined || targetLng === undefined) {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
         const geoRes = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`,
+          { signal: controller.signal }
         );
+        clearTimeout(timeoutId);
         if (geoRes.ok) {
           const geoData = await geoRes.json();
           if (geoData.results && geoData.results.length > 0) {
@@ -216,7 +252,7 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
           }
         }
       } catch (e) {
-        console.warn('Geocoding error, falling back to default coordinates:', e);
+        console.warn('Geocoding notice, using default coordinates:', e);
       }
     }
 
@@ -226,9 +262,13 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${targetLat}&longitude=${targetLng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,uv_index&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max&timezone=auto`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const data = await response.json();
         const current = data.current || {};
@@ -265,7 +305,7 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
           });
         }
 
-        setWeather({
+        const weatherPayload: WeatherData = {
           city: cityName,
           temperature: Math.round(current.temperature_2m ?? 26),
           apparentTemperature: Math.round(current.apparent_temperature ?? 27),
@@ -287,12 +327,27 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
           hourly: hourlyList,
           daily: dailyList,
           lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        });
+        };
+
+        // Cache the result
+        weatherMemoryCache.set(cacheKey, { data: weatherPayload, timestamp: Date.now() });
+        try {
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem(
+              `cityscape_weather_${cacheKey}`,
+              JSON.stringify({ data: weatherPayload, timestamp: Date.now() })
+            );
+          }
+        } catch {
+          // Ignore storage quota
+        }
+
+        setWeather(weatherPayload);
       } else {
         generateSmartFallbackWeather(cityName);
       }
     } catch (err) {
-      console.warn('Weather fetch error, using local simulation:', err);
+      console.warn('Weather fetch notice, using cached or fallback data:', err);
       generateSmartFallbackWeather(cityName);
     } finally {
       setIsLoading(false);

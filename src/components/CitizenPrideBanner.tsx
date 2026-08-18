@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, Sparkles, Building2, Compass, Landmark, History, Locate, Loader2, RefreshCw, Plus, ShieldCheck, HeartHandshake } from 'lucide-react';
 import { ThreeDWeatherWidget } from './ThreeDWeatherWidget';
+import { KNOWN_CITIES, calculateDistanceKm } from '../lib/geoUtils';
 
 interface CityData {
   id: string;
@@ -404,7 +405,6 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
 
     if (!navigator.geolocation) {
       setIsGeotagging(false);
-      alert('Geolocation is not supported by your browser.');
       return;
     }
 
@@ -412,14 +412,42 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
       async (position) => {
         const { latitude, longitude } = position.coords;
         setCurrentCoords({ lat: latitude, lng: longitude });
+
+        // 1. Check if coords are close (<60km) to a known curated city (0 network requests needed!)
+        let closestKnownCity: string | null = null;
+        let minDistance = Infinity;
+        for (const city of KNOWN_CITIES) {
+          const d = calculateDistanceKm(latitude, longitude, city.lat, city.lng);
+          if (d < minDistance) {
+            minDistance = d;
+            if (d < 60) {
+              closestKnownCity = city.name;
+            }
+          }
+        }
+
+        if (closestKnownCity) {
+          applyDetectedCity(closestKnownCity, latitude, longitude);
+          setIsGeotagging(false);
+          return;
+        }
+
+        // 2. Fallback to Open-Meteo or Nominatim with rate limiting
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4000);
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`,
+            {
+              headers: { 'User-Agent': 'CITYSCAPE-CommunityCivicPlatform/1.0', 'Accept-Language': 'en' },
+              signal: controller.signal,
+            }
           );
+          clearTimeout(timeoutId);
           if (response.ok) {
             const data = await response.json();
             const addr = data.address || {};
-            const detectedCity = addr.city || addr.town || addr.county || addr.state_district || addr.state || 'Rawalpindi';
+            const detectedCity = addr.city || addr.town || addr.municipality || addr.county || addr.state_district || addr.state || 'Rawalpindi';
             applyDetectedCity(detectedCity, latitude, longitude);
           } else {
             applyDetectedCity('Rawalpindi', latitude, longitude);
@@ -434,7 +462,7 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
         applyDetectedCity('Rawalpindi', 33.597, 73.0479);
         setIsGeotagging(false);
       },
-      { timeout: 8000, enableHighAccuracy: true }
+      { timeout: 6000, enableHighAccuracy: false }
     );
   };
 
@@ -484,24 +512,12 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
   };
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          try {
-            setCurrentCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&zoom=10`);
-            if (res.ok) {
-              const data = await res.json();
-              const detected = data.address?.city || data.address?.town || data.address?.county || 'Rawalpindi';
-              applyDetectedCity(detected, pos.coords.latitude, pos.coords.longitude);
-            }
-          } catch {
-            // Ignore silent error
-          }
-        },
-        () => {},
-        { timeout: 4000 }
-      );
+    const savedCity = localStorage.getItem('cityscape_user_city');
+    if (savedCity) {
+      const matched = CITIES.find((c) => c.cityName.toLowerCase() === savedCity.toLowerCase());
+      if (matched) {
+        setSelectedCityId(matched.id);
+      }
     }
   }, []);
 

@@ -264,12 +264,40 @@ function getGeminiClient(): GoogleGenAI {
   return aiClient;
 }
 
-// Resilient Gemini Generation Helper with Retries, Exponential Backoff, and Fallback Handling
+// In-memory cache for AI generation responses to prevent redundant Gemini API calls & rate limit exhaustion
+const aiResponseCache = new Map<string, { response: any; timestamp: number }>();
+const AI_CACHE_TTL_MS = 30 * 60 * 1000; // 30-minute cache TTL
+
+function hashPrompt(input: any): string {
+  try {
+    const str = typeof input === 'string' ? input : JSON.stringify(input);
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash |= 0; // Convert to 32bit integer
+    }
+    return `hash_${hash}_${str.length}`;
+  } catch {
+    return `hash_${Date.now()}`;
+  }
+}
+
+// Resilient Gemini Generation Helper with Caching, Retries, Exponential Backoff, and Fallback Handling
 async function generateContentWithRetry(
   ai: GoogleGenAI,
   params: { contents: any; config?: any }
 ): Promise<any> {
-  const modelsToTry = ["gemini-3.7-flash", "gemini-flash-latest", "gemini-3.1-flash-lite"];
+  const promptKey = hashPrompt({ contents: params.contents, config: params.config });
+
+  // 1. Check in-memory cache first to save quota
+  const cached = aiResponseCache.get(promptKey);
+  if (cached && Date.now() - cached.timestamp < AI_CACHE_TTL_MS) {
+    return cached.response;
+  }
+
+  // Model cascade: prioritize fast, high-rate-limit models
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash", "gemini-flash-latest"];
   let lastError: any = null;
 
   for (const model of modelsToTry) {
@@ -288,24 +316,31 @@ async function generateContentWithRetry(
         });
 
         if (response && response.text) {
+          // Cache successful response
+          aiResponseCache.set(promptKey, { response, timestamp: Date.now() });
           return response;
         }
       } catch (err: any) {
         lastError = err;
-        const isTransient =
+        const errStr = String(err?.message || err?.status || err?.code || '');
+        const isRateLimitOrTransient =
+          err?.status === 429 ||
+          err?.code === 429 ||
           err?.status === 503 ||
           err?.code === 503 ||
-          err?.message?.includes('503') ||
-          err?.message?.includes('UNAVAILABLE') ||
-          err?.message?.includes('high demand') ||
-          err?.message?.includes('429');
+          errStr.includes('429') ||
+          errStr.includes('RESOURCE_EXHAUSTED') ||
+          errStr.includes('quota') ||
+          errStr.includes('rate') ||
+          errStr.includes('503') ||
+          errStr.includes('UNAVAILABLE') ||
+          errStr.includes('high demand');
 
-        if (isTransient) {
-          if (attempt < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 600 * attempt));
-          }
+        if (isRateLimitOrTransient) {
+          const backoffTime = 800 * attempt + Math.floor(Math.random() * 400);
+          await new Promise((resolve) => setTimeout(resolve, backoffTime));
         } else {
-          break;
+          break; // Move to next model if it's a structural or schema error
         }
       }
     }

@@ -18,7 +18,6 @@ import { AccessibilityToolbar } from './components/AccessibilityToolbar';
 import { CivicBulletinHub } from './components/CivicBulletinHub';
 import { SlaDashboard } from './components/SlaDashboard';
 import { CitizenPrideBanner } from './components/CitizenPrideBanner';
-import { TrialEcosystemNotificationBanner } from './components/TrialEcosystemNotificationBanner';
 import { AppDownloadShareModal } from './components/AppDownloadShareModal';
 import { BrandIdentitySystem } from './components/BrandIdentitySystem';
 import { StrategicArchitectureView } from './components/StrategicArchitectureView';
@@ -733,18 +732,6 @@ export default function App() {
 
         {/* Main View Container */}
         <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 pb-28 lg:pb-8 space-y-6">
-          {/* Free Community Trial Run & Ecosystem Notification Banner (Red Themed with Audio Sync) */}
-          {activeView !== 'bulletin' && (
-            <TrialEcosystemNotificationBanner
-              onNavigateToView={(view) => setActiveView(view as any)}
-              onOpenReportModal={() => setIsReportModalOpen(true)}
-              onOpenDownloadShareModal={(tab) => {
-                setDownloadShareModalTab(tab || 'download');
-                setIsDownloadShareModalOpen(true);
-              }}
-            />
-          )}
-
           {/* Dynamic Citizen Pride Banner - Only on Home Screen */}
           {activeView === 'map' && (
             <CitizenPrideBanner onOpenReportModal={() => setIsReportModalOpen(true)} />

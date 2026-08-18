@@ -1,3 +1,41 @@
+export interface FamousPerson {
+  id: string;
+  name: string;
+  localName?: string;
+  lifespanOrEra: string;
+  role: string;
+  field: 'Literature & Poetry' | 'Civic Leadership & Governance' | 'Arts & Music' | 'Philosophy & Sufism' | 'Science & Education' | 'Heroic Heritage';
+  biography: string;
+  famousContributions: string[];
+  civicLegacy: string;
+  famousQuote?: string;
+}
+
+export interface HistoricalEra {
+  eraTitle: string;
+  period: string;
+  summary: string;
+  civicMilestones: string[];
+}
+
+export interface CityCulinarySpecialty {
+  dishName: string;
+  localName?: string;
+  description: string;
+  heritageStory: string;
+  famousHub: string;
+}
+
+export interface CityCultureProfile {
+  culturalEssence: string;
+  livingTraditions: string[];
+  folkCrafts: string[];
+  culinaryHeritage: CityCulinarySpecialty[];
+  festivalsAndCivicRhythms: string[];
+  literaryAndMusicalHeritage: string;
+  languagesAndDialects: string[];
+}
+
 export interface CityAttraction {
   id: string;
   cityId: string;
@@ -25,6 +63,9 @@ export interface CityAttraction {
   accessibilityScore: 'High (Wheelchair & Senior Accessible)' | 'Moderate (Assisted Access)' | 'Heritage Steps (Partial Access)';
   audioNarrationText: string;
   neighborTips: { author: string; role: string; tip: string; date: string }[];
+  culturalLoreAndLegends?: string;
+  famousHistoricalVisitors?: { name: string; era: string; note: string }[];
+  masonryAndCraftDetails?: string;
 }
 
 export interface CityAttractionGroup {
@@ -33,6 +74,10 @@ export interface CityAttractionGroup {
   demonym: string;
   country: string;
   description: string;
+  cityGenesisAndHistory?: string;
+  cultureProfile?: CityCultureProfile;
+  famousFigures?: FamousPerson[];
+  historicalTimeline?: HistoricalEra[];
   totalLandmarks: number;
   attractions: CityAttraction[];
 }

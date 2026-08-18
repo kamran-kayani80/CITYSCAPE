@@ -9,8 +9,10 @@ import { NYC_DESTINATIONS } from './cities/nycDestinations';
 import { LONDON_DESTINATIONS } from './cities/londonDestinations';
 import { PARIS_DESTINATIONS } from './cities/parisDestinations';
 import { TOKYO_DESTINATIONS } from './cities/tokyoDestinations';
+import { CITY_CULTURAL_ARCHIVES } from './cityCulturalData';
 
 export * from './attractionTypes';
+export * from './cityCulturalData';
 
 export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
   rawalpindi: {
@@ -19,6 +21,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Rawalpindian',
     country: 'Pakistan',
     description: 'The historic gateway to the Potohar Plateau and northern mountains, rich with ancient trade bazaars, colonial garrison architecture, 2,500-year Gandharan ruins, and vast municipal parks.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['rawalpindi']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['rawalpindi']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['rawalpindi']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['rawalpindi']?.historicalTimeline,
     totalLandmarks: RAWALPINDI_DESTINATIONS.length,
     attractions: RAWALPINDI_DESTINATIONS
   },
@@ -28,6 +34,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Islamabadian',
     country: 'Pakistan',
     description: 'The verdant national capital framed by the Margalla Hills, renowned for iconic modern Islamic geometry, 2,400-year-old Buddhist caves, ethnic folklore museums, and panoramic scenic viewpoints.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['islamabad']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['islamabad']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['islamabad']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['islamabad']?.historicalTimeline,
     totalLandmarks: ISLAMABAD_DESTINATIONS.length,
     attractions: ISLAMABAD_DESTINATIONS
   },
@@ -37,6 +47,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Lahori',
     country: 'Pakistan',
     description: 'The cultural capital and crowning jewel of Mughal South Asia, celebrated for UNESCO World Heritage palaces, red sandstone imperial mosques, glazed tile art, and ancient bazaars.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['lahore']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['lahore']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['lahore']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['lahore']?.historicalTimeline,
     totalLandmarks: LAHORE_DESTINATIONS.length,
     attractions: LAHORE_DESTINATIONS
   },
@@ -46,6 +60,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Karachite',
     country: 'Pakistan',
     description: 'The vibrant mega-city on the Arabian Sea, uniting national marble monuments, Venetian Gothic stone halls, Anglo-Mughal palaces, and cooling ocean sunset promenades.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['karachi']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['karachi']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['karachi']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['karachi']?.historicalTimeline,
     totalLandmarks: KARACHI_DESTINATIONS.length,
     attractions: KARACHI_DESTINATIONS
   },
@@ -55,6 +73,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Peshawari',
     country: 'Pakistan',
     description: 'One of the oldest continuously inhabited cities in Asia, legendary for Silk Road storyteller bazaars, 1,000-year-old citadels, white marble Mughal mosques, and the world’s largest Gandhara art museum.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['peshawar']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['peshawar']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['peshawar']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['peshawar']?.historicalTimeline,
     totalLandmarks: PESHAWAR_DESTINATIONS.length,
     attractions: PESHAWAR_DESTINATIONS
   },
@@ -64,6 +86,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Multani',
     country: 'Pakistan',
     description: 'The 5,000-year-old City of Saints, celebrated for monumental 14th-century Sufi brick mausoleums, cobalt blue Kashigari ceramic pottery, and Victorian municipal palaces.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['multan']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['multan']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['multan']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['multan']?.historicalTimeline,
     totalLandmarks: MULTAN_DESTINATIONS.length,
     attractions: MULTAN_DESTINATIONS
   },
@@ -73,6 +99,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'New Yorker',
     country: 'United States',
     description: 'A global cultural metropolis featuring world-renowned urban parks, iconic harbor monuments, 5,000 years of global art, and repurposed elevated greenways.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['new-york']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['new-york']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['new-york']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['new-york']?.historicalTimeline,
     totalLandmarks: NYC_DESTINATIONS.length,
     attractions: NYC_DESTINATIONS
   },
@@ -82,6 +112,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Londoner',
     country: 'United Kingdom',
     description: 'A historic global capital spanning two millennia, celebrated for iconic river crossings, encyclopedic public museums, and UNESCO Gothic royal coronation cathedrals.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['london']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['london']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['london']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['london']?.historicalTimeline,
     totalLandmarks: LONDON_DESTINATIONS.length,
     attractions: LONDON_DESTINATIONS
   },
@@ -91,6 +125,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Parisian',
     country: 'France',
     description: 'The City of Light along the Seine, celebrated for monumental 19th-century wrought-iron towers, royal palace art galleries, and Gothic architectural treasures.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['paris']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['paris']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['paris']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['paris']?.historicalTimeline,
     totalLandmarks: PARIS_DESTINATIONS.length,
     attractions: PARIS_DESTINATIONS
   },
@@ -100,6 +138,10 @@ export const CITY_ATTRACTIONS_DATA: Record<string, CityAttractionGroup> = {
     demonym: 'Tokyoite',
     country: 'Japan',
     description: 'A harmonious blend of ancient spiritual heritage and cutting-edge engineering, featuring 1,400-year-old Buddhist temples, sacred forests, and soaring observation towers.',
+    cityGenesisAndHistory: CITY_CULTURAL_ARCHIVES['tokyo']?.cityGenesisAndHistory,
+    cultureProfile: CITY_CULTURAL_ARCHIVES['tokyo']?.cultureProfile,
+    famousFigures: CITY_CULTURAL_ARCHIVES['tokyo']?.famousFigures,
+    historicalTimeline: CITY_CULTURAL_ARCHIVES['tokyo']?.historicalTimeline,
     totalLandmarks: TOKYO_DESTINATIONS.length,
     attractions: TOKYO_DESTINATIONS
   }

@@ -36,6 +36,12 @@ export const RAWALPINDI_DESTINATIONS: CityAttraction[] = [
     audioNarrationText: 'Raja Bazaar and its iconic 1883 Clock Tower form the historic soul of Rawalpindi, bridging centuries of Silk Route merchant tradition with vibrant Potohari hospitality.',
     neighborTips: [
       { author: 'Chaudhry Tariq', role: 'Purana Qila Elder', tip: 'Walk through Sarafa Bazaar into Moti Bazaar to see surviving 19th-century brick archways.', date: '2 days ago' }
+    ],
+    culturalLoreAndLegends: 'Locals recount that during the late 19th century, Silk Route merchant caravans arriving from Central Asia would tether their camels at Purana Qila and judge the day\'s trading luck by the ringing chimes of the Raja Bazaar Clock Tower.',
+    masonryAndCraftDetails: 'Constructed using exposed burnt red lime-mortar bricks, hand-chiseled sandstone corner quoins, and cantilevered Kashmiri deodar cedarwood eaves.',
+    famousHistoricalVisitors: [
+      { name: 'Rudyard Kipling', era: '1885 CE', note: 'Visited the bustling cantonment bazaars while reporting for The Civil and Military Gazette.' },
+      { name: 'Jagan Nath Azad', era: '1940s CE', note: 'Frequented the literary tea houses of Raja Bazaar as a student of Gordon College.' }
     ]
   },
   {
@@ -110,6 +116,12 @@ export const RAWALPINDI_DESTINATIONS: CityAttraction[] = [
     audioNarrationText: 'Rawat Fort stands as a 500-year-old stone sentinel guarding the Grand Trunk Road, immortalizing the heroic stand of Sultan Sarang Khan and the Potohar Gakhar warriors.',
     neighborTips: [
       { author: 'Malik Jahangir', role: 'Rawat Historian', tip: 'Look closely at the inner chambers of Sarang Khan’s tomb to see remnants of geometric fresco patterns.', date: '1 week ago' }
+    ],
+    culturalLoreAndLegends: 'According to folk Potohari balladeers, Sultan Sarang Khan fought valiantly to his final breath in 1546; his sixteenth son and sixteen brothers were interred in the perimeter courtyard, their bravery immortalized in traditional Potohari folk songs.',
+    masonryAndCraftDetails: 'Built using dressed limestone blocks and river pebble aggregate bound with kankar lime mortar, featuring double-height gateway arches and arched bastions.',
+    famousHistoricalVisitors: [
+      { name: 'Mughal Emperor Babur', era: '1519 CE', note: 'Traveled through the Potohar corridor and forged strategic alliances with Gakhar chiefs.' },
+      { name: 'Sher Shah Suri', era: '1541 CE', note: 'Engaged in legendary desert warfare across the Potohar plateau.' }
     ]
   },
   {
