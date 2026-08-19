@@ -105,6 +105,71 @@ export const CIVIC_LEXICON_CATALOG: CivicLexiconTerm[] = [
     colorTone: '#006D5B'
   },
   {
+    id: 'digital-public-goods',
+    term: 'Digital Public Good (DPG)',
+    internationalStandard: 'Digital Public Goods Alliance / UN Tech Roadmap',
+    category: 'Civic Tech & Data',
+    tagline: 'Open-source, non-rivalrous software serving humanity',
+    modernUrbanistMeaning: 'Civic software designed with open code, high privacy standards, and public sovereignty that no single private monopoly controls.',
+    plainSeniorMeaning: 'Free, transparent software built to help the whole community without selling your private data.',
+    cityscapeUsageExample: '“Cityscape’s dispatch core is registered as a verified Digital Public Good for open civic governance.”',
+    badgeCode: 'DPG_STANDARD',
+    iconName: 'Code',
+    colorTone: '#0A2540'
+  },
+  {
+    id: 'participatory-budgeting',
+    term: 'Participatory Budgeting Deliberation',
+    internationalStandard: 'Decidim & Participatory Budgeting Project Global Standard',
+    category: 'Resolution & Workflow',
+    tagline: 'Direct resident voting on municipal capital improvements',
+    modernUrbanistMeaning: 'Direct democracy protocol where residents propose, deliberate, and vote on how actual municipal tax dollars are allocated across their blocks.',
+    plainSeniorMeaning: 'When the city asks neighbors to vote directly on which local park or sidewalk gets repaired first.',
+    cityscapeUsageExample: '“Over 1,400 neighbors participated in the Ward 3 crosswalk lighting budget deliberation.”',
+    badgeCode: 'PARTICIPATORY_BUDGET',
+    iconName: 'Vote',
+    colorTone: '#006D5B'
+  },
+  {
+    id: 'tactical-urbanism',
+    term: 'Tactical Urbanism Intervention',
+    internationalStandard: 'NACTO Global Street Design Guide',
+    category: 'Urban Stewardship',
+    tagline: 'Low-cost, rapid-deployment neighborhood enhancements',
+    modernUrbanistMeaning: 'Agile, short-term, scalable physical changes (such as pop-up planters, painted curb extensions, or bike corrals) tested before permanent installation.',
+    plainSeniorMeaning: 'Quick, temporary street improvements like painted crosswalks and flower planters to slow down cars immediately.',
+    cityscapeUsageExample: '“Neighbors organized a tactical urbanism planter installation to calm traffic near the elementary school.”',
+    badgeCode: 'TACTICAL_URBANISM',
+    iconName: 'Lightbulb',
+    colorTone: '#B45309'
+  },
+  {
+    id: '15-minute-city',
+    term: '15-Minute City Proximity Matrix',
+    internationalStandard: 'C40 Cities Climate Leadership Group & Carlos Moreno Framework',
+    category: 'Urban Stewardship',
+    tagline: 'Universal pedestrian access to daily essentials within a short walk',
+    modernUrbanistMeaning: 'Hyper-accessible neighborhood urban planning ensuring groceries, healthcare, transit, and green spaces are within a 15-minute walk or roll.',
+    plainSeniorMeaning: 'Designing our neighborhood so you can easily walk to the doctor, grocery store, and park in under 15 minutes.',
+    cityscapeUsageExample: '“The new pedestrian curb ramps increased the district’s 15-Minute City Accessibility Score to 91%.”',
+    badgeCode: '15_MIN_CITY',
+    iconName: 'Compass',
+    colorTone: '#006D5B'
+  },
+  {
+    id: 'public-interest-technology',
+    term: 'Public Interest Technology (PIT)',
+    internationalStandard: 'Ford & MacArthur Foundation PIT-UN Global Charter',
+    category: 'Civic Tech & Data',
+    tagline: 'Engineering and digital design serving social justice and equity',
+    modernUrbanistMeaning: 'Developing digital systems prioritizing public welfare, democratic accountability, civil liberties, and universal accessibility over corporate profit.',
+    plainSeniorMeaning: 'Technology created with love and care to solve real neighborhood problems and make life easier for all residents.',
+    cityscapeUsageExample: '“Cityscape’s senior-first high contrast UI is recognized as a premier Public Interest Tech implementation.”',
+    badgeCode: 'PUBLIC_INTEREST_TECH',
+    iconName: 'HeartHandshake',
+    colorTone: '#B45309'
+  },
+  {
     id: 'micro-ward-vanguard',
     term: 'Micro-Ward Vanguard',
     internationalStandard: 'Bloomberg Philanthropies Mayors Challenge Standard',
@@ -116,6 +181,58 @@ export const CIVIC_LEXICON_CATALOG: CivicLexiconTerm[] = [
     badgeCode: 'WARD_VANGUARD',
     iconName: 'Award',
     colorTone: '#B45309'
+  },
+  {
+    id: 'algorithmic-transparency',
+    term: 'Algorithmic Transparency Register',
+    internationalStandard: 'EU AI Act & Open Government Partnership Guidelines',
+    category: 'Civic Tech & Data',
+    tagline: 'Fully explainable municipal triage and dispatch algorithms',
+    modernUrbanistMeaning: 'Clear, auditable explanations of the math and rules used to prioritize repair queues, preventing systemic bias or redlining.',
+    plainSeniorMeaning: 'A simple public guide explaining exactly how the city decides which street repairs get done first.',
+    cityscapeUsageExample: '“Algorithmic Transparency Register confirms dispatch was prioritized solely by safety severity and neighbor vouch count.”',
+    badgeCode: 'ALGO_TRANSPARENCY',
+    iconName: 'FileCheck',
+    colorTone: '#0A2540'
+  },
+  {
+    id: 'sponge-city-capacity',
+    term: 'Permeable Sponge City Capacity',
+    internationalStandard: 'International Water Association (IWA) Sponge Cities Standard',
+    category: 'Infrastructure Resiliency',
+    tagline: 'Nature-based drainage absorption to prevent urban flash flooding',
+    modernUrbanistMeaning: 'Ecological infrastructure incorporating bioswales, rain gardens, and permeable pavers to naturally absorb, filter, and reuse stormwater runoff.',
+    plainSeniorMeaning: 'Green street gardens and porous pavements that soak up heavy rain like a sponge so our streets do not flood.',
+    cityscapeUsageExample: '“Public Works added bioswale drains on Maple Ave, raising the block’s Sponge City Capacity by 40%.”',
+    badgeCode: 'SPONGE_CITY',
+    iconName: 'Droplet',
+    colorTone: '#006D5B'
+  },
+  {
+    id: 'desire-line-mapping',
+    term: 'Pedestrian Desire Line Mapping',
+    internationalStandard: 'Gehl Institute Public Life Diversity Protocol',
+    category: 'Urban Stewardship',
+    tagline: 'Mapping authentic footpaths chosen naturally by walkers',
+    modernUrbanistMeaning: 'Observing and honoring the organic paths pedestrians carve across public spaces, using community foot traffic data to pave actual walkways.',
+    plainSeniorMeaning: 'Noticing the natural walking paths people use across parks and paving them so everyone has an easy route.',
+    cityscapeUsageExample: '“Desire line mapping prompted the city to pave the shortcut path connecting the senior center to the transit plaza.”',
+    badgeCode: 'DESIRE_LINES',
+    iconName: 'Route',
+    colorTone: '#B45309'
+  },
+  {
+    id: 'civic-data-dignity',
+    term: 'Civic Data Sovereignty & Dignity',
+    internationalStandard: 'Mozilla Civic Data Trust & Berkman Klein Center',
+    category: 'Civic Tech & Data',
+    tagline: 'Community ownership and strict privacy over civic sensor feeds',
+    modernUrbanistMeaning: 'Ensuring data generated by residents (air quality monitors, GPS reports, street photos) remains in community trust rather than harvested for ads.',
+    plainSeniorMeaning: 'Your photos and reports belong to our community, and the city will never sell your personal information.',
+    cityscapeUsageExample: '“All neighborhood telemetry is protected under the Civic Data Dignity charter with zero third-party tracking.”',
+    badgeCode: 'DATA_DIGNITY',
+    iconName: 'Lock',
+    colorTone: '#0A2540'
   },
   {
     id: 'civic-equity-parity',
@@ -157,6 +274,32 @@ export const CIVIC_LEXICON_CATALOG: CivicLexiconTerm[] = [
     colorTone: '#B45309'
   },
   {
+    id: 'climate-refuge-network',
+    term: 'Climate Micro-Refuge Network',
+    internationalStandard: 'UNDRR Sendai Disaster Risk Reduction Framework',
+    category: 'Infrastructure Resiliency',
+    tagline: 'Shaded cooling corridors, drinking fountains, and clean air zones',
+    modernUrbanistMeaning: 'A distributed urban network of misting stations, tree canopies, hydration points, and clean air shelters protecting pedestrians during heatwaves.',
+    plainSeniorMeaning: 'Shaded benches, water fountains, and air-conditioned community rooms to rest and cool down on hot summer days.',
+    cityscapeUsageExample: '“Cityscape Map now pinpoints 18 climate micro-refuges with free cold drinking water along 5th Avenue.”',
+    badgeCode: 'CLIMATE_REFUGE',
+    iconName: 'SunMedium',
+    colorTone: '#006D5B'
+  },
+  {
+    id: 'frictionless-escalation',
+    term: 'Frictionless Municipal Escalation',
+    internationalStandard: 'GovTech Global & UK Government Digital Service (GDS)',
+    category: 'Resolution & Workflow',
+    tagline: 'Automated multi-agency handoff without redundant reporting',
+    modernUrbanistMeaning: 'Intelligent backend routing that automatically transfers complex reports (e.g., fallen tree touching powerlines) between Power and Forestry.',
+    plainSeniorMeaning: 'When an issue needs two different city crews, the system notifies both teams automatically without making you call twice.',
+    cityscapeUsageExample: '“Frictionless escalation alerted both Public Works and Water Dept simultaneously for the broken hydrant.”',
+    badgeCode: 'FRICTIONLESS_ESC',
+    iconName: 'Workflow',
+    colorTone: '#0A2540'
+  },
+  {
     id: 'sensory-wayfinding-audit',
     term: 'Sensory Wayfinding & Spatial Audit',
     internationalStandard: 'WHO Age-Friendly Cities & Universal Design Guidelines',
@@ -168,5 +311,19 @@ export const CIVIC_LEXICON_CATALOG: CivicLexiconTerm[] = [
     badgeCode: 'SPATIAL_AUDIT',
     iconName: 'Compass',
     colorTone: '#006D5B'
+  },
+  {
+    id: 'self-sovereign-civic-id',
+    term: 'Self-Sovereign Civic Identity (SSI)',
+    internationalStandard: 'W3C Verifiable Credentials & EU Digital Identity Standard',
+    category: 'Community Trust',
+    tagline: 'Cryptographic proof of ward residency without exposing personal identity',
+    modernUrbanistMeaning: 'Zero-knowledge credential systems allowing residents to prove they live in a specific council ward to vote on initiatives without giving away private names or addresses.',
+    plainSeniorMeaning: 'A safe digital pass that proves you live in our neighborhood without revealing your home address or private details.',
+    cityscapeUsageExample: '“Verified via Self-Sovereign Civic ID: Eligible to cast ballot in Ward 2 traffic calming initiative.”',
+    badgeCode: 'CIVIC_SSI',
+    iconName: 'KeyRound',
+    colorTone: '#006D5B'
   }
 ];
+
