@@ -854,18 +854,20 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
             <span className="text-xs font-semibold">Calibrating Atmospheric Sensors...</span>
           </div>
         ) : weather ? (
-          <div className="pt-2.5 sm:pt-3 space-y-3">
+          <div className="pt-2 sm:pt-2.5 md:pt-3 space-y-2.5 sm:space-y-3">
             {/* Primary Row: 3D Sculpture + Large Scaled Temperature + Condition */}
-            <div className="flex items-center justify-between gap-2.5 sm:gap-3">
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                {render3DWeatherSculpture(weather.conditionCategory, weather.isDay)}
+            <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-2 xs:gap-2.5 sm:gap-3.5 min-w-0 w-full xs:w-auto">
+                <div className="shrink-0 scale-90 xs:scale-100 transition-transform">
+                  {render3DWeatherSculpture(weather.conditionCategory, weather.isDay)}
+                </div>
 
-                <div className="space-y-0.5 min-w-0">
+                <div className="space-y-0.5 min-w-0 flex-1">
                   <div className="flex items-baseline space-x-1.5 flex-wrap">
-                    <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#0A2540] dark:text-white leading-none">
+                    <span className="text-2xl xs:text-3xl sm:text-4xl lg:text-3xl xl:text-4xl font-extrabold tracking-tight text-[#0A2540] dark:text-white leading-none">
                       {displayTemp(weather.temperature)}°{unit}
                     </span>
-                    <span className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       Feels {displayTemp(weather.apparentTemperature)}°
                     </span>
                   </div>
@@ -874,7 +876,7 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
                     {weather.conditionLabel}
                   </div>
 
-                  <div className="text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5 pt-0.5">
+                  <div className="text-[10px] xs:text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5 pt-0.5">
                     <span>H: {displayTemp(weather.tempMax)}°</span>
                     <span>•</span>
                     <span>L: {displayTemp(weather.tempMin)}°</span>
@@ -883,14 +885,14 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
               </div>
 
               {/* Quick Diagnostic Pill */}
-              <div className="flex flex-col items-end text-right space-y-1 shrink-0">
+              <div className="flex xs:flex-col items-center xs:items-end justify-between xs:justify-center w-full xs:w-auto text-left xs:text-right gap-1.5 xs:gap-1 shrink-0 pt-1 xs:pt-0 border-t xs:border-t-0 border-slate-200/60 dark:border-slate-700/60">
                 {weather.isDay ? (
-                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-[#FEF3C7] dark:bg-amber-950/70 text-[#B45309] dark:text-amber-300 border border-[#FDE68A] dark:border-amber-800">
+                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-[#FEF3C7] dark:bg-amber-950/70 text-[#B45309] dark:text-amber-300 border border-[#FDE68A] dark:border-amber-800 shadow-2xs">
                     <Sun className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 fill-amber-400" />
                     <span>UV {weather.uvIndex}</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shadow-2xs">
                     <MoonStar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-400 fill-indigo-300" />
                     <span>Night Sky</span>
                   </span>
@@ -901,29 +903,32 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
               </div>
             </div>
 
-            {/* Quick Metrics Grid (3 Key Indicators) */}
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-0.5">
-              <div className="p-1.5 sm:p-2 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center space-x-1.5 sm:space-x-2">
-                <Droplets className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
-                <div className="leading-none truncate">
-                  <span className="block text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium">Humidity</span>
-                  <span className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white">{weather.humidity}%</span>
+            {/* Quick Metrics Grid (3 Key Indicators: Humidity, Wind, Pressure) */}
+            <div className="grid grid-cols-3 gap-1.5 xs:gap-2 sm:gap-2.5 pt-0.5">
+              {/* Metric 1: Humidity */}
+              <div className="p-1.5 xs:p-2 sm:p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 min-w-0 transition-all hover:bg-slate-100 dark:hover:bg-slate-800">
+                <Droplets className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                <div className="leading-tight min-w-0 flex-1">
+                  <span className="block text-[9px] xs:text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Humidity</span>
+                  <span className="text-[11px] xs:text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate block">{weather.humidity}%</span>
                 </div>
               </div>
 
-              <div className="p-1.5 sm:p-2 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center space-x-1.5 sm:space-x-2">
-                <Wind className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
-                <div className="leading-none truncate">
-                  <span className="block text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium">Wind</span>
-                  <span className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white">{weather.windSpeed} km/h</span>
+              {/* Metric 2: Wind */}
+              <div className="p-1.5 xs:p-2 sm:p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 min-w-0 transition-all hover:bg-slate-100 dark:hover:bg-slate-800">
+                <Wind className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+                <div className="leading-tight min-w-0 flex-1">
+                  <span className="block text-[9px] xs:text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Wind</span>
+                  <span className="text-[11px] xs:text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate block">{weather.windSpeed} km/h</span>
                 </div>
               </div>
 
-              <div className="p-1.5 sm:p-2 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center space-x-1.5 sm:space-x-2">
-                <Gauge className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                <div className="leading-none truncate">
-                  <span className="block text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium">Pressure</span>
-                  <span className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white">{weather.pressure} hPa</span>
+              {/* Metric 3: Pressure */}
+              <div className="p-1.5 xs:p-2 sm:p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 min-w-0 transition-all hover:bg-slate-100 dark:hover:bg-slate-800">
+                <Gauge className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <div className="leading-tight min-w-0 flex-1">
+                  <span className="block text-[9px] xs:text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Pressure</span>
+                  <span className="text-[11px] xs:text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate block">{weather.pressure} hPa</span>
                 </div>
               </div>
             </div>
@@ -932,7 +937,7 @@ export const ThreeDWeatherWidget: React.FC<ThreeDWeatherWidgetProps> = ({
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="w-full pt-2 flex items-center justify-between text-[11px] sm:text-xs font-bold text-[#006D5B] dark:text-teal-300 hover:text-[#0A2540] dark:hover:text-white transition-colors cursor-pointer border-t border-slate-200/80 dark:border-slate-700/80 min-h-[32px]"
+              className="w-full pt-2 flex items-center justify-between text-[11px] sm:text-xs font-bold text-[#006D5B] dark:text-teal-300 hover:text-[#0A2540] dark:hover:text-white transition-colors cursor-pointer border-t border-slate-200/80 dark:border-slate-700/80 min-h-[34px]"
               aria-expanded={isExpanded}
             >
               <span className="flex items-center gap-1.5">
