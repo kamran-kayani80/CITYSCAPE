@@ -27,6 +27,7 @@ import { MobileNavigation } from './components/MobileNavigation';
 import { SEOHead } from './components/SEOHead';
 import { UndoSnackbar, UndoUpvoteState } from './components/UndoSnackbar';
 import { AdminControlPanel } from './components/AdminControlPanel';
+import { CivicLexiconModal } from './components/CivicLexiconModal';
 import { INITIAL_REPORTS } from './data/seedData';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
@@ -56,6 +57,7 @@ export default function App() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isDownloadShareModalOpen, setIsDownloadShareModalOpen] = useState(false);
   const [downloadShareModalTab, setDownloadShareModalTab] = useState<'download' | 'invite' | 'share'>('download');
+  const [isCivicLexiconModalOpen, setIsCivicLexiconModalOpen] = useState(false);
   const [verificationReport, setVerificationReport] = useState<Report | null>(null);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAdminControlPanelOpen, setIsAdminControlPanelOpen] = useState(false);
@@ -80,6 +82,9 @@ export default function App() {
     const handleOpenReportModal = () => {
       setIsReportModalOpen(true);
     };
+    const handleOpenCivicLexicon = () => {
+      setIsCivicLexiconModalOpen(true);
+    };
     const handleOpenDownloadModal = (e: Event) => {
       const customEv = e as CustomEvent<{ tab?: 'download' | 'invite' | 'share' }>;
       if (customEv.detail?.tab) {
@@ -94,12 +99,14 @@ export default function App() {
     window.addEventListener('cityscape:open-arch-modal', handleOpenArchModal);
     window.addEventListener('cityscape:open-admin-customizer', handleOpenAdminCustomizer);
     window.addEventListener('cityscape:open-report-modal', handleOpenReportModal);
+    window.addEventListener('cityscape:open-civic-lexicon', handleOpenCivicLexicon);
     window.addEventListener('cityscape:open-download-modal', handleOpenDownloadModal);
     return () => {
       window.removeEventListener('cityscape:navigate-hashtag', handleNavigateHashtag);
       window.removeEventListener('cityscape:open-arch-modal', handleOpenArchModal);
       window.removeEventListener('cityscape:open-admin-customizer', handleOpenAdminCustomizer);
       window.removeEventListener('cityscape:open-report-modal', handleOpenReportModal);
+      window.removeEventListener('cityscape:open-civic-lexicon', handleOpenCivicLexicon);
       window.removeEventListener('cityscape:open-download-modal', handleOpenDownloadModal);
     };
   }, []);
@@ -719,6 +726,7 @@ export default function App() {
             setDownloadShareModalTab(tab || 'download');
             setIsDownloadShareModalOpen(true);
           }}
+          onOpenCivicLexiconModal={() => setIsCivicLexiconModalOpen(true)}
           isAdminMode={isAdminMode}
           setIsAdminMode={setIsAdminMode}
           totalReportsCount={reports.length}
@@ -976,6 +984,12 @@ export default function App() {
           setUserKarma((prev) => prev + bonus);
           showToast(`+${bonus} Civic Karma Earned! Trial Invitation Sent.`);
         }}
+      />
+
+      {/* Civic Lexicon 3.0 International Urbanist Jargon & Plain Language Glossary Modal */}
+      <CivicLexiconModal
+        isOpen={isCivicLexiconModalOpen}
+        onClose={() => setIsCivicLexiconModalOpen(false)}
       />
 
       {/* Toast Notification Popup with Spring Entrance */}

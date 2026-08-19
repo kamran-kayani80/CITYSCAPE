@@ -116,6 +116,18 @@ class CivicAudioSynthesizer {
       });
     } catch {}
   }
+
+  public playSuccess(): void {
+    this.playSuccessBadge();
+  }
+
+  public playSuccessChime(): void {
+    this.playSuccessBadge();
+  }
+
+  public playCelebration(): void {
+    this.playCivicChime().catch(() => {});
+  }
 }
 
 export const civicAudio = new CivicAudioSynthesizer();

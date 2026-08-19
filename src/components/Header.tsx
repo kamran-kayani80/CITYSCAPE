@@ -31,6 +31,7 @@ import {
   Users,
   Landmark,
   Compass,
+  Globe2,
 } from 'lucide-react';
 import { CityscapeLogo } from './CityscapeLogo';
 import { GoogleAuthButton } from './GoogleAuthButton';
@@ -44,6 +45,7 @@ interface HeaderProps {
   setFilter: React.Dispatch<React.SetStateAction<ReportFilter>>;
   onOpenReportModal: () => void;
   onOpenDownloadShareModal?: (tab?: 'download' | 'invite' | 'share') => void;
+  onOpenCivicLexiconModal?: () => void;
   isAdminMode: boolean;
   setIsAdminMode: (admin: boolean) => void;
   totalReportsCount: number;
@@ -59,6 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
   setFilter,
   onOpenReportModal,
   onOpenDownloadShareModal,
+  onOpenCivicLexiconModal,
   isAdminMode,
   setIsAdminMode,
   totalReportsCount,
@@ -373,6 +376,22 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <Palette className="w-4 h-4 shrink-0 text-[#006D5B] dark:text-teal-300" />
                 <span className="font-bold text-xs sm:text-[13px] whitespace-nowrap">Brand Guide</span>
+              </motion.button>
+
+              {/* Civic Jargons 3.0 International Lexicon Modal Trigger */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                id="btn-header-civic-jargons"
+                onClick={onOpenCivicLexiconModal}
+                title="Explore International Civic Jargons & Urbanist Lexicon"
+                className="header-nav-btn w-full bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700"
+              >
+                <Globe2 className="w-4 h-4 shrink-0 text-[#B45309] dark:text-amber-400" />
+                <span className="font-extrabold text-xs sm:text-[13px] whitespace-nowrap">Civic Jargons</span>
+                <span className="bg-[#B45309] text-white text-[9px] sm:text-[10px] h-4.5 sm:h-5 px-1.5 rounded-md font-bold uppercase tracking-wider inline-flex items-center justify-center leading-none shadow-xs shrink-0">
+                  ISO
+                </span>
               </motion.button>
             </nav>
           </div>

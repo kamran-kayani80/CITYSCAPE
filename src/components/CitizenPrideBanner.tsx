@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Sparkles, Building2, Compass, Landmark, History, Locate, Loader2, RefreshCw, Plus, ShieldCheck, HeartHandshake } from 'lucide-react';
+import { MapPin, Sparkles, Building2, Compass, Landmark, History, Locate, Loader2, RefreshCw, Plus, ShieldCheck, HeartHandshake, Globe2 } from 'lucide-react';
 import { ThreeDWeatherWidget } from './ThreeDWeatherWidget';
 import { KNOWN_CITIES, calculateDistanceKm } from '../lib/geoUtils';
 
@@ -582,6 +582,17 @@ export const CitizenPrideBanner: React.FC<CitizenPrideBannerProps> = ({ onLocati
               <Compass className="w-3.5 h-3.5 text-teal-300 shrink-0" />
               <span className="truncate max-w-[180px]">{activeCity.landmarksName}</span>
             </div>
+
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('cityscape:open-civic-lexicon'))}
+              title="Open International Civic Lexicon Matrix & Standards"
+              className="inline-flex items-center space-x-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-bold bg-white/15 hover:bg-white/25 text-white border border-white/20 shadow-xs shrink-0 transition-all cursor-pointer active:scale-95"
+            >
+              <Globe2 className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span className="hidden xs:inline">ISO 37120</span>
+              <span>Civic Lexicon</span>
+            </button>
           </div>
 
           {/* Right: Consolidated Geotag Location Control */}

@@ -334,4 +334,113 @@ export interface PredictiveCompletionAnalysis {
   isAiGroundTruth: boolean;
 }
 
+// =======================================================
+// CITY NEWS BULLETIN CURRENCY FRAMEWORK & DEPARTMENT DISPATCH
+// =======================================================
+
+export type BulletinCategory =
+  | 'ROADWORK'
+  | 'UTILITY'
+  | 'EMERGENCY'
+  | 'SENIOR_SERVICES'
+  | 'PUBLIC_HEARING'
+  | 'ENVIRONMENT'
+  | 'HEALTH_SANITATION'
+  | 'TRAFFIC_TRANSIT';
+
+export type BulletinPriority = 'CRITICAL' | 'URGENT' | 'REGULAR';
+
+export type CurrencyGrade =
+  | 'BREAKING'         // Within last 2 hours (Fresh Hot Alert)
+  | 'TODAY_DISPATCH'   // Within last 12 hours (Today's Cycle)
+  | 'ACTIVE_24H'       // Active within 24 hours
+  | 'SCHEDULED_CYCLE'; // Upcoming scheduled maintenance / notice
+
+export type MunicipalDepartmentCode =
+  | 'DPW'      // Public Works & Infrastructure
+  | 'WASA'     // Water & Sanitation Agency
+  | 'TRANSIT'  // Traffic, Transit & Mobility Bureau
+  | 'RESCUE'   // Emergency Services & Disaster 1122
+  | 'COUNCIL'; // City Council & Citizen Engagement
+
+export interface MunicipalDepartmentConfig {
+  code: MunicipalDepartmentCode;
+  name: string;
+  shortName: string;
+  roleTitle: string;
+  defaultPasskey: string;
+  supervisorRecoveryCode: string;
+  securityQuestion: string;
+  securityAnswer: string;
+  recoveryEmail: string;
+  iconName: string;
+  badgeBg: string;
+  badgeText: string;
+  borderColor: string;
+  description: string;
+  sampleTopics: string[];
+}
+
+export interface PasswordRecoveryState {
+  step: 'SELECT_METHOD' | 'VERIFY_TOKEN' | 'SECURITY_QUESTION' | 'EMAIL_OTP' | 'SET_NEW_PASSWORD' | 'SUCCESS';
+  method: 'RECOVERY_TOKEN' | 'SECURITY_QUESTION' | 'EMAIL_OTP';
+  target: 'MUNICIPAL_MAIN_DESK' | MunicipalDepartmentCode;
+  email: string;
+  tokenOrCode: string;
+  securityAnswerInput: string;
+  otpInput: string;
+  newPassword: string;
+  confirmPassword: string;
+  statusMessage: string;
+  errorMessage: string;
+}
+
+export interface PasswordChangeEvent {
+  target: 'MUNICIPAL_MAIN_DESK' | MunicipalDepartmentCode;
+  oldPassword?: string;
+  newPassword: string;
+  isResetToDefault?: boolean;
+  updatedAt: string;
+}
+
+export interface LiveBulletin {
+  id: string;
+  category: BulletinCategory | string;
+  priority: BulletinPriority;
+  title: string;
+  description: string;
+  department: string;
+  departmentCode?: MunicipalDepartmentCode | string;
+  sourceName: string;
+  sourceUrl?: string;
+  publishedAt: string;
+  wardZone?: string;
+  verifiedBy: string;
+  
+  // Currency (Current News) Framework Properties
+  currencyScore?: number; // 0 to 100 freshness index
+  currencyGrade?: CurrencyGrade;
+  currencyWindow?: string; // e.g. "Within 1 Hour", "Morning Shift (Today)", "Active 24h Window"
+  relativeFreshnessText?: string;
+  isStaffCustomBroadcast?: boolean;
+  authorOfficerName?: string;
+  authorBadgeId?: string;
+  officialGazetteNumber?: string;
+  impactRadiusKm?: number;
+  broadcastExpiryAt?: string;
+  actionAdvice?: string;
+}
+
+export interface CityBulletinFeed {
+  cityName: string;
+  refreshedAt: string;
+  nextRefreshAt: string;
+  sourceCount: number;
+  currencyHealthIndex: number; // Aggregate freshness % (e.g. 98%)
+  breakingCount: number;
+  todayCount: number;
+  bulletins: LiveBulletin[];
+  fromCache?: boolean;
+}
+
 

@@ -2044,6 +2044,59 @@ export const BrandIdentitySystem: React.FC = () => {
         {/* ========================================================= */}
         {activeTab === 'voice' && (
           <div className="space-y-8 animate-fadeIn">
+            {/* Top Showcase: International Civic Jargon 3.0 Engine */}
+            <div className="bg-gradient-to-br from-[#0A2540] via-[#0E3357] to-[#0A2540] rounded-3xl p-6 sm:p-10 border-2 border-teal-500/40 text-white shadow-2xl space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-700 pb-6">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-black uppercase tracking-wider bg-[#006D5B] text-teal-200 border border-teal-400/40">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>International Standard Matrix // UN-Habitat & ISO 37120</span>
+                  </div>
+                  <h2 className="text-3xl font-black font-['Montserrat'] text-white">
+                    Civic Lexicon 3.0 Framework
+                  </h2>
+                  <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+                    Elevating municipal communication to world-class urbanist and Gen Z standards while safeguarding WCAG AAA clarity for senior community members.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('cityscape:open-civic-lexicon'))}
+                  className="px-6 py-3 bg-[#B45309] hover:bg-[#92400E] text-white rounded-2xl font-black text-sm transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 active:scale-95 border border-amber-300/40 shrink-0"
+                >
+                  <Globe className="w-4 h-4 text-amber-200" />
+                  <span>Launch Interactive Lexicon Hub</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-['Montserrat']">
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-1.5">
+                  <span className="text-[11px] font-mono font-bold text-teal-300 uppercase block">1. Urban Stewardship</span>
+                  <h4 className="font-extrabold text-sm text-white">Public Realm Stewardship</h4>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    Reframing civic maintenance from complaint-logging to shared leadership of streets and greenways.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-1.5">
+                  <span className="text-[11px] font-mono font-bold text-amber-300 uppercase block">2. Resolution & Workflow</span>
+                  <h4 className="font-extrabold text-sm text-white">Closed-Loop Governance</h4>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    End-to-end accountability guaranteeing verified photo proof and post-completion audit logs.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-1.5">
+                  <span className="text-[11px] font-mono font-bold text-sky-300 uppercase block">3. Multi-Generational Inclusivity</span>
+                  <h4 className="font-extrabold text-sm text-white">Dual Perspective Engine</h4>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    Real-time switching between energetic global urbanist framing and plain senior translations.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border-2 border-slate-300 dark:border-slate-800 shadow-xl space-y-6">
               <h2 className="text-2xl font-black font-['Montserrat']">Verbal Lexicon Matrix & Brand Language Engine</h2>
               <div className="overflow-x-auto">

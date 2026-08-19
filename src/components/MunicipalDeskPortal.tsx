@@ -34,6 +34,7 @@ import {
   Palette,
   BookOpen,
   Wrench,
+  Radio,
 } from 'lucide-react';
 import { CityStats, Report, ReportStatus } from '../types';
 import { AdminDashboard } from './AdminDashboard';
@@ -48,11 +49,13 @@ import { AdminControlPanel } from './AdminControlPanel';
 import { AdminThemeWorkspaceView } from './AdminThemeWorkspaceView';
 import { ExpertQASection } from './ExpertQASection';
 import { useThemeCustomizer, THEME_PRESETS } from '../context/ThemeCustomizerContext';
+import { DepartmentNewsPublisher } from './DepartmentNewsPublisher';
 
 export type MunicipalSubTab =
   | 'board'
   | 'sla'
   | 'analytics'
+  | 'deptnews'
   | 'strategic'
   | 'expertqa'
   | 'customizer'
@@ -758,6 +761,26 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
             <span>City Analytics</span>
           </button>
 
+          {/* Sub-Tab: Department News & Currency Dispatch (5 Depts) */}
+          <button
+            id="btn-muni-dept-news-dispatch"
+            onClick={() => setActiveTab('deptnews')}
+            aria-label="Municipal Department News Dispatch and Currency Bulletin Publisher"
+            title="Role-protected broadcasting for 5 municipal departments (DPW, WASA, Transit, Rescue, Council)"
+            className={`px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[44px] flex items-center gap-1.5 border ${
+              activeTab === 'deptnews'
+                ? 'bg-[#B45309] text-white shadow-lg border-amber-300 ring-2 ring-amber-400/40'
+                : 'bg-amber-50/70 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60'
+            }`}
+          >
+            <Radio className="w-4 h-4 text-amber-400" />
+            <span>Dept Dispatch</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider bg-amber-600 text-white flex items-center gap-0.5 shadow-xs">
+              <Building2 className="w-2.5 h-2.5" />
+              <span>5 DEPTS</span>
+            </span>
+          </button>
+
           {/* Sub-Tab 4: Strategic AI & Governance Roadmap */}
           <button
             onClick={() => setActiveTab('strategic')}
@@ -1223,6 +1246,16 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
             </button>
           </form>
         </div>
+      )}
+
+      {/* Sub-Tab: Department News & Currency Dispatch Engine */}
+      {activeTab === 'deptnews' && (
+        <DepartmentNewsPublisher
+          currentCityName={reports[0]?.city || 'Rawalpindi'}
+          onOpenPublicBulletinBoard={() => {
+            window.dispatchEvent(new CustomEvent('cityscape:navigate-tab', { detail: { tab: 'bulletins' } }));
+          }}
+        />
       )}
     </div>
   );

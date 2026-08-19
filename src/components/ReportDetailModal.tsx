@@ -29,6 +29,8 @@ import {
   Image as ImageIcon,
   QrCode,
   Printer,
+  Globe2,
+  Sparkles,
 } from 'lucide-react';
 import { Report, Comment } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
@@ -663,6 +665,63 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 </div>
                 <p className="text-[11px] text-slate-300 font-medium leading-normal">
                   Social media platforms will auto-render this image preview, title, and direct report link.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* INTERNATIONAL CIVIC GOVERNANCE STANDARDS & JARGON MATRIX */}
+          <div className="p-4 bg-gradient-to-br from-[#0A2540] to-[#0A335C] rounded-2xl border-2 border-slate-700 text-white space-y-3 shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700/80 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#006D5B] flex items-center justify-center text-amber-300 shrink-0">
+                  <Globe2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-black text-xs uppercase tracking-wider text-white">
+                    Civic Governance Standards Matrix
+                  </h4>
+                  <span className="text-[10px] text-slate-300 font-medium">
+                    ISO 37120 / UN-Habitat / OECD Municipal Framework
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('cityscape:open-civic-lexicon'))}
+                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 border border-amber-300/30 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 self-start sm:self-auto shrink-0 active:scale-95"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Explore Lexicon 3.0</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <div className="p-2.5 bg-white/5 rounded-xl border border-white/10 space-y-1">
+                <span className="text-[10px] font-mono font-bold text-teal-300 block">
+                  [GROUND TRUTH]
+                </span>
+                <p className="text-[11px] text-slate-200 font-medium">
+                  Verified field observation directly from on-site community sensors and residents.
+                </p>
+              </div>
+
+              <div className="p-2.5 bg-white/5 rounded-xl border border-white/10 space-y-1">
+                <span className="text-[10px] font-mono font-bold text-amber-300 block">
+                  [PUBLIC REALM STEWARDSHIP]
+                </span>
+                <p className="text-[11px] text-slate-200 font-medium">
+                  Continuous civic co-ownership protecting shared streets, parks, and water infrastructure.
+                </p>
+              </div>
+
+              <div className="p-2.5 bg-white/5 rounded-xl border border-white/10 space-y-1">
+                <span className="text-[10px] font-mono font-bold text-emerald-300 block">
+                  [LOOP CLOSURE GUARANTEE]
+                </span>
+                <p className="text-[11px] text-slate-200 font-medium">
+                  Transparent municipal workflow from initial intake to photo-documented resolution.
                 </p>
               </div>
             </div>
