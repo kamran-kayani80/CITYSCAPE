@@ -2000,15 +2000,89 @@ export const BrandIdentitySystem: React.FC = () => {
               {/* Light & Dark Logo Variants Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Light Surface Variant */}
-                <div className="p-10 bg-[#F8FAFC] rounded-3xl border-2 border-slate-300 flex flex-col items-center justify-center space-y-4 shadow-md">
-                  <span className="text-xs font-mono font-black text-slate-500 uppercase tracking-wider">Light Surface Variant</span>
-                  <CityscapeLogo variant="full" size="lg" showTagline={true} />
+                <div className="p-8 bg-[#F8FAFC] rounded-3xl border-2 border-slate-300 flex flex-col items-center justify-center space-y-6 shadow-md">
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-xs font-mono font-black text-slate-500 uppercase tracking-wider">Light Surface Variant</span>
+                    <span className="text-[11px] font-mono text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full font-bold">Standard</span>
+                  </div>
+                  <div className="py-4">
+                    <CityscapeLogo variant="full" size="lg" showTagline={true} />
+                  </div>
+                  <div className="flex items-center gap-3 w-full pt-4 border-t border-slate-200">
+                    <a
+                      href="/cityscape-logo.svg"
+                      download="cityscape-logo-light.svg"
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#0A2540] hover:bg-[#06182a] text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+                    >
+                      <Download className="w-4 h-4 text-[#CCFF00]" />
+                      <span>Download SVG</span>
+                    </a>
+                    <button
+                      onClick={() => handleCopy('/cityscape-logo.svg', 'Light SVG URL')}
+                      className="px-3 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                      title="Copy URL"
+                    >
+                      {copiedToken === 'Light SVG URL' ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Dark Surface Variant */}
-                <div className="p-10 bg-[#0A2540] rounded-3xl border-2 border-slate-800 flex flex-col items-center justify-center space-y-4 shadow-md">
-                  <span className="text-xs font-mono font-black text-teal-300 uppercase tracking-wider">Dark Surface Variant (Civic Navy)</span>
-                  <CityscapeLogo variant="dark" size="lg" showTagline={true} />
+                <div className="p-8 bg-[#0A2540] rounded-3xl border-2 border-slate-800 flex flex-col items-center justify-center space-y-6 shadow-md">
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-xs font-mono font-black text-teal-300 uppercase tracking-wider">Dark Surface Variant</span>
+                    <span className="text-[11px] font-mono text-teal-200 bg-teal-900/60 px-2.5 py-0.5 rounded-full font-bold">Civic Navy</span>
+                  </div>
+                  <div className="py-4">
+                    <CityscapeLogo variant="dark" size="lg" showTagline={true} />
+                  </div>
+                  <div className="flex items-center gap-3 w-full pt-4 border-t border-slate-800">
+                    <a
+                      href="/cityscape-logo-dark.svg"
+                      download="cityscape-logo-dark.svg"
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#006D5B] hover:bg-[#005244] text-white text-xs font-bold transition-all shadow-sm cursor-pointer border border-teal-400/30"
+                    >
+                      <Download className="w-4 h-4 text-[#CCFF00]" />
+                      <span>Download Dark SVG</span>
+                    </a>
+                    <button
+                      onClick={() => handleCopy('/cityscape-logo-dark.svg', 'Dark SVG URL')}
+                      className="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                      title="Copy URL"
+                    >
+                      {copiedToken === 'Dark SVG URL' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Action Download Suite */}
+              <div className="bg-slate-100 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="space-y-1 text-center sm:text-left">
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white font-['Montserrat']">
+                    Brand Vector Assets & App Favicon Kit
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Lossless scalable vectors formatted for print, mobile apps, and web headers.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <a
+                    href="/favicon.svg"
+                    download="cityscape-icon.svg"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold hover:bg-slate-50 transition-all shadow-sm"
+                  >
+                    <Download className="w-3.5 h-3.5 text-[#008080]" />
+                    <span>Download App Icon</span>
+                  </a>
+                  <a
+                    href="/cityscape-logo.svg"
+                    download="cityscape-brand-logo.svg"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-black transition-all shadow-sm"
+                  >
+                    <Download className="w-3.5 h-3.5 text-amber-200" />
+                    <span>Download Full Logo</span>
+                  </a>
                 </div>
               </div>
 

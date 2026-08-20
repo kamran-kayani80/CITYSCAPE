@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 120" width="540" height="120">
+  <!-- CITYSCAPE OFFICIAL VECTOR BRAND LOGO (LIGHT / STANDARD) -->
+  <g transform="translate(10, 10)">
+    <!-- Base Ground Line -->
+    <path d="M 6 88 H 134" stroke="#0A2540" stroke-width="4.5" stroke-linecap="round"/>
+    
+    <!-- SKYLINE BUILDINGS (Civic Navy Silhouette) -->
+    <!-- Building 1 -->
+    <path d="M 12 88 V 54 L 26 42 V 88" stroke="#0A2540" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Building 2 - Central Tower -->
+    <path d="M 30 88 V 26 L 40 16 L 50 26 V 88" stroke="#0A2540" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 40 16 V 6" stroke="#0A2540" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="40" cy="5" r="3" fill="#B45309"/>
+    
+    <!-- Building 3 -->
+    <path d="M 54 88 V 36 L 70 48 V 88" stroke="#0A2540" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- COMMUNITY CIVIC NETWORK (Action Amber & Warm Sage Teal Mesh) -->
+    <path d="M 70 48 L 86 30 L 108 22 L 128 40" stroke="#B45309" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 86 30 L 98 56 L 124 64 L 128 40" stroke="#006D5B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 70 88 V 64 L 98 56 M 108 22 L 124 64" stroke="#B45309" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 86 30 L 124 64 M 98 56 L 128 40" stroke="#006D5B" stroke-width="3" stroke-dasharray="4 3"/>
+
+    <!-- Network Nodes -->
+    <circle cx="86" cy="30" r="5.5" fill="#B45309" stroke="#FFFFFF" stroke-width="2.5"/>
+    <circle cx="108" cy="22" r="6.5" fill="#B45309" stroke="#FFFFFF" stroke-width="2.5"/>
+    <circle cx="128" cy="40" r="5.5" fill="#B45309" stroke="#FFFFFF" stroke-width="2.5"/>
+
+    <circle cx="98" cy="56" r="6" fill="#006D5B" stroke="#FFFFFF" stroke-width="2.5"/>
+    <circle cx="124" cy="64" r="5.5" fill="#006D5B" stroke="#FFFFFF" stroke-width="2.5"/>
+    <circle cx="70" cy="48" r="5" fill="#0A2540" stroke="#FFFFFF" stroke-width="2.5"/>
+  </g>
+
+  <!-- Typography Wordmark & Tagline -->
+  <g transform="translate(160, 20)">
+    <!-- Primary Wordmark -->
+    <text x="0" y="48" font-family="'Montserrat', 'Inter', system-ui, sans-serif" font-size="44" font-weight="900" letter-spacing="1.5" fill="#0A2540">
+      CITYSCAPE
+    </text>
+    <!-- Tagline -->
+    <text x="2" y="74" font-family="'Inter', system-ui, sans-serif" font-size="14" font-weight="600" letter-spacing="0.5" fill="#475569">
+      A Community Civic Engagement Platform
+    </text>
+  </g>
+</svg>
