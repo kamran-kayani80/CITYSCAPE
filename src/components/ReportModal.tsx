@@ -22,7 +22,7 @@ import {
   ShieldAlert,
   Scan,
 } from 'lucide-react';
-import { ReportCategory, SeverityLevel, AIAnalysisResult, AiForensicResult } from '../types';
+import { ReportCategory, SeverityLevel, AIAnalysisResult, AiForensicResult, ReportingScope } from '../types';
 import { CATEGORY_CONFIG, SEVERITY_CONFIG, CATEGORY_SLA_HOURS } from '../lib/constants';
 import { CategoryIcon } from './CategoryIcon';
 import { CommunityMap } from './CommunityMap';
@@ -34,9 +34,10 @@ interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmitReport: (newReportData: any) => Promise<void>;
+  initialScope?: ReportingScope;
 }
 
-export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSubmitReport }) => {
+export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSubmitReport, initialScope }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Form State
@@ -51,6 +52,17 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
   const [severity, setSeverity] = useState<SeverityLevel>('MEDIUM');
   const [wardZone, setWardZone] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // HOA & Governance Jurisdiction Scope
+  const [reportingScope, setReportingScope] = useState<ReportingScope>(initialScope || 'GENERAL_PUBLIC');
+  const [hoaName, setHoaName] = useState<string>('Silver Oaks Enclave');
+  const [unitPlotNumber, setUnitPlotNumber] = useState<string>('Plot 42-B');
+
+  useEffect(() => {
+    if (isOpen && initialScope) {
+      setReportingScope(initialScope);
+    }
+  }, [isOpen, initialScope]);
 
   // Dynamic geotagged city and administrative ward derivation
   const geotaggedCity = extractCityFromAddress(addressText, latitude, longitude);
@@ -287,6 +299,12 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
         slaStatus: 'ON_TRACK',
         aiForensics: forensicResult || undefined,
         isFlaggedAsAiFake: forensicResult?.isAiGenerated || false,
+        reportingScope,
+        estateName: reportingScope !== 'GENERAL_PUBLIC' ? hoaName.trim() : undefined,
+        unitPlotNumber: reportingScope !== 'GENERAL_PUBLIC' ? unitPlotNumber.trim() : undefined,
+        isEscalatedToMunicipal: reportingScope === 'HOA_ESCALATED_MUNICIPAL',
+        municipalLiaisonStatus: reportingScope === 'HOA_ESCALATED_MUNICIPAL' ? 'ESCALATED_TO_CITY' : undefined,
+        escalatedAt: reportingScope === 'HOA_ESCALATED_MUNICIPAL' ? new Date().toISOString() : undefined,
       });
 
       // Reset modal state
@@ -358,6 +376,111 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
           {/* STEP 1: CATEGORY & WARD SELECTION */}
           {step === 1 && (
             <div className="space-y-6">
+              {/* JURISDICTION & REPORTING SCOPE SELECTOR */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0A2540] border-1.5 border-[#CBD5E1] dark:border-slate-700 space-y-3.5 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="text-base font-black text-[#111827] dark:text-white flex items-center gap-2">
+                    <Building className="w-5 h-5 text-[#006D5B] dark:text-teal-300" />
+                    <span>Select Reporting Scope &amp; Jurisdiction</span>
+                  </label>
+                  <span className="text-xs font-bold text-[#006D5B] dark:text-teal-200 bg-[#E6F4F1] dark:bg-[#004D40] px-3 py-1 rounded-xl border border-[#006D5B]/30 self-start sm:self-auto">
+                    Smart Jurisdiction Router
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  Choose whether this issue is on public city land, inside your private housing society (HOA), or an HOA boundary issue requiring municipal escalation.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
+                  {/* Scope 1: General Public Municipal Infrastructure */}
+                  <button
+                    type="button"
+                    onClick={() => setReportingScope('GENERAL_PUBLIC')}
+                    className={`p-3.5 rounded-xl border-1.5 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 min-h-[96px] ${
+                      reportingScope === 'GENERAL_PUBLIC'
+                        ? 'border-[#0A2540] dark:border-teal-400 bg-[#0A2540] text-white ring-2 ring-[#006D5B] shadow-md'
+                        : 'border-[#CBD5E1] dark:border-slate-700 bg-white dark:bg-slate-900 text-[#111827] dark:text-white hover:border-slate-400'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black uppercase tracking-wider">Public City Road</span>
+                      {reportingScope === 'GENERAL_PUBLIC' && <CheckCircle className="w-4 h-4 text-teal-300" />}
+                    </div>
+                    <p className={`text-xs ${reportingScope === 'GENERAL_PUBLIC' ? 'text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>
+                      Dispatched to City Public Works &amp; Municipal Corporation crews.
+                    </p>
+                  </button>
+
+                  {/* Scope 2: Inside Private Gated Community / HOA */}
+                  <button
+                    type="button"
+                    onClick={() => setReportingScope('HOA_INTERNAL')}
+                    className={`p-3.5 rounded-xl border-1.5 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 min-h-[96px] ${
+                      reportingScope === 'HOA_INTERNAL'
+                        ? 'border-[#006D5B] dark:border-teal-400 bg-[#006D5B] text-white ring-2 ring-teal-400 shadow-md'
+                        : 'border-[#CBD5E1] dark:border-slate-700 bg-white dark:bg-slate-900 text-[#111827] dark:text-white hover:border-slate-400'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black uppercase tracking-wider">Inside HOA / Estate</span>
+                      {reportingScope === 'HOA_INTERNAL' && <CheckCircle className="w-4 h-4 text-amber-300" />}
+                    </div>
+                    <p className={`text-xs ${reportingScope === 'HOA_INTERNAL' ? 'text-slate-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                      Routed to Society Admin &amp; Contracted Private Maintenance Team.
+                    </p>
+                  </button>
+
+                  {/* Scope 3: HOA Boundary Issue Escalated to City */}
+                  <button
+                    type="button"
+                    onClick={() => setReportingScope('HOA_ESCALATED_MUNICIPAL')}
+                    className={`p-3.5 rounded-xl border-1.5 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 min-h-[96px] ${
+                      reportingScope === 'HOA_ESCALATED_MUNICIPAL'
+                        ? 'border-[#B45309] dark:border-amber-400 bg-[#B45309] text-white ring-2 ring-amber-400 shadow-md'
+                        : 'border-[#CBD5E1] dark:border-slate-700 bg-white dark:bg-slate-900 text-[#111827] dark:text-white hover:border-slate-400'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black uppercase tracking-wider">HOA ⇄ City Liaison</span>
+                      {reportingScope === 'HOA_ESCALATED_MUNICIPAL' && <CheckCircle className="w-4 h-4 text-white" />}
+                    </div>
+                    <p className={`text-xs ${reportingScope === 'HOA_ESCALATED_MUNICIPAL' ? 'text-amber-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                      HOA perimeter &amp; feeder line escalated to Municipal Liaison Bridge.
+                    </p>
+                  </button>
+                </div>
+
+                {/* HOA Context Inputs if HOA Scope Selected */}
+                {reportingScope !== 'GENERAL_PUBLIC' && (
+                  <div className="p-3.5 bg-slate-50 dark:bg-[#071B2F] rounded-xl border border-[#CBD5E1] dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Housing Society / HOA Name
+                      </label>
+                      <input
+                        type="text"
+                        value={hoaName}
+                        onChange={(e) => setHoaName(e.target.value)}
+                        placeholder="e.g. Silver Oaks Enclave, Greenwood Heights"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-[#CBD5E1] dark:border-slate-700 rounded-lg text-xs font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Resident Unit / Villa / Plot # (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={unitPlotNumber}
+                        onChange={(e) => setUnitPlotNumber(e.target.value)}
+                        placeholder="e.g. Villa 14-B or Plot 42"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-[#CBD5E1] dark:border-slate-700 rounded-lg text-xs font-bold"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Category Grid */}
               <div>
                 <label className="text-base font-bold text-[#111827] dark:text-white block mb-2.5">

@@ -22,7 +22,9 @@ import {
   INITIAL_VERIFICATIONS,
   INITIAL_ADOPTED_ZONES,
 } from "./src/data/seedData";
-import { PRESET_GATED_COMMUNITIES } from "./src/data/estateData";
+import { INITIAL_MUNICIPAL_STAFF, INITIAL_ASSIGNMENTS, getOrCreateMunicipalStaffForCity } from "./src/data/municipalStaffData";
+import { INITIAL_MUNICIPAL_CITY_SUBSCRIPTIONS, getOrCreateMunicipalSubscription } from "./src/data/municipalSubscriptionsData";
+import { PRESET_GATED_COMMUNITIES, INITIAL_STAFF_MEMBERS, INITIAL_HOA_ASSIGNMENTS } from "./src/data/estateData";
 import {
   Report,
   Comment,
@@ -33,6 +35,10 @@ import {
   UserProfile,
   IssueVerification,
   AdoptedZone,
+  MunicipalStaffMember,
+  TaskAssignment,
+  EstateStaffMember,
+  MunicipalCitySubscription,
 } from "./src/types";
 import {
   extractCityFromAddress,
@@ -68,6 +74,11 @@ let trialInvites: Array<{
   channel: string;
   createdAt: string;
 }> = [];
+let municipalStaffList: MunicipalStaffMember[] = [...INITIAL_MUNICIPAL_STAFF];
+let taskAssignmentsList: TaskAssignment[] = [...INITIAL_ASSIGNMENTS];
+let municipalCitySubscriptions: MunicipalCitySubscription[] = [...INITIAL_MUNICIPAL_CITY_SUBSCRIPTIONS];
+let hoaStaffList: EstateStaffMember[] = [...INITIAL_STAFF_MEMBERS];
+let hoaTaskAssignmentsList: TaskAssignment[] = [...INITIAL_HOA_ASSIGNMENTS];
 
 // Initialize Firebase Firestore for persistent Cloud DB storage
 let firestoreDb: any = null;
@@ -367,6 +378,21 @@ function loadStorageFromDisk() {
       if (Array.isArray(parsed.customStaffBulletins) && parsed.customStaffBulletins.length > 0) {
         customStaffBulletins = parsed.customStaffBulletins;
       }
+      if (Array.isArray(parsed.municipalStaffList) && parsed.municipalStaffList.length > 0) {
+        municipalStaffList = parsed.municipalStaffList;
+      }
+      if (Array.isArray(parsed.taskAssignmentsList) && parsed.taskAssignmentsList.length > 0) {
+        taskAssignmentsList = parsed.taskAssignmentsList;
+      }
+      if (Array.isArray(parsed.municipalCitySubscriptions) && parsed.municipalCitySubscriptions.length > 0) {
+        municipalCitySubscriptions = parsed.municipalCitySubscriptions;
+      }
+      if (Array.isArray(parsed.hoaStaffList) && parsed.hoaStaffList.length > 0) {
+        hoaStaffList = parsed.hoaStaffList;
+      }
+      if (Array.isArray(parsed.hoaTaskAssignmentsList) && parsed.hoaTaskAssignmentsList.length > 0) {
+        hoaTaskAssignmentsList = parsed.hoaTaskAssignmentsList;
+      }
       if (typeof parsed.activeMunicipalDeskPasscode === 'string') {
         activeMunicipalDeskPasscode = parsed.activeMunicipalDeskPasscode;
       }
@@ -384,7 +410,7 @@ function loadStorageFromDisk() {
           if (k && v) cityBulletinsCache.set(k, v);
         });
       }
-      console.log(`[Storage] Loaded ${reports.length} reports, ${customStaffBulletins.length} custom staff bulletins, ${trialSubscribers.length} trial subscribers, and ${cityBulletinsCache.size} city bulletin feeds from local persistent disk store.`);
+      console.log(`[Storage] Loaded ${reports.length} reports, ${municipalStaffList.length} staff, ${hoaStaffList.length} HOA contractors, ${taskAssignmentsList.length} muni tasks, ${hoaTaskAssignmentsList.length} HOA tasks.`);
     } catch (err) {
       console.error("[Storage] Failed reading data_store.json:", err);
     }
@@ -406,6 +432,11 @@ function persistStorageToDisk() {
       estateCommunities,
       trialSubscribers,
       customStaffBulletins,
+      municipalStaffList,
+      taskAssignmentsList,
+      municipalCitySubscriptions,
+      hoaStaffList,
+      hoaTaskAssignmentsList,
       activeMunicipalDeskPasscode,
       activeDepartmentPasskeys,
       cityBulletins: Array.from(cityBulletinsCache.entries()),
@@ -436,6 +467,50 @@ async function saveCommentToFirestore(reportId: string, comment: Comment) {
     await setDoc(ref, comment, { merge: true });
   } catch (err) {
     console.error(`[Firestore] Error saving comment ${comment.id}:`, err);
+  }
+}
+
+// Sync municipal staff member to Cloud Firestore DB
+async function saveStaffToFirestore(staff: MunicipalStaffMember) {
+  if (!firestoreDb) return;
+  try {
+    const ref = doc(firestoreDb, "municipal_staff", staff.id);
+    await setDoc(ref, staff, { merge: true });
+  } catch (err) {
+    console.error(`[Firestore] Error saving municipal staff ${staff.id}:`, err);
+  }
+}
+
+// Sync HOA staff / contractor member to Cloud Firestore DB
+async function saveHoaStaffToFirestore(staff: EstateStaffMember) {
+  if (!firestoreDb) return;
+  try {
+    const ref = doc(firestoreDb, "hoa_staff", staff.id);
+    await setDoc(ref, staff, { merge: true });
+  } catch (err) {
+    console.error(`[Firestore] Error saving HOA staff ${staff.id}:`, err);
+  }
+}
+
+// Sync HOA task assignment to Cloud Firestore DB
+async function saveHoaAssignmentToFirestore(assignment: TaskAssignment) {
+  if (!firestoreDb) return;
+  try {
+    const ref = doc(firestoreDb, "hoa_assignments", assignment.id);
+    await setDoc(ref, assignment, { merge: true });
+  } catch (err) {
+    console.error(`[Firestore] Error saving HOA assignment ${assignment.id}:`, err);
+  }
+}
+
+// Sync task assignment to Cloud Firestore DB
+async function saveAssignmentToFirestore(asgn: TaskAssignment) {
+  if (!firestoreDb) return;
+  try {
+    const ref = doc(firestoreDb, "assignments", asgn.id);
+    await setDoc(ref, asgn, { merge: true });
+  } catch (err) {
+    console.error(`[Firestore] Error saving assignment ${asgn.id}:`, err);
   }
 }
 
@@ -1465,6 +1540,605 @@ app.patch('/api/v1/tickets/:ticketId/status', async (req, res) => {
   return res.json({ success: true, message: "Status updated successfully.", ticket: report });
 });
 
+// ==========================================
+// MUNICIPAL CITY SUBSCRIPTIONS & STAFF API
+// ==========================================
+
+// 0. Get all subscribed municipal cities
+app.get("/api/municipal/subscriptions", (req, res) => {
+  try {
+    const { status, search } = req.query;
+    let list = [...municipalCitySubscriptions];
+
+    if (status && typeof status === 'string' && status !== 'ALL') {
+      list = list.filter(s => s.status === status);
+    }
+    if (search && typeof search === 'string' && search.trim()) {
+      const q = search.toLowerCase().trim();
+      list = list.filter(s =>
+        s.cityName.toLowerCase().includes(q) ||
+        s.municipalityName.toLowerCase().includes(q) ||
+        s.country.toLowerCase().includes(q) ||
+        s.planTier.toLowerCase().includes(q)
+      );
+    }
+
+    res.json({ subscriptions: list, total: list.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch municipal subscriptions" });
+  }
+});
+
+// 0.1 Get specific city subscription (or auto-provision if geotagged)
+app.get("/api/municipal/subscriptions/:cityKey", (req, res) => {
+  try {
+    const { cityKey } = req.params;
+    const normKey = cityKey.toLowerCase().replace(/[^a-z0-9]/g, '');
+    
+    let sub = municipalCitySubscriptions.find(s => s.cityKey === normKey || s.cityName.toLowerCase() === cityKey.toLowerCase());
+    if (!sub) {
+      // Auto-provision subscription for this geotagged city
+      sub = getOrCreateMunicipalSubscription(cityKey);
+      municipalCitySubscriptions.push(sub);
+      persistStorageToDisk();
+    }
+
+    res.json({ subscription: sub });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch city subscription" });
+  }
+});
+
+// 0.2 Register a new municipal city subscription
+app.post("/api/municipal/subscriptions", (req, res) => {
+  try {
+    const { cityName, municipalityName, country, flagEmoji, latitude, longitude, planTier, contactLead, seatsAssigned } = req.body;
+    if (!cityName) {
+      return res.status(400).json({ error: "Missing required field: cityName" });
+    }
+
+    const normCity = cityName.trim();
+    const cityKey = normCity.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    const existingIndex = municipalCitySubscriptions.findIndex(s => s.cityKey === cityKey);
+    const sub: MunicipalCitySubscription = {
+      id: existingIndex >= 0 ? municipalCitySubscriptions[existingIndex].id : `sub-${cityKey}-gov`,
+      cityKey,
+      cityName: normCity,
+      country: country || 'International',
+      flagEmoji: flagEmoji || '🌐',
+      latitude: latitude || 33.5651,
+      longitude: longitude || 73.0169,
+      municipalityName: municipalityName || `${normCity} Municipal Corporation & Public Works`,
+      planTier: planTier || 'Enterprise Gov Desk ($1,250/mo)',
+      mrr: planTier?.includes('2,500') ? 2500 : 1250,
+      annualBilling: planTier?.includes('2,500') ? '$30,000 / yr' : '$15,000 / yr',
+      status: 'ACTIVE',
+      subscribedSince: existingIndex >= 0 ? municipalCitySubscriptions[existingIndex].subscribedSince : new Date().toISOString(),
+      renewalDate: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+      slaTier: 'Gold 99.9% 1-Hour Response',
+      contactLead: contactLead || `operations@${cityKey}.civicgov.org`,
+      seatsAssigned: Number(seatsAssigned) || 35,
+      activeDispatchersCount: 2,
+      activeDispatcheesCount: 10,
+      subscribedDepartments: [
+        'Department of Public Works (DPW)',
+        'Water & Sanitation Agency',
+        'Public Lighting & Traffic Signals',
+        'Health & Municipal Sanitation',
+      ],
+      zonesCovered: [`${normCity} Central Ward`, `${normCity} Commercial Sector`, `${normCity} Metro Sub-division`],
+      isGeotagged: true,
+      poNumber: `PO-${new Date().getFullYear()}-${cityKey.toUpperCase()}-GOV`,
+    };
+
+    if (existingIndex >= 0) {
+      municipalCitySubscriptions[existingIndex] = sub;
+    } else {
+      municipalCitySubscriptions.push(sub);
+    }
+
+    // Auto-provision initial staff for this subscribed city if not already present
+    const cityStaff = municipalStaffList.filter(s => s.cityName && s.cityName.toLowerCase() === normCity.toLowerCase());
+    if (cityStaff.length === 0) {
+      const generatedStaff = getOrCreateMunicipalStaffForCity(normCity, sub.municipalityName);
+      generatedStaff.forEach(st => municipalStaffList.push(st));
+    }
+
+    persistStorageToDisk();
+    res.status(201).json({ success: true, subscription: sub });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to register city subscription" });
+  }
+});
+
+// 1. Get all registered municipal staff & executives
+app.get("/api/municipal/staff", (req, res) => {
+  try {
+    const { role, department, status, search, city, cityName, operationalType } = req.query;
+
+    const targetCity = (city || cityName) as string | undefined;
+    if (targetCity && typeof targetCity === 'string' && targetCity !== 'ALL') {
+      const cityQuery = targetCity.toLowerCase().trim();
+      
+      // Check if staff exists for this geotagged city. If not, dynamically provision a complete roster!
+      const hasStaff = municipalStaffList.some(s => 
+        (s.cityName && s.cityName.toLowerCase() === cityQuery) ||
+        (s.municipality && s.municipality.toLowerCase().includes(cityQuery))
+      );
+
+      if (!hasStaff && targetCity.trim().length > 0) {
+        const generated = getOrCreateMunicipalStaffForCity(targetCity.trim());
+        generated.forEach(st => {
+          if (!municipalStaffList.some(existing => existing.id === st.id)) {
+            municipalStaffList.push(st);
+          }
+        });
+        
+        // Also ensure city subscription is recorded
+        const existingSub = municipalCitySubscriptions.find(s => s.cityName.toLowerCase() === cityQuery);
+        if (!existingSub) {
+          municipalCitySubscriptions.push(getOrCreateMunicipalSubscription(targetCity.trim()));
+        }
+
+        persistStorageToDisk();
+      }
+    }
+
+    let list = [...municipalStaffList];
+
+    if (targetCity && typeof targetCity === 'string' && targetCity !== 'ALL') {
+      const cityQuery = targetCity.toLowerCase().trim();
+      list = list.filter(s => 
+        (s.cityName && s.cityName.toLowerCase().includes(cityQuery)) ||
+        (s.municipality && s.municipality.toLowerCase().includes(cityQuery))
+      );
+    }
+    if (operationalType && typeof operationalType === 'string' && operationalType !== 'ALL') {
+      list = list.filter(s => s.operationalType === operationalType);
+    }
+    if (role && typeof role === 'string' && role !== 'ALL') {
+      list = list.filter(s => s.role === role);
+    }
+    if (department && typeof department === 'string' && department !== 'ALL') {
+      list = list.filter(s => s.departmentCode === department || s.department.toLowerCase().includes(department.toLowerCase()));
+    }
+    if (status && typeof status === 'string' && status !== 'ALL') {
+      list = list.filter(s => s.status === status);
+    }
+    if (search && typeof search === 'string' && search.trim()) {
+      const q = search.toLowerCase().trim();
+      list = list.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.title.toLowerCase().includes(q) ||
+        s.badgeId.toLowerCase().includes(q) ||
+        s.department.toLowerCase().includes(q) ||
+        (s.cityName && s.cityName.toLowerCase().includes(q))
+      );
+    }
+
+    res.json({ staff: list, total: list.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch municipal staff" });
+  }
+});
+
+// 2. Register a new municipal staff member / field specialist
+app.post("/api/municipal/staff", (req, res) => {
+  try {
+    const { name, role, title, department, departmentCode, badgeId, phone, email, specialties, wardZone, cityName, municipality, operationalType } = req.body;
+    if (!name || !role || !title || !badgeId) {
+      return res.status(400).json({ error: "Missing required fields: name, role, title, badgeId" });
+    }
+
+    const assignedOperationalType = operationalType || (role === 'EXECUTIVE' ? 'DISPATCHER' : 'DISPATCHEE');
+
+    const newStaff: MunicipalStaffMember = {
+      id: `staff-${Date.now()}`,
+      name: name.trim(),
+      role: role || 'FIELD_OFFICER',
+      operationalType: assignedOperationalType,
+      title: title.trim(),
+      department: department || 'Department of Public Works (DPW)',
+      departmentCode: departmentCode || 'DPW',
+      badgeId: badgeId.trim(),
+      phone: phone || '+92 (300) 000-0000',
+      email: email || `${name.toLowerCase().replace(/\s+/g, '.')}@cityscape.solutions`,
+      avatarUrl: `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 90000000000)}?auto=format&fit=crop&w=400&q=80`,
+      cityName: cityName || 'Rawalpindi',
+      municipality: municipality || 'Municipal Corporation & Public Works',
+      status: 'AVAILABLE',
+      activeTasksCount: 0,
+      resolvedTasksCount: 0,
+      rating: 5.0,
+      specialties: Array.isArray(specialties) ? specialties : ['General Infrastructure Repair'],
+      wardZone: wardZone || 'Central Zone',
+      registeredAt: new Date().toISOString(),
+      lastActiveAt: new Date().toISOString(),
+    };
+
+    municipalStaffList.push(newStaff);
+    persistStorageToDisk();
+    saveStaffToFirestore(newStaff);
+
+    res.status(201).json({ staff: newStaff });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to register municipal staff member" });
+  }
+});
+
+// 3. Get task assignments log (Audit Log)
+app.get("/api/municipal/assignments", (req, res) => {
+  try {
+    const { reportId, staffId, executiveId, status, department, priority, search, city, cityName } = req.query;
+    let list = [...taskAssignmentsList];
+
+    const targetCity = (city || cityName) as string | undefined;
+    if (targetCity && typeof targetCity === 'string' && targetCity !== 'ALL') {
+      const cityQuery = targetCity.toLowerCase().trim();
+      list = list.filter(a => a.cityName && a.cityName.toLowerCase().includes(cityQuery));
+    }
+    if (reportId && typeof reportId === 'string') {
+      list = list.filter(a => a.reportId === reportId);
+    }
+    if (staffId && typeof staffId === 'string') {
+      list = list.filter(a => a.assignedStaffId === staffId);
+    }
+    if (executiveId && typeof executiveId === 'string') {
+      list = list.filter(a => a.assignedByExecutiveId === executiveId);
+    }
+    if (status && typeof status === 'string' && status !== 'ALL') {
+      list = list.filter(a => a.status === status);
+    }
+    if (department && typeof department === 'string' && department !== 'ALL') {
+      list = list.filter(a => a.department.toLowerCase().includes((department as string).toLowerCase()));
+    }
+    if (priority && typeof priority === 'string' && priority !== 'ALL') {
+      list = list.filter(a => a.priority === priority);
+    }
+    if (search && typeof search === 'string' && search.trim() !== '') {
+      const q = search.toLowerCase().trim();
+      list = list.filter(a =>
+        (a.reportTitle && a.reportTitle.toLowerCase().includes(q)) ||
+        (a.assignedStaffName && a.assignedStaffName.toLowerCase().includes(q)) ||
+        (a.assignedByExecutiveName && a.assignedByExecutiveName.toLowerCase().includes(q)) ||
+        (a.assignedStaffBadge && a.assignedStaffBadge.toLowerCase().includes(q)) ||
+        (a.directive && a.directive.toLowerCase().includes(q)) ||
+        (a.reportId && a.reportId.toLowerCase().includes(q)) ||
+        (a.cityName && a.cityName.toLowerCase().includes(q))
+      );
+    }
+
+    // Sort newest assignment first
+    list.sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime());
+
+    res.json({ assignments: list, total: list.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch task assignments" });
+  }
+});
+
+// 4. Executive Task Assignment Endpoint (e.g., Mr. Kamran assigns report to registered staff Mr. Sagheer)
+app.post("/api/reports/:id/assign", (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      assignedStaffId,
+      assignedStaffName,
+      assignedByExecutiveId,
+      assignedByExecutiveName,
+      directive,
+      priority,
+      slaHours,
+      department,
+    } = req.body;
+
+    const report = reports.find(r => r.id === id);
+    if (!report) {
+      return res.status(404).json({ error: "Report not found" });
+    }
+
+    // Lookup staff member in directory
+    const staffMember = municipalStaffList.find(s => s.id === assignedStaffId || s.name.toLowerCase() === (assignedStaffName || '').toLowerCase());
+    const executiveName = assignedByExecutiveName || 'Mr. Kamran (Chief Municipal Executive)';
+    const staffName = staffMember ? staffMember.name : (assignedStaffName || 'Mr. Sagheer');
+    const staffBadge = staffMember ? staffMember.badgeId : 'DPW-FO-842';
+    const staffPhone = staffMember ? staffMember.phone : '+92 (333) 514-9921';
+    const staffAvatar = staffMember ? staffMember.avatarUrl : undefined;
+    const staffRole = staffMember ? staffMember.role : 'FIELD_OFFICER';
+
+    // Update staff active count and status
+    if (staffMember) {
+      staffMember.status = 'DISPATCHED';
+      staffMember.activeTasksCount += 1;
+      staffMember.lastActiveAt = new Date().toISOString();
+      saveStaffToFirestore(staffMember);
+    }
+
+    const assignedTimestamp = new Date().toISOString();
+    const targetSlaHours = slaHours ? Number(slaHours) : (report.slaHoursTarget || 24);
+    const slaDueDate = new Date(Date.now() + targetSlaHours * 3600 * 1000).toISOString();
+
+    // Create official task assignment record with initial audit history
+    const initialAuditNote = `Executive Work Order Dispatched: Municipal Executive ${executiveName} assigned report to ${staffName} (Badge: ${staffBadge}). Directive: "${directive || 'Execute emergency on-site remediation.'}"`;
+    const newAssignment: TaskAssignment = {
+      id: `asgn-${Date.now()}`,
+      reportId: id,
+      reportTitle: report.title,
+      reportCategory: report.category,
+      reportAddress: report.addressText || report.cityName || 'Rawalpindi',
+      cityName: report.cityName || 'Rawalpindi',
+      assignedStaffId: staffMember ? staffMember.id : (assignedStaffId || 'staff-sagheer-field'),
+      assignedStaffName: staffName,
+      assignedStaffRole: staffRole,
+      assignedStaffBadge: staffBadge,
+      assignedStaffPhone: staffPhone,
+      assignedStaffAvatar: staffAvatar,
+      dispatcheeOperationalType: 'DISPATCHEE',
+      assignedByExecutiveId: assignedByExecutiveId || 'staff-kamran-exec',
+      assignedByExecutiveName: executiveName,
+      dispatcherOperationalType: 'DISPATCHER',
+      dispatcherRole: 'Chief Municipal Executive & Zonal Administrator',
+      assignedAt: assignedTimestamp,
+      priority: (priority as 'CRITICAL' | 'HIGH' | 'STANDARD') || 'CRITICAL',
+      directive: directive || 'Execute urgent on-site assessment, public safety coning, and high-durability infrastructure remediation.',
+      slaTargetHours: targetSlaHours,
+      slaDueDate: slaDueDate,
+      status: 'EN_ROUTE',
+      department: department || (staffMember ? staffMember.department : 'Department of Public Works (DPW)'),
+      citizenNotificationSent: true,
+      citizenNotifiedAt: assignedTimestamp,
+      citizenAcknowledged: false,
+      lastUpdatedBy: executiveName,
+      lastUpdatedAt: assignedTimestamp,
+      auditHistory: [
+        {
+          id: `audit-${Date.now()}-1`,
+          timestamp: assignedTimestamp,
+          previousStatus: 'ASSIGNED',
+          newStatus: 'ASSIGNED',
+          updatedByName: executiveName,
+          updatedByRole: 'EXECUTIVE',
+          note: initialAuditNote,
+        },
+        {
+          id: `audit-${Date.now()}-2`,
+          timestamp: new Date(Date.now() + 1000).toISOString(),
+          previousStatus: 'ASSIGNED',
+          newStatus: 'EN_ROUTE',
+          updatedByName: staffName,
+          updatedByRole: 'FIELD_OFFICER',
+          note: `Field Specialist ${staffName} acknowledged dispatch order and mobilized team en route.`,
+        }
+      ],
+    };
+
+    taskAssignmentsList.unshift(newAssignment);
+
+    // Update Report entity with complete assignment telemetry
+    report.status = 'IN_PROGRESS';
+    report.assignedWorker = `${staffName} (${staffBadge})`;
+    report.assignedStaffId = newAssignment.assignedStaffId;
+    report.assignedStaffName = staffName;
+    report.assignedStaffRole = staffRole;
+    report.assignedStaffBadge = staffBadge;
+    report.assignedStaffPhone = staffPhone;
+    report.assignedStaffAvatar = staffAvatar;
+    report.assignedByExecutiveId = newAssignment.assignedByExecutiveId;
+    report.assignedByExecutiveName = executiveName;
+    report.assignedAt = assignedTimestamp;
+    report.assignmentPriority = newAssignment.priority;
+    report.assignmentDirective = newAssignment.directive;
+    report.assignmentStatus = 'EN_ROUTE';
+    report.slaHoursTarget = targetSlaHours;
+    report.slaDueDate = slaDueDate;
+    report.slaStatus = 'ON_TRACK';
+    report.citizenNotificationSent = true;
+    report.citizenNotifiedAt = assignedTimestamp;
+    report.citizenAcknowledged = false;
+    report.updatedAt = assignedTimestamp;
+
+    // Log Official Executive System Comment in Report Timeline
+    const officialComment: Comment = {
+      id: `comm-${Date.now()}`,
+      reportId: id,
+      userName: `Executive Office (${executiveName.split(' ')[0]} ${executiveName.split(' ')[1] || ''})`,
+      userRole: 'admin',
+      content: `🏛️ Official Task Assignment: Municipal Executive ${executiveName} has assigned this report to registered specialist ${staffName} (Badge: ${staffBadge}). Directive: "${newAssignment.directive}"`,
+      isOfficialUpdate: true,
+      createdAt: assignedTimestamp,
+    };
+    comments.push(officialComment);
+
+    persistStorageToDisk();
+    saveAssignmentToFirestore(newAssignment);
+    saveReportToFirestore(report);
+    saveCommentToFirestore(id, officialComment);
+
+    res.json({
+      success: true,
+      message: `Task successfully assigned to ${staffName} by ${executiveName}. Citizen notification dispatched.`,
+      report,
+      assignment: newAssignment,
+    });
+  } catch (err: any) {
+    console.error("Task assignment error:", err);
+    res.status(500).json({ error: err.message || "Failed to dispatch task assignment" });
+  }
+});
+
+// 4b. Status Update & Audit Log Append for Task Assignment
+app.post("/api/municipal/assignments/:id/status", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newStatus, note, updatedByName, updatedByRole, resolutionNotes, resolutionProofUrl } = req.body;
+
+    const assignment = taskAssignmentsList.find(a => a.id === id || a.reportId === id);
+    if (!assignment) {
+      return res.status(404).json({ error: "Task assignment record not found" });
+    }
+
+    const previousStatus = assignment.status;
+    const timestamp = new Date().toISOString();
+    const updater = updatedByName || assignment.assignedStaffName || 'Municipal Executive';
+    const role = updatedByRole || 'FIELD_OFFICER';
+
+    if (newStatus) {
+      assignment.status = newStatus;
+    }
+    assignment.lastUpdatedBy = updater;
+    assignment.lastUpdatedAt = timestamp;
+    if (resolutionNotes) assignment.resolutionNotes = resolutionNotes;
+    if (resolutionProofUrl) assignment.resolutionProofUrl = resolutionProofUrl;
+
+    if (!assignment.auditHistory) {
+      assignment.auditHistory = [];
+    }
+
+    const auditEntry = {
+      id: `audit-${Date.now()}`,
+      timestamp,
+      previousStatus,
+      newStatus: newStatus || assignment.status,
+      updatedByName: updater,
+      updatedByRole: role,
+      note: note || `Status transitioned from ${previousStatus} to ${newStatus || assignment.status}`,
+      attachmentUrl: resolutionProofUrl,
+    };
+
+    assignment.auditHistory.push(auditEntry);
+
+    // Also sync with Report entity if found
+    const report = reports.find(r => r.id === assignment.reportId);
+    if (report) {
+      if (newStatus === 'RESOLVED') {
+        report.status = 'RESOLVED';
+        report.resolvedAt = timestamp;
+        report.slaStatus = 'ON_TRACK';
+        if (resolutionNotes) report.officialNote = resolutionNotes;
+        if (resolutionProofUrl) report.resolutionImageUrl = resolutionProofUrl;
+      } else if (newStatus === 'IN_PROGRESS' || newStatus === 'ON_SITE' || newStatus === 'EN_ROUTE') {
+        report.status = 'IN_PROGRESS';
+      }
+      report.updatedAt = timestamp;
+
+      // Add comment to report timeline
+      const statusComment: Comment = {
+        id: `comm-${Date.now()}`,
+        reportId: report.id,
+        userName: `${updater} (${role === 'EXECUTIVE' ? 'Executive Officer' : 'Field Operations'})`,
+        userRole: role === 'EXECUTIVE' ? 'admin' : 'worker',
+        content: `📋 Audit Update [${newStatus}]: ${auditEntry.note}`,
+        isOfficialUpdate: true,
+        createdAt: timestamp,
+      };
+      comments.push(statusComment);
+      saveCommentToFirestore(report.id, statusComment);
+      saveReportToFirestore(report);
+    }
+
+    // If resolved, update staff member active / resolved counts
+    if (newStatus === 'RESOLVED') {
+      const staff = municipalStaffList.find(s => s.id === assignment.assignedStaffId);
+      if (staff) {
+        if (staff.activeTasksCount > 0) staff.activeTasksCount -= 1;
+        staff.resolvedTasksCount += 1;
+        staff.status = 'AVAILABLE';
+        staff.lastActiveAt = timestamp;
+        saveStaffToFirestore(staff);
+      }
+    }
+
+    persistStorageToDisk();
+    saveAssignmentToFirestore(assignment);
+
+    res.json({
+      success: true,
+      message: `Audit update logged for assignment ${assignment.id}`,
+      assignment,
+      auditEntry,
+    });
+  } catch (err: any) {
+    console.error("Error updating assignment status:", err);
+    res.status(500).json({ error: err.message || "Failed to update assignment status" });
+  }
+});
+
+// 5. Citizen Acknowledges Staff Assignment
+app.patch("/api/reports/:id/assignment-ack", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { citizenName } = req.body;
+
+    const report = reports.find(r => r.id === id);
+    if (!report) {
+      return res.status(404).json({ error: "Report not found" });
+    }
+
+    report.citizenAcknowledged = true;
+    report.updatedAt = new Date().toISOString();
+
+    // Update assignment record if exists
+    const assignment = taskAssignmentsList.find(a => a.reportId === id);
+    if (assignment) {
+      assignment.citizenAcknowledged = true;
+      saveAssignmentToFirestore(assignment);
+    }
+
+    // Optional confirmation comment in timeline
+    const residentAckComment: Comment = {
+      id: `comm-${Date.now()}`,
+      reportId: id,
+      userName: citizenName || report.userName || 'Community Resident',
+      userRole: 'citizen',
+      content: `✅ Resident Notification: Confirmed receipt that ${report.assignedStaffName || 'field officer'} has been assigned to resolve this issue.`,
+      isOfficialUpdate: false,
+      createdAt: new Date().toISOString(),
+    };
+    comments.push(residentAckComment);
+
+    persistStorageToDisk();
+    saveReportToFirestore(report);
+    saveCommentToFirestore(id, residentAckComment);
+
+    res.json({ success: true, message: "Assignment acknowledged by resident.", report });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to acknowledge assignment" });
+  }
+});
+
+// 6. Citizen Notifications Feed (Live stream of executive assignments)
+app.get("/api/citizen/notifications", (req, res) => {
+  try {
+    const { userEmail, userName } = req.query;
+
+    const assignedReports = reports.filter(r => r.citizenNotificationSent && r.assignedStaffName);
+
+    const notifications = assignedReports.map(r => ({
+      id: `notif-${r.id}`,
+      reportId: r.id,
+      reportTitle: r.title,
+      category: r.category,
+      severity: r.severity,
+      assignedStaffName: r.assignedStaffName,
+      assignedStaffRole: r.assignedStaffRole,
+      assignedStaffBadge: r.assignedStaffBadge,
+      assignedStaffPhone: r.assignedStaffPhone,
+      assignedStaffAvatar: r.assignedStaffAvatar,
+      assignedByExecutiveName: r.assignedByExecutiveName || 'Municipal Executive Council',
+      directive: r.assignmentDirective || 'Mobilized for field repair and resolution.',
+      assignedAt: r.assignedAt || r.updatedAt,
+      citizenAcknowledged: Boolean(r.citizenAcknowledged),
+      status: r.status,
+      addressText: r.addressText,
+    }));
+
+    res.json({ notifications, count: notifications.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch citizen notifications" });
+  }
+});
+
 // 7. City Infrastructure Analytics Stats
 app.get("/api/stats", (req, res) => {
   const totalReports = reports.length;
@@ -1839,6 +2513,447 @@ app.patch("/api/estates/:id/visitor-passes/:passId/status", (req, res) => {
 
   persistStorageToDisk();
   res.json({ pass, passes });
+});
+
+// ==========================================
+// HOA STAFF & TASK ASSIGNMENT AUDIT API ROUTES
+// ==========================================
+
+// 6. Get all HOA Staff Members & Approved Contractors
+app.get("/api/hoa/staff", (req, res) => {
+  try {
+    const { estateId, search, tradeSpecialty, status } = req.query;
+    let list = [...hoaStaffList];
+
+    if (estateId && typeof estateId === 'string' && estateId !== 'all') {
+      list = list.filter(s => !s.estateId || s.estateId === estateId || s.estateId === 'all');
+    }
+
+    if (tradeSpecialty && typeof tradeSpecialty === 'string' && tradeSpecialty !== 'ALL') {
+      list = list.filter(s => s.tradeSpecialty === tradeSpecialty);
+    }
+
+    if (status && typeof status === 'string' && status !== 'ALL') {
+      list = list.filter(s => s.status === status);
+    }
+
+    if (search && typeof search === 'string') {
+      const q = search.toLowerCase();
+      list = list.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.tradeSpecialty.toLowerCase().includes(q) ||
+        s.vendorCompany.toLowerCase().includes(q) ||
+        (s.badgeId && s.badgeId.toLowerCase().includes(q))
+      );
+    }
+
+    res.json({ staff: list, total: list.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch HOA staff members" });
+  }
+});
+
+// 7. Enroll New HOA Staff / Registered Contractor
+app.post("/api/hoa/staff", (req, res) => {
+  try {
+    const {
+      name,
+      role,
+      tradeSpecialty,
+      phone,
+      email,
+      vendorCompany,
+      badgeId,
+      hourlyRateUsd,
+      avatarUrl,
+      estateId,
+    } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: "Staff member name is required." });
+    }
+
+    const newStaff: EstateStaffMember = {
+      id: `hoa-staff-${Date.now()}`,
+      name: name.trim(),
+      roleTitle: role || 'Certified Field Technician',
+      role: role || 'Technician',
+      tradeSpecialty: tradeSpecialty || 'General Maintenance',
+      phone: phone || '+1 (555) 000-TECH',
+      email: email || `${name.toLowerCase().replace(/\s+/g, '.')}@hoa-contractors.com`,
+      vendorCompany: vendorCompany || 'Independent HOA Contractor',
+      badgeId: badgeId || `HOA-CT-${Math.floor(100 + Math.random() * 900)}`,
+      hourlyRateUsd: hourlyRateUsd ? Number(hourlyRateUsd) : 65,
+      avatarUrl: avatarUrl || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80`,
+      status: 'AVAILABLE',
+      rating: 5.0,
+      sectorAssigned: 'All Estate Sectors',
+      activeWorkOrdersCount: 0,
+      activeTasksCount: 0,
+      resolvedTasksCount: 0,
+      operationalType: 'DISPATCHEE',
+      estateId: estateId || undefined,
+      lastActiveAt: new Date().toISOString(),
+      onDutySince: '8:00 AM Today',
+    };
+
+    hoaStaffList.push(newStaff);
+    persistStorageToDisk();
+    saveHoaStaffToFirestore(newStaff);
+
+    res.status(201).json({ success: true, staff: newStaff });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to create HOA staff member" });
+  }
+});
+
+// 8. Update HOA Staff Member Profile / Status
+app.patch("/api/hoa/staff/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const staff = hoaStaffList.find(s => s.id === id);
+    if (!staff) {
+      return res.status(404).json({ error: "HOA staff member not found" });
+    }
+
+    const { status, rating, phone, vendorCompany, hourlyRateUsd, tradeSpecialty } = req.body;
+    if (status) staff.status = status;
+    if (rating !== undefined) staff.rating = Number(rating);
+    if (phone) staff.phone = phone;
+    if (vendorCompany) staff.vendorCompany = vendorCompany;
+    if (hourlyRateUsd !== undefined) staff.hourlyRateUsd = Number(hourlyRateUsd);
+    if (tradeSpecialty) staff.tradeSpecialty = tradeSpecialty;
+    staff.lastActiveAt = new Date().toISOString();
+
+    persistStorageToDisk();
+    saveHoaStaffToFirestore(staff);
+
+    res.json({ success: true, staff });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to update staff member" });
+  }
+});
+
+// 9. Get all HOA Task Assignments (with Filters & Audit Trails)
+app.get("/api/hoa/assignments", (req, res) => {
+  try {
+    const { estateId, status, priority, staffId, workOrderTier, search } = req.query;
+    let list = [...hoaTaskAssignmentsList];
+
+    if (estateId && typeof estateId === 'string' && estateId !== 'all') {
+      list = list.filter(a => !a.estateId || a.estateId === estateId || a.estateId === 'all');
+    }
+
+    if (status && typeof status === 'string' && status !== 'ALL') {
+      list = list.filter(a => a.status === status);
+    }
+
+    if (priority && typeof priority === 'string' && priority !== 'ALL') {
+      list = list.filter(a => a.priority === priority);
+    }
+
+    if (staffId && typeof staffId === 'string') {
+      list = list.filter(a => a.assignedStaffId === staffId);
+    }
+
+    if (workOrderTier && typeof workOrderTier === 'string' && workOrderTier !== 'ALL') {
+      list = list.filter(a => a.workOrderTier === workOrderTier);
+    }
+
+    if (search && typeof search === 'string') {
+      const q = search.toLowerCase();
+      list = list.filter(a =>
+        a.reportTitle.toLowerCase().includes(q) ||
+        a.assignedStaffName.toLowerCase().includes(q) ||
+        a.assignedByExecutiveName.toLowerCase().includes(q) ||
+        (a.unitPlotNumber && a.unitPlotNumber.toLowerCase().includes(q)) ||
+        (a.assignedStaffBadge && a.assignedStaffBadge.toLowerCase().includes(q))
+      );
+    }
+
+    // Sort most recent first
+    list.sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime());
+
+    res.json({ assignments: list, total: list.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch HOA task assignments" });
+  }
+});
+
+// 10. HOA Executive Dispatch & Task Assignment Endpoint
+app.post("/api/hoa/assignments", (req, res) => {
+  try {
+    const {
+      reportId,
+      reportTitle,
+      reportCategory,
+      reportAddress,
+      unitPlotNumber,
+      estateId,
+      estateName,
+      assignedStaffId,
+      assignedStaffName,
+      assignedByExecutiveId,
+      assignedByExecutiveName,
+      directive,
+      priority,
+      slaHours,
+      workOrderTier,
+      tradeSpecialty,
+    } = req.body;
+
+    // Find staff member in HOA registry
+    const staff = hoaStaffList.find(s => s.id === assignedStaffId || s.name.toLowerCase() === (assignedStaffName || '').toLowerCase());
+    const executiveName = assignedByExecutiveName || 'HOA Board Facilities Director';
+    const staffName = staff ? staff.name : (assignedStaffName || 'Lead Field Technician');
+    const staffBadge = staff ? staff.badgeId : `HOA-CT-${Math.floor(100 + Math.random() * 900)}`;
+    const staffPhone = staff ? staff.phone : '+1 (555) 303-9912';
+    const staffRole = staff ? staff.role : 'Specialist Contractor';
+    const staffAvatar = staff ? staff.avatarUrl : undefined;
+
+    // Update staff active count and status
+    if (staff) {
+      staff.status = 'DISPATCHED';
+      staff.activeTasksCount += 1;
+      staff.lastActiveAt = new Date().toISOString();
+      saveHoaStaffToFirestore(staff);
+    }
+
+    const assignedTimestamp = new Date().toISOString();
+    const targetSlaHours = slaHours ? Number(slaHours) : 24;
+    const slaDueDate = new Date(Date.now() + targetSlaHours * 3600 * 1000).toISOString();
+
+    const initialAuditNote = `HOA Executive Dispatch: ${executiveName} assigned work order to ${staffName} (${staff ? staff.vendorCompany : 'Authorized HOA Contractor'}, Badge: ${staffBadge}). Directive: "${directive || 'Execute on-site maintenance inspection.'}"`;
+
+    const newAssignment: TaskAssignment = {
+      id: `hoa-asgn-${Date.now()}`,
+      reportId: reportId || `hoa-wo-${Date.now()}`,
+      reportTitle: reportTitle || 'HOA Common Area Maintenance Work Order',
+      reportCategory: reportCategory || 'GENERAL_MAINTENANCE',
+      reportAddress: reportAddress || 'Community Common Property',
+      estateId: estateId || 'estate-meadowood',
+      estateName: estateName || 'Meadowood Gated Sanctuary',
+      unitPlotNumber: unitPlotNumber || 'Clubhouse & Amenity Zone',
+      assignedStaffId: staff ? staff.id : (assignedStaffId || 'hoa-staff-default'),
+      assignedStaffName: staffName,
+      assignedStaffRole: staffRole,
+      assignedStaffBadge: staffBadge,
+      assignedStaffPhone: staffPhone,
+      assignedStaffAvatar: staffAvatar,
+      dispatcheeOperationalType: 'DISPATCHEE',
+      assignedByExecutiveId: assignedByExecutiveId || 'hoa-board-pres',
+      assignedByExecutiveName: executiveName,
+      dispatcherOperationalType: 'DISPATCHER',
+      dispatcherRole: 'HOA Board Executive & Property Manager',
+      assignedAt: assignedTimestamp,
+      priority: (priority as 'CRITICAL' | 'HIGH' | 'STANDARD') || 'HIGH',
+      workOrderTier: (workOrderTier as 'COMMON_GROUNDS' | 'RESIDENTIAL_INTERIOR' | 'EMERGENCY_AMENITY') || 'COMMON_GROUNDS',
+      directive: directive || 'Execute scheduled on-site inspection, diagnostics, and repairs with zero disruption to neighbors.',
+      slaTargetHours: targetSlaHours,
+      slaDueDate: slaDueDate,
+      status: 'EN_ROUTE',
+      department: tradeSpecialty || (staff ? staff.tradeSpecialty : 'Facilities & Grounds'),
+      citizenNotificationSent: true,
+      citizenNotifiedAt: assignedTimestamp,
+      citizenAcknowledged: false,
+      lastUpdatedBy: executiveName,
+      lastUpdatedAt: assignedTimestamp,
+      auditHistory: [
+        {
+          id: `audit-${Date.now()}-1`,
+          timestamp: assignedTimestamp,
+          previousStatus: 'ASSIGNED',
+          newStatus: 'ASSIGNED',
+          updatedByName: executiveName,
+          updatedByRole: 'EXECUTIVE',
+          note: initialAuditNote,
+        },
+        {
+          id: `audit-${Date.now()}-2`,
+          timestamp: new Date(Date.now() + 1000).toISOString(),
+          previousStatus: 'ASSIGNED',
+          newStatus: 'EN_ROUTE',
+          updatedByName: staffName,
+          updatedByRole: 'FIELD_OFFICER',
+          note: `Contractor ${staffName} acknowledged HOA work order and mobilized team en route to property.`,
+        }
+      ],
+    };
+
+    hoaTaskAssignmentsList.unshift(newAssignment);
+
+    // If reportId matches an existing civic report in reports array, update it
+    if (reportId) {
+      const report = reports.find(r => r.id === reportId);
+      if (report) {
+        report.status = 'IN_PROGRESS';
+        report.assignedWorker = `${staffName} (${staffBadge})`;
+        report.assignedStaffId = newAssignment.assignedStaffId;
+        report.assignedStaffName = staffName;
+        report.assignedStaffRole = staffRole;
+        report.assignedStaffBadge = staffBadge;
+        report.assignedStaffPhone = staffPhone;
+        report.assignedStaffAvatar = staffAvatar;
+        report.assignedByExecutiveId = newAssignment.assignedByExecutiveId;
+        report.assignedByExecutiveName = executiveName;
+        report.assignedAt = assignedTimestamp;
+        report.assignmentPriority = newAssignment.priority;
+        report.assignmentDirective = newAssignment.directive;
+        report.assignmentStatus = 'EN_ROUTE';
+        report.slaHoursTarget = targetSlaHours;
+        report.slaDueDate = slaDueDate;
+        report.slaStatus = 'ON_TRACK';
+        report.citizenNotificationSent = true;
+        report.citizenNotifiedAt = assignedTimestamp;
+        report.updatedAt = assignedTimestamp;
+
+        // Add timeline comment
+        const officialComment: Comment = {
+          id: `comm-${Date.now()}`,
+          reportId: report.id,
+          userName: `HOA Board (${executiveName.split(' ')[0]})`,
+          userRole: 'admin',
+          content: `🏡 HOA Dispatch Order: Board Executive ${executiveName} assigned work order to ${staffName} (${staff ? staff.vendorCompany : 'Contractor'}, Badge: ${staffBadge}). Directive: "${newAssignment.directive}"`,
+          isOfficialUpdate: true,
+          createdAt: assignedTimestamp,
+        };
+        comments.push(officialComment);
+        saveCommentToFirestore(report.id, officialComment);
+        saveReportToFirestore(report);
+      }
+    }
+
+    persistStorageToDisk();
+    saveHoaAssignmentToFirestore(newAssignment);
+
+    res.status(201).json({
+      success: true,
+      message: `Work order dispatched to ${staffName} by ${executiveName}.`,
+      assignment: newAssignment,
+    });
+  } catch (err: any) {
+    console.error("HOA Task assignment error:", err);
+    res.status(500).json({ error: err.message || "Failed to dispatch HOA work order" });
+  }
+});
+
+// 11. HOA Task Assignment Status Update & Audit Log Append
+const updateHoaAssignmentStatusHandler = (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { newStatus, note, updatedByName, updatedByRole, resolutionNotes, resolutionProofUrl } = req.body;
+
+    const assignment = hoaTaskAssignmentsList.find(a => a.id === id || a.reportId === id);
+    if (!assignment) {
+      return res.status(404).json({ error: "HOA task assignment record not found" });
+    }
+
+    const previousStatus = assignment.status;
+    const timestamp = new Date().toISOString();
+    const updater = updatedByName || assignment.assignedStaffName || 'HOA Executive Officer';
+    const role = updatedByRole || 'FIELD_OFFICER';
+
+    if (newStatus) {
+      assignment.status = newStatus;
+    }
+    assignment.lastUpdatedBy = updater;
+    assignment.lastUpdatedAt = timestamp;
+    if (resolutionNotes) assignment.resolutionNotes = resolutionNotes;
+    if (resolutionProofUrl) assignment.resolutionProofUrl = resolutionProofUrl;
+
+    if (!assignment.auditHistory) {
+      assignment.auditHistory = [];
+    }
+
+    const auditEntry = {
+      id: `audit-${Date.now()}`,
+      timestamp,
+      previousStatus,
+      newStatus: newStatus || assignment.status,
+      updatedByName: updater,
+      updatedByRole: role,
+      note: note || `HOA status transitioned from ${previousStatus} to ${newStatus || assignment.status}`,
+      attachmentUrl: resolutionProofUrl,
+    };
+
+    assignment.auditHistory.push(auditEntry);
+
+    // If resolved, update staff member active / resolved counts
+    if (newStatus === 'RESOLVED') {
+      const staff = hoaStaffList.find(s => s.id === assignment.assignedStaffId);
+      if (staff) {
+        if (staff.activeTasksCount > 0) staff.activeTasksCount -= 1;
+        staff.resolvedTasksCount += 1;
+        staff.status = 'AVAILABLE';
+        staff.lastActiveAt = timestamp;
+        saveHoaStaffToFirestore(staff);
+      }
+    }
+
+    // Sync with Report entity if found
+    if (assignment.reportId) {
+      const report = reports.find(r => r.id === assignment.reportId);
+      if (report) {
+        if (newStatus === 'RESOLVED') {
+          report.status = 'RESOLVED';
+          report.resolvedAt = timestamp;
+          report.slaStatus = 'ON_TRACK';
+          if (resolutionNotes) report.officialNote = resolutionNotes;
+          if (resolutionProofUrl) report.resolutionImageUrl = resolutionProofUrl;
+        } else if (newStatus === 'IN_PROGRESS' || newStatus === 'ON_SITE' || newStatus === 'EN_ROUTE') {
+          report.status = 'IN_PROGRESS';
+        }
+        report.updatedAt = timestamp;
+
+        const statusComment: Comment = {
+          id: `comm-${Date.now()}`,
+          reportId: report.id,
+          userName: `${updater} (${role === 'EXECUTIVE' ? 'HOA Board' : 'Field Operations'})`,
+          userRole: role === 'EXECUTIVE' ? 'admin' : 'worker',
+          content: `📋 HOA Audit Update [${newStatus}]: ${auditEntry.note}`,
+          isOfficialUpdate: true,
+          createdAt: timestamp,
+        };
+        comments.push(statusComment);
+        saveCommentToFirestore(report.id, statusComment);
+        saveReportToFirestore(report);
+      }
+    }
+
+    persistStorageToDisk();
+    saveHoaAssignmentToFirestore(assignment);
+
+    res.json({
+      success: true,
+      message: `Audit update logged for HOA assignment ${assignment.id}`,
+      assignment,
+      auditEntry,
+    });
+  } catch (err: any) {
+    console.error("Error updating HOA assignment status:", err);
+    res.status(500).json({ error: err.message || "Failed to update HOA assignment status" });
+  }
+};
+
+app.post("/api/hoa/assignments/:id/status", updateHoaAssignmentStatusHandler);
+app.patch("/api/hoa/assignments/:id/status", updateHoaAssignmentStatusHandler);
+
+// 12. Delete / Archive HOA Task Assignment
+app.delete("/api/hoa/assignments/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const initialLen = hoaTaskAssignmentsList.length;
+    hoaTaskAssignmentsList = hoaTaskAssignmentsList.filter(a => a.id !== id);
+
+    if (hoaTaskAssignmentsList.length === initialLen) {
+      return res.status(404).json({ error: "HOA assignment not found" });
+    }
+
+    persistStorageToDisk();
+    res.json({ success: true, message: "HOA assignment removed" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to delete assignment" });
+  }
 });
 
 // 15. Community Wall of Fame & Gratitude Feed

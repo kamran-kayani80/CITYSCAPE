@@ -1,6 +1,10 @@
+export type UserPersona = 'RESIDENT' | 'MUNICIPAL_STAFF' | 'HOA_ADMIN' | 'PLATFORM_OWNER';
+
 export type AppViewMode =
   | 'map'
   | 'admin'
+  | 'estate'
+  | 'owner_oversight'
   | 'analytics'
   | 'gratitude'
   | 'profile'
@@ -11,8 +15,8 @@ export type AppViewMode =
   | 'sla'
   | 'brand'
   | 'strategic'
-  | 'estate'
-  | 'hashtag';
+  | 'hashtag'
+  | 'hoa_liaison';
 
 export type ReportCategory =
   | 'EMERGENCY'
@@ -29,6 +33,50 @@ export type ReportStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED';
 export type SlaStatus = 'ON_TRACK' | 'APPROACHING_DUE' | 'OVERDUE' | 'DISPUTED';
 
 export type SeverityLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+export type ReportingScope =
+  | 'MUNICIPAL_PUBLIC'
+  | 'HOA_PRIVATE'
+  | 'CROSS_JURISDICTION_TRIAGE'
+  | 'GENERAL_PUBLIC'
+  | 'HOA_INTERNAL'
+  | 'HOA_ESCALATED_MUNICIPAL';
+
+export type MunicipalLiaisonStatus =
+  | 'PENDING_MUNICIPAL_REVIEW'
+  | 'ESCALATED_TO_CITY'
+  | 'UNDER_REVIEW'
+  | 'ACCEPTED_BY_MUNICIPAL'
+  | 'REJECTED_HOA_JURISDICTION'
+  | 'JOINT_RESOLUTION'
+  | 'WORK_IN_PROGRESS'
+  | 'RESOLVED';
+
+export interface GovernanceLiaisonCase {
+  id: string;
+  reportId: string;
+  caseNumber: string;
+  title: string;
+  description: string;
+  category: ReportCategory;
+  severity: SeverityLevel;
+  estateId: string;
+  estateName: string;
+  unitPlotNumber?: string;
+  cityName: string;
+  municipalityName: string;
+  targetDepartment: 'DPW' | 'WASA' | 'TRANSIT' | 'RESCUE' | 'COUNCIL';
+  escalatedAt: string;
+  escalatedByHoaAdminName: string;
+  escalationReason: string;
+  jurisdictionArgument: string;
+  status: MunicipalLiaisonStatus;
+  municipalReviewNotes?: string;
+  municipalReviewerName?: string;
+  municipalAssignedOfficer?: string;
+  municipalEstimatedResolutionDays?: number;
+  lastUpdated: string;
+}
 
 export interface IssueVerification {
   id: string;
@@ -82,6 +130,158 @@ export interface Report {
   resolutionNotes?: string;
   resolutionConfirmedByReporter?: boolean | null;
   resolutionDisputeReason?: string;
+  
+  // Scope & HOA Context Fields
+  reportingScope?: ReportingScope;
+  estateId?: string;
+  estateName?: string;
+  unitPlotNumber?: string;
+  isEscalatedToMunicipal?: boolean;
+  escalatedAt?: string;
+  escalatedByHoaAdminName?: string;
+  municipalLiaisonNotes?: string;
+  municipalLiaisonStatus?: MunicipalLiaisonStatus;
+  municipalCaseReferenceId?: string;
+  municipalAssignedDept?: 'DPW' | 'WASA' | 'TRANSIT' | 'RESCUE' | 'COUNCIL';
+
+  // Official Municipal Staff & Executive Task Assignment Fields
+  assignedStaffId?: string;
+  assignedStaffName?: string;
+  assignedStaffRole?: 'EXECUTIVE' | 'SUPERVISOR' | 'FIELD_OFFICER' | 'SPECIALIST' | string;
+  assignedStaffBadge?: string;
+  assignedStaffPhone?: string;
+  assignedStaffAvatar?: string;
+  assignedByExecutiveId?: string;
+  assignedByExecutiveName?: string;
+  assignedAt?: string;
+  assignmentPriority?: 'CRITICAL' | 'HIGH' | 'STANDARD';
+  assignmentDirective?: string;
+  assignmentStatus?: 'ASSIGNED' | 'ACKNOWLEDGED' | 'EN_ROUTE' | 'IN_PROGRESS' | 'RESOLVED';
+  citizenNotificationSent?: boolean;
+  citizenNotifiedAt?: string;
+  citizenAcknowledged?: boolean;
+  citizenAcknowledgedAssignment?: boolean;
+}
+
+export type MunicipalSubscriptionStatus = 'ACTIVE' | 'TRIAL' | 'PENDING' | 'RENEWAL_DUE' | 'EXPIRED';
+
+export interface MunicipalCitySubscription {
+  id: string;
+  cityKey: string;
+  cityName: string;
+  country: string;
+  flagEmoji: string;
+  latitude: number;
+  longitude: number;
+  municipalityName: string;
+  planTier: string;
+  mrr: number;
+  annualBilling: string;
+  status: MunicipalSubscriptionStatus;
+  subscribedSince: string;
+  renewalDate: string;
+  slaTier: string;
+  contactLead: string;
+  seatsAssigned: number;
+  activeDispatchersCount: number;
+  activeDispatcheesCount: number;
+  subscribedDepartments: string[];
+  zonesCovered: string[];
+  isGeotagged: boolean;
+  poNumber?: string;
+  einNumber?: string;
+}
+
+export type MunicipalStaffRole = 'EXECUTIVE' | 'SUPERVISOR' | 'FIELD_OFFICER' | 'SPECIALIST';
+export type MunicipalStaffStatus = 'AVAILABLE' | 'DISPATCHED' | 'ON_SITE' | 'RESOLVING' | 'OFF_DUTY';
+export type MunicipalStaffOperationalType = 'DISPATCHER' | 'DISPATCHEE';
+
+export interface MunicipalStaffMember {
+  id: string;
+  name: string;
+  role: MunicipalStaffRole;
+  operationalType?: MunicipalStaffOperationalType; // DISPATCHER (Authorizing Executive) vs DISPATCHEE (On-site Field Specialist)
+  title: string;
+  department: string;
+  departmentCode: string;
+  badgeId: string;
+  phone: string;
+  email: string;
+  avatarUrl?: string;
+  cityName?: string; // Subscribed city for this staff member (e.g. Rawalpindi, Islamabad, Karachi, Lahore)
+  municipality?: string;
+  status: MunicipalStaffStatus;
+  activeTasksCount: number;
+  resolvedTasksCount: number;
+  rating: number;
+  specialties: string[];
+  wardZone?: string;
+  registeredAt: string;
+  lastActiveAt?: string;
+}
+
+export type TaskAssignmentStatus =
+  | 'ASSIGNED'
+  | 'ACKNOWLEDGED'
+  | 'EN_ROUTE'
+  | 'ON_SITE'
+  | 'IN_PROGRESS'
+  | 'RESOLVED'
+  | 'REASSIGNED'
+  | 'ESCALATED';
+
+export interface TaskAssignmentAuditEntry {
+  id: string;
+  timestamp: string;
+  previousStatus?: TaskAssignmentStatus;
+  newStatus: TaskAssignmentStatus;
+  updatedByName: string;
+  updatedByRole: 'EXECUTIVE' | 'FIELD_OFFICER' | 'ADMIN' | 'SUPERVISOR' | 'SYSTEM';
+  note?: string;
+  attachmentUrl?: string;
+  locationCoordinates?: { lat: number; lng: number };
+}
+
+export interface TaskAssignment {
+  id: string;
+  reportId: string;
+  reportTitle?: string;
+  reportCategory?: string;
+  reportAddress?: string;
+  cityName?: string; // City for which task is assigned
+  estateId?: string; // HOA / Estate context
+  estateName?: string;
+  unitPlotNumber?: string;
+  workOrderTier?: WorkOrderTier;
+  // DISPATCHEE (Field Officer / Contractor receiving and executing the task)
+  assignedStaffId: string;
+  assignedStaffName: string;
+  assignedStaffRole: string;
+  assignedStaffBadge: string;
+  assignedStaffPhone: string;
+  assignedStaffAvatar?: string;
+  dispatcheeOperationalType?: 'DISPATCHEE';
+  // DISPATCHER (Municipal Executive or HOA Board Official issuing the task)
+  assignedByExecutiveId: string;
+  assignedByExecutiveName: string;
+  dispatcherOperationalType?: 'DISPATCHER';
+  dispatcherRole?: string;
+  assignedAt: string;
+  priority: 'CRITICAL' | 'HIGH' | 'STANDARD';
+  directive: string;
+  slaTargetHours?: number;
+  slaDueDate?: string;
+  status: TaskAssignmentStatus;
+  department: string;
+  citizenNotificationSent: boolean;
+  citizenNotifiedAt?: string;
+  citizenAcknowledged?: boolean;
+  // Detailed Audit Trail & History
+  auditHistory?: TaskAssignmentAuditEntry[];
+  lastUpdatedBy?: string;
+  lastUpdatedAt?: string;
+  resolutionNotes?: string;
+  resolutionProofUrl?: string;
 }
 
 export interface CivicAnnouncement {
@@ -227,7 +427,7 @@ export interface AdoptedZone {
 
 export type EstateUserRole = 'owner' | 'tenant' | 'admin' | 'technician';
 export type EstateScope = 'INSIDE_ESTATE' | 'OUTER_MUNICIPAL';
-export type WorkOrderTier = 'PRIVATE_UNIT' | 'COMMUNITY_SHARED';
+export type WorkOrderTier = 'PRIVATE_UNIT' | 'COMMUNITY_SHARED' | 'COMMON_GROUNDS' | 'RESIDENTIAL_INTERIOR' | 'EMERGENCY_AMENITY';
 export type DuesPaymentStatus = 'PAID' | 'DUE' | 'OVERDUE';
 
 export interface EstateContext {
@@ -295,11 +495,26 @@ export interface EstateStaffMember {
   id: string;
   name: string;
   roleTitle: string;
+  role?: string;
+  badgeId?: string;
   phone: string;
-  status: 'ON_DUTY_PATROL' | 'DISPATCHED' | 'OFF_DUTY';
+  email?: string;
+  tradeSpecialty?: string;
+  vendorCompany?: string;
+  hourlyRateUsd?: number;
+  operationalType?: 'DISPATCHER' | 'DISPATCHEE';
+  status: 'ON_DUTY_PATROL' | 'DISPATCHED' | 'OFF_DUTY' | 'AVAILABLE';
   sectorAssigned: string;
   activeWorkOrdersCount: number;
+  activeTasksCount?: number;
+  totalResolvedOrders?: number;
+  resolvedTasksCount?: number;
+  rating?: number;
   avatarUrl?: string;
+  joinedDate?: string;
+  estateId?: string;
+  lastActiveAt?: string;
+  onDutySince?: string;
 }
 
 export interface PredictiveMilestone {

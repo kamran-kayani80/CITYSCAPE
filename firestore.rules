@@ -60,46 +60,47 @@ service cloud.firestore {
     // ENTITY SCHEMAS & FIELD SIZE GUARDS
     // ----------------------------------------------------------------------
     function isValidReport(data) {
-      return data.title is string && data.title.size() > 0 && data.title.size() <= 150 &&
-             data.description is string && data.description.size() <= 2000 &&
-             data.category is string && isValidCategory(data.category) &&
-             data.status is string && isValidStatus(data.status) &&
-             data.severity is string && isValidSeverity(data.severity) &&
-             data.addressText is string && data.addressText.size() <= 300 &&
-             (!('upvotesCount' in data) || (data.upvotesCount is number && data.upvotesCount >= 0)) &&
-             (!('imageUrls' in data) || (data.imageUrls is list && data.imageUrls.size() <= 10)) &&
-             (!('userId' in data) || (data.userId is string && data.userId.size() <= 128));
+      return data.title is string && data.title.size() > 0 && data.title.size() <= 300 &&
+             data.description is string && data.description.size() <= 5000 &&
+             data.category is string &&
+             data.status is string &&
+             data.severity is string;
     }
 
     function isValidComment(data) {
-      return data.reportId is string && isValidId(data.reportId) &&
-             data.userName is string && data.userName.size() > 0 && data.userName.size() <= 100 &&
-             data.content is string && data.content.size() > 0 && data.content.size() <= 1000 &&
-             (!('userRole' in data) || (data.userRole is string && data.userRole in ['citizen', 'admin', 'municipal_worker'])) &&
-             (!('userId' in data) || (data.userId is string && data.userId.size() <= 128));
+      return data.reportId is string &&
+             data.userName is string && data.userName.size() > 0 && data.userName.size() <= 150 &&
+             data.content is string && data.content.size() > 0 && data.content.size() <= 2000;
     }
 
     function isValidVerification(data) {
-      return data.reportId is string && isValidId(data.reportId) &&
-             data.userName is string && data.userName.size() > 0 && data.userName.size() <= 100 &&
-             data.statusConfirmed is string && data.statusConfirmed in ['RESOLVED', 'STILL_BROKEN'] &&
-             (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
-             (!('userId' in data) || (data.userId is string && data.userId.size() <= 128));
+      return data.reportId is string &&
+             data.userName is string && data.userName.size() > 0 && data.userName.size() <= 150 &&
+             data.statusConfirmed is string;
     }
 
     function isValidUserProfile(data) {
-      return data.username is string && data.username.size() > 0 && data.username.size() <= 50 &&
-             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 100 &&
-             (!('email' in data) || (data.email is string && data.email.size() <= 200)) &&
-             (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 500)) &&
-             (!('civicKarma' in data) || data.civicKarma is number);
+      return data.username is string && data.username.size() > 0 && data.username.size() <= 100 &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 150;
     }
 
     function isValidHashtag(data) {
       return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
-             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100 &&
-             (!('usageCount' in data) || data.usageCount is number) &&
-             (!('recentCount' in data) || data.recentCount is number);
+             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100;
+    }
+
+    function isValidMunicipalStaff(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 150 &&
+             data.role is string && data.role.size() > 0 && data.role.size() <= 50 &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.badgeId is string && data.badgeId.size() > 0 && data.badgeId.size() <= 60;
+    }
+
+    function isValidTaskAssignment(data) {
+      return data.reportId is string &&
+             data.assignedStaffId is string && data.assignedStaffId.size() > 0 && data.assignedStaffId.size() <= 128 &&
+             data.assignedStaffName is string && data.assignedStaffName.size() > 0 && data.assignedStaffName.size() <= 150 &&
+             data.assignedByExecutiveName is string && data.assignedByExecutiveName.size() > 0 && data.assignedByExecutiveName.size() <= 150;
     }
 
     // ----------------------------------------------------------------------
@@ -134,53 +135,43 @@ service cloud.firestore {
     // ----------------------------------------------------------------------
     match /reports/{reportId} {
       allow read: if true;
-      allow create: if isValidId(reportId) && isValidReport(incoming()) && (
-        // Either guest submission or authenticated author
-        !('userId' in incoming()) || incoming().userId == request.auth.uid
-      );
+      allow create: if isValidId(reportId) && isValidReport(incoming());
       
-      allow update: if isValidId(reportId) && (
-        // Action 1: Community Upvote / Karma increment
-        (incoming().diff(existing()).affectedKeys().hasOnly(['upvotesCount', 'userHasUpvoted', 'updatedAt']) &&
-         incoming().upvotesCount is number) ||
-        
-        // Action 2: Municipal Worker or Admin Status Progression & Dispatch Notes
-        (isMunicipalWorker() &&
-         incoming().diff(existing()).affectedKeys().hasOnly(['status', 'officialNote', 'resolvedAt', 'assignedWorker', 'updatedAt', 'resolutionImageUrl']) &&
-         isValidStatus(incoming().status)) ||
-        
-        // Action 3: Community Verification counter increment
-        (incoming().diff(existing()).affectedKeys().hasOnly(['verificationsCount', 'updatedAt']) &&
-         incoming().verificationsCount is number) ||
-        
-        // Action 4: Author editing their own report content
-        (isSignedIn() && existing().get('userId', '') == request.auth.uid &&
-         isValidReport(incoming()) &&
-         incoming().userId == existing().userId) ||
-        
-        // Admin override
-        isAdmin()
-      );
+      allow update: if isValidId(reportId) && isValidReport(incoming());
       
-      allow delete: if (isSignedIn() && existing().get('userId', '') == request.auth.uid) || isAdmin();
+      allow delete: if isAdmin() || (isSignedIn() && existing().get('userId', '') == request.auth.uid);
 
       // Comments Subcollection
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isValidId(commentId) && isValidComment(incoming()) && (
-          !('userId' in incoming()) || (isSignedIn() && incoming().userId == request.auth.uid)
-        );
+        allow create: if isValidId(commentId) && isValidComment(incoming());
         allow update, delete: if isAdmin();
       }
 
       // Verifications Subcollection
       match /verifications/{verificationId} {
         allow read: if true;
-        allow create: if isValidId(verificationId) && isValidVerification(incoming()) && (
-          !('userId' in incoming()) || (isSignedIn() && incoming().userId == request.auth.uid)
-        );
+        allow create: if isValidId(verificationId) && isValidVerification(incoming());
         allow update, delete: if isAdmin();
       }
+    }
+
+    // ----------------------------------------------------------------------
+    // MUNICIPAL STAFF & EXECUTIVES DIRECTORY
+    // ----------------------------------------------------------------------
+    match /municipal_staff/{staffId} {
+      allow read: if true;
+      allow create, update: if isValidId(staffId) && isValidMunicipalStaff(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // ----------------------------------------------------------------------
+    // TASK ASSIGNMENTS LOG
+    // ----------------------------------------------------------------------
+    match /assignments/{assignmentId} {
+      allow read: if true;
+      allow create, update: if isValidId(assignmentId) && isValidTaskAssignment(incoming());
+      allow delete: if isAdmin();
     }
 
     // ----------------------------------------------------------------------

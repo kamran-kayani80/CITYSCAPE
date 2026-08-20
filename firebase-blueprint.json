@@ -85,6 +85,46 @@
         "updatedAt": { "type": "string" }
       },
       "required": ["name", "displayName", "usageCount", "recentCount"]
+    },
+    "MunicipalStaff": {
+      "title": "MunicipalStaff",
+      "description": "Registered municipal executive or field staff specialist for task assignment.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "maxLength": 50 },
+        "title": { "type": "string", "maxLength": 150 },
+        "department": { "type": "string", "maxLength": 100 },
+        "badgeId": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "maxLength": 50 },
+        "rating": { "type": "number" },
+        "activeTasksCount": { "type": "number" },
+        "resolvedTasksCount": { "type": "number" },
+        "registeredAt": { "type": "string" }
+      },
+      "required": ["name", "role", "title", "department", "badgeId"]
+    },
+    "TaskAssignment": {
+      "title": "TaskAssignment",
+      "description": "Official task assignment dispatched by an executive to a registered municipal staff member.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "reportId": { "type": "string" },
+        "assignedStaffId": { "type": "string" },
+        "assignedStaffName": { "type": "string", "maxLength": 100 },
+        "assignedByExecutiveId": { "type": "string" },
+        "assignedByExecutiveName": { "type": "string", "maxLength": 100 },
+        "directive": { "type": "string", "maxLength": 1000 },
+        "priority": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "maxLength": 50 },
+        "assignedAt": { "type": "string" },
+        "citizenNotificationSent": { "type": "boolean" }
+      },
+      "required": ["reportId", "assignedStaffId", "assignedStaffName", "assignedByExecutiveName", "assignedAt"]
     }
   },
   "firestore": {
@@ -107,6 +147,14 @@
     "/hashtags/{hashtagId}": {
       "schema": { "$ref": "#/entities/Hashtag" },
       "description": "Trending hashtags index"
+    },
+    "/municipal_staff/{staffId}": {
+      "schema": { "$ref": "#/entities/MunicipalStaff" },
+      "description": "Registered municipal staff and executives directory"
+    },
+    "/assignments/{assignmentId}": {
+      "schema": { "$ref": "#/entities/TaskAssignment" },
+      "description": "Task assignments and citizen notification logs"
     }
   }
 }

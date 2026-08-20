@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Building2,
   CheckCircle2,
@@ -14,8 +14,10 @@ import {
   ChevronRight,
   Check,
   Search,
+  Users,
+  Briefcase,
 } from 'lucide-react';
-import { Report, ReportStatus } from '../types';
+import { Report, ReportStatus, MunicipalStaffMember } from '../types';
 import { STATUS_CONFIG, CATEGORY_CONFIG, SEVERITY_CONFIG } from '../lib/constants';
 import { CategoryIcon } from './CategoryIcon';
 
@@ -40,10 +42,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [updatingReportId, setUpdatingReportId] = useState<string | null>(null);
   const [activeEditingId, setActiveEditingId] = useState<string | null>(null);
+  const [staffList, setStaffList] = useState<MunicipalStaffMember[]>([]);
 
   const [noteInput, setNoteInput] = useState('');
   const [workerInput, setWorkerInput] = useState('');
   const [statusSelect, setStatusSelect] = useState<ReportStatus>('IN_PROGRESS');
+
+  useEffect(() => {
+    fetch('/api/municipal/staff')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.staff)) {
+          setStaffList(data.staff);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filteredReports = reports.filter((r) => {
     const matchesStatus = selectedStatusFilter === 'ALL' || r.status === selectedStatusFilter;
@@ -227,16 +241,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold uppercase text-[#111827] dark:text-white mb-1">
-                          Assigned Public Works Crew
-                        </label>
-                        <input
-                          type="text"
-                          value={workerInput}
-                          onChange={(e) => setWorkerInput(e.target.value)}
-                          placeholder="e.g. Ward 4 Maintenance Crew B"
-                          className="w-full p-2.5 text-sm font-semibold bg-white dark:bg-slate-800 border-1.5 border-[#CBD5E1] dark:border-slate-700 rounded-xl min-h-[44px]"
-                        />
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-xs font-bold uppercase text-[#111827] dark:text-white">
+                            Assigned Municipal Specialist
+                          </label>
+                          {staffList.length > 0 && (
+                            <span className="text-[10px] text-teal-600 dark:text-teal-300 font-bold">
+                              {staffList.length} Registered Staff
+                            </span>
+                          )}
+                        </div>
+                        <div className="space-y-1.5">
+                          <input
+                            type="text"
+                            value={workerInput}
+                            onChange={(e) => setWorkerInput(e.target.value)}
+                            placeholder="e.g. Mr. Sagheer (Badge: DPW-FO-842)"
+                            className="w-full p-2.5 text-sm font-semibold bg-white dark:bg-slate-800 border-1.5 border-[#CBD5E1] dark:border-slate-700 rounded-xl min-h-[44px]"
+                          />
+                          {staffList.length > 0 && (
+                            <select
+                              onChange={(e) => {
+                                if (e.target.value) setWorkerInput(e.target.value);
+                              }}
+                              value=""
+                              className="w-full p-1.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-[#CBD5E1] dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300"
+                            >
+                              <option value="">⚡ Quick Select from Registered Staff...</option>
+                              {staffList.map((st) => (
+                                <option key={st.id} value={`${st.name} (${st.badgeId})`}>
+                                  {st.name} — {st.title} ({st.departmentCode})
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
                       </div>
                     </div>
 

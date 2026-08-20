@@ -35,6 +35,8 @@ import {
   BookOpen,
   Wrench,
   Radio,
+  Users,
+  History,
 } from 'lucide-react';
 import { CityStats, Report, ReportStatus } from '../types';
 import { AdminDashboard } from './AdminDashboard';
@@ -50,9 +52,15 @@ import { AdminThemeWorkspaceView } from './AdminThemeWorkspaceView';
 import { ExpertQASection } from './ExpertQASection';
 import { useThemeCustomizer, THEME_PRESETS } from '../context/ThemeCustomizerContext';
 import { DepartmentNewsPublisher } from './DepartmentNewsPublisher';
+import { MunicipalStaffView } from './MunicipalStaffView';
+import { TaskAssignmentHistoryView } from './TaskAssignmentHistoryView';
+import { GovernanceLiaisonHub } from './GovernanceLiaisonHub';
 
 export type MunicipalSubTab =
   | 'board'
+  | 'staff'
+  | 'history'
+  | 'liaison'
   | 'sla'
   | 'analytics'
   | 'deptnews'
@@ -735,6 +743,66 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
             <span>Work Orders</span>
           </button>
 
+          {/* Sub-Tab: Staff Roster & Task Assignment */}
+          <button
+            id="btn-muni-staff-roster"
+            onClick={() => setActiveTab('staff')}
+            aria-label="Municipal Registered Staff Roster and Task Assignment"
+            title="Manage registered municipal specialists and assign tasks by executives"
+            className={`px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[44px] flex items-center gap-1.5 border ${
+              activeTab === 'staff'
+                ? 'bg-[#006D5B] text-white shadow-lg border-teal-300 ring-2 ring-teal-400/40'
+                : 'bg-teal-50/70 dark:bg-teal-950/40 text-[#006D5B] dark:text-teal-200 border-teal-300 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60'
+            }`}
+          >
+            <Users className="w-4 h-4 text-amber-400" />
+            <span>Staff &amp; Dispatch</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider bg-teal-700 text-white flex items-center gap-0.5 shadow-xs">
+              <ShieldCheck className="w-2.5 h-2.5" />
+              <span>ROSTER</span>
+            </span>
+          </button>
+
+          {/* Sub-Tab: Task Assignment History & Audit Log */}
+          <button
+            id="btn-muni-assignment-history"
+            onClick={() => setActiveTab('history')}
+            aria-label="Municipal Task Assignment History & Audit Trail"
+            title="Audit log of municipal executive task assignments and real-time field status updates"
+            className={`px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[44px] flex items-center gap-1.5 border ${
+              activeTab === 'history'
+                ? 'bg-[#0A2540] text-white shadow-lg border-amber-400 ring-2 ring-amber-400/40'
+                : 'bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border-[#CBD5E1] dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            <History className="w-4 h-4 text-amber-400" />
+            <span>Assignment History</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider bg-amber-600 text-white flex items-center gap-0.5 shadow-xs">
+              <ShieldCheck className="w-2.5 h-2.5" />
+              <span>AUDIT</span>
+            </span>
+          </button>
+
+          {/* Sub-Tab: HOA Governance Liaison Queue */}
+          <button
+            id="btn-muni-hoa-liaison"
+            onClick={() => setActiveTab('liaison')}
+            aria-label="HOA Cross-Jurisdiction Governance Liaison Queue"
+            title="Review and resolve infrastructure inquiries and escalations from Gated Communities & HOAs"
+            className={`px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[44px] flex items-center gap-1.5 border ${
+              activeTab === 'liaison'
+                ? 'bg-gradient-to-r from-[#0A2540] to-[#006D5B] text-white shadow-lg border-teal-300 ring-2 ring-teal-400/40'
+                : 'bg-teal-50/70 dark:bg-teal-950/40 text-[#006D5B] dark:text-teal-200 border-teal-300 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60'
+            }`}
+          >
+            <Building2 className="w-4 h-4 text-teal-400" />
+            <span>HOA Liaison</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider bg-[#006D5B] text-white flex items-center gap-0.5 shadow-xs">
+              <ShieldCheck className="w-2.5 h-2.5 text-teal-300" />
+              <span>BRIDGE</span>
+            </span>
+          </button>
+
           {/* Sub-Tab 2: SLAs & Resolution Timelines */}
           <button
             onClick={() => setActiveTab('sla')}
@@ -903,6 +971,40 @@ export const MunicipalDeskPortal: React.FC<MunicipalDeskPortalProps> = ({
           reports={reports}
           onUpdateStatus={onUpdateStatus}
           onSelectReport={onSelectReport}
+        />
+      )}
+
+      {/* SUB-VIEW: MUNICIPAL REGISTERED STAFF ROSTER & EXECUTIVE TASK DISPATCH */}
+      {activeTab === 'staff' && (
+        <MunicipalStaffView
+          reports={reports}
+          onSelectReport={onSelectReport}
+          onNavigateToTab={setActiveTab}
+          onRefreshReports={() => {
+            window.dispatchEvent(new CustomEvent('cityscape:refresh-reports'));
+          }}
+        />
+      )}
+
+      {/* SUB-VIEW: TASK ASSIGNMENT HISTORY & AUDIT LOG */}
+      {activeTab === 'history' && (
+        <TaskAssignmentHistoryView
+          reports={reports}
+          onSelectReport={onSelectReport}
+          onRefreshReports={() => {
+            window.dispatchEvent(new CustomEvent('cityscape:refresh-reports'));
+          }}
+        />
+      )}
+
+      {/* SUB-VIEW: HOA CROSS-JURISDICTION GOVERNANCE LIAISON QUEUE */}
+      {activeTab === 'liaison' && (
+        <GovernanceLiaisonHub
+          userPersona="MUNICIPAL_STAFF"
+          onSelectReport={(repId) => {
+            const found = reports.find((r) => r.id === repId);
+            if (found) onSelectReport(found);
+          }}
         />
       )}
 

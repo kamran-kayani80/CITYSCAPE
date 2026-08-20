@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Building2,
   TrendingUp,
@@ -26,6 +26,9 @@ import {
   ChevronRight,
   ShieldAlert,
   Clock,
+  Globe2,
+  Plus,
+  RefreshCw,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -42,6 +45,8 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
+import { MunicipalCitySubscription } from '../types';
+import { INITIAL_MUNICIPAL_CITY_SUBSCRIPTIONS } from '../data/municipalSubscriptionsData';
 
 interface MunicipalBillingDashboardProps {
   officerEmail?: string;
@@ -252,6 +257,30 @@ export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps>
   const [activeStreamTab, setActiveStreamTab] = useState<'all' | 'gov' | 'hoa' | 'ads'>('all');
   const [timeRange, setTimeRange] = useState<'30d' | '90d' | 'ytd'>('30d');
   const [searchQuery, setSearchQuery] = useState('');
+  const [citySubscriptions, setCitySubscriptions] = useState<MunicipalCitySubscription[]>(INITIAL_MUNICIPAL_CITY_SUBSCRIPTIONS);
+  const [isLoadingSubs, setIsLoadingSubs] = useState(false);
+
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      setIsLoadingSubs(true);
+      try {
+        const res = await fetch('/api/municipal/subscriptions');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.subscriptions) && data.subscriptions.length > 0) {
+            setCitySubscriptions(data.subscriptions);
+          }
+        }
+      } catch (err) {
+        console.error('Failed fetching subscriptions in billing dashboard:', err);
+      } finally {
+        setIsLoadingSubs(false);
+      }
+    };
+    fetchSubscriptions();
+  }, []);
+
+  const totalGovMrr = citySubscriptions.reduce((sum, s) => sum + (s.mrr || 1250), 0);
 
   const handleDownloadMasterCSV = () => {
     if (onExportSummary) {
@@ -263,10 +292,10 @@ export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps>
       `Exported By: ${officerEmail}`,
       `Export Date: ${new Date().toISOString()}`,
       '',
-      '--- 1. MUNICIPAL GOVERNMENT SUBSCRIPTIONS ($8,750 MRR) ---',
-      'Contract ID,Agency Name,Plan Tier,Annual Billing,Monthly MRR,Assigned Seats,Renewal Date,Status',
-      ...MUNICIPAL_GOV_SUBSCRIPTIONS.map((g) =>
-        [g.id, `"${g.agencyName}"`, `"${g.planTier}"`, `"${g.annualBilling}"`, g.mrr, `"${g.seatsAssigned}"`, g.renewalDate, g.status].join(',')
+      `--- 1. MUNICIPAL GOVERNMENT SUBSCRIPTIONS ($${totalGovMrr.toLocaleString()} MRR) ---`,
+      'City / Region,Agency Name,Country,Plan Tier,Monthly MRR,Assigned Seats,Renewal Date,PO Number,Status',
+      ...citySubscriptions.map((g) =>
+        [g.cityName, `"${g.municipalityName}"`, g.country, `"${g.planTier}"`, g.mrr, `${g.seatsAssigned} Seats`, g.renewalDate, g.poNumber, g.status].join(',')
       ),
       '',
       '--- 2. GATED COMMUNITIES & HOA REVENUE ($19,152 MRR) ---',
@@ -281,8 +310,8 @@ export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps>
         [a.id, `"${a.advertiserName}"`, `"${a.campaignTitle}"`, `"${a.placementTier}"`, a.monthlyBilling, `"${a.impressions}"`, `"${a.clicks}"`, a.ctr, `"${a.duration}"`, a.status].join(',')
       ),
       '',
-      'TOTAL GROSS MRR: $32,722.00 / mo',
-      'TOTAL PROJECTED ARR: $392,664.00 / yr',
+      `TOTAL GROSS MRR: $${(totalGovMrr + 19152 + 4820).toLocaleString()} / mo`,
+      `TOTAL PROJECTED ARR: $${((totalGovMrr + 19152 + 4820) * 12).toLocaleString()} / yr`,
     ];
     const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -664,15 +693,18 @@ export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps>
                   Gov SaaS Revenue Stream
                 </span>
                 <span className="font-mono text-xs font-bold text-blue-700 dark:text-blue-400">
-                  Total MRR: $8,750.00
+                  Total MRR: ${totalGovMrr.toLocaleString()}.00
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold">
+                  {citySubscriptions.length} Subscribed Cities Active
                 </span>
               </div>
               <h3 className="font-black text-lg text-[#0A2540] dark:text-white flex items-center gap-2 mt-1">
                 <Landmark className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                Municipal Government SaaS Subscriptions & Enterprise Contracts
+                Municipal Government Subscriptions for Geotagged Cities
               </h3>
               <p className="text-xs text-slate-500 font-medium">
-                Active municipal department contracts subscribed at $1,250/mo standard Gov Desk tier with automated dispatch and SLA monitoring.
+                Active municipal department contracts subscribed at standard Gov Desk tiers with automated staff roster provisioning and executive dispatch.
               </p>
             </div>
 
@@ -681,7 +713,7 @@ export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps>
                 Annual Gov Contract Value
               </span>
               <p className="text-xl font-black text-blue-900 dark:text-blue-200 font-mono">
-                $105,000 / yr
+                ${(totalGovMrr * 12).toLocaleString()} / yr
               </p>
             </div>
           </div>
@@ -690,8 +722,8 @@ export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps>
             <table className="w-full text-left border-collapse text-xs font-['Montserrat']">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-[#0A2540] dark:text-slate-200 font-black">
-                  <th className="p-3">Municipal Agency / Department</th>
-                  <th className="p-3">Contract Plan Tier</th>
+                  <th className="p-3">Geotagged City &amp; Municipal Agency</th>
+                  <th className="p-3">Plan Tier &amp; PO</th>
                   <th className="p-3 text-center">Allocated Staff Seats</th>
                   <th className="p-3 text-center">SLA Tier</th>
                   <th className="p-3 text-center">Renewal Date</th>
@@ -700,22 +732,33 @@ export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-                {MUNICIPAL_GOV_SUBSCRIPTIONS.map((gov) => (
+                {citySubscriptions.map((gov) => (
                   <tr key={gov.id} className="hover:bg-blue-50/50 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="p-3">
                       <div className="font-bold text-[#0A2540] dark:text-white flex items-center gap-2">
+                        <span className="text-base">{gov.flagEmoji || '🏛️'}</span>
                         <BadgeCheck className="w-4 h-4 text-blue-600 shrink-0" />
-                        <span>{gov.agencyName}</span>
+                        <span>{gov.cityName}</span>
+                        <span className="text-slate-400 text-[11px]">({gov.country})</span>
                       </div>
-                      <span className="text-[10px] text-slate-400 font-mono">{gov.contactLead}</span>
+                      <div className="text-[11px] text-slate-600 dark:text-slate-300 font-medium pl-7">
+                        {gov.municipalityName}
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-mono pl-7 block">{gov.contactLead}</span>
                     </td>
                     <td className="p-3">
-                      <span className="px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-900 dark:text-blue-200 font-extrabold text-[11px] border border-blue-200 dark:border-blue-800">
+                      <span className="px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-900 dark:text-blue-200 font-extrabold text-[11px] border border-blue-200 dark:border-blue-800 block w-fit">
                         {gov.planTier}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-400 mt-0.5 block">
+                        PO: {gov.poNumber || 'PO-2026-GOV'}
                       </span>
                     </td>
                     <td className="p-3 text-center font-bold text-slate-700 dark:text-slate-300">
-                      {gov.seatsAssigned}
+                      {gov.seatsAssigned} Seats
+                      <span className="text-[10px] text-teal-600 dark:text-teal-400 block font-normal">
+                        ({gov.activeDispatchersCount || 2} Execs / {gov.activeDispatcheesCount || 10} Field)
+                      </span>
                     </td>
                     <td className="p-3 text-center">
                       <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 font-mono font-bold text-[10px]">
@@ -723,15 +766,15 @@ export const MunicipalBillingDashboard: React.FC<MunicipalBillingDashboardProps>
                       </span>
                     </td>
                     <td className="p-3 text-center font-mono text-slate-600 dark:text-slate-400">
-                      {gov.renewalDate}
+                      {new Date(gov.renewalDate).toLocaleDateString()}
                     </td>
                     <td className="p-3 text-right font-black font-mono text-[#0A2540] dark:text-white text-sm">
-                      ${gov.mrr.toLocaleString()} / mo
+                      ${(gov.mrr || 1250).toLocaleString()} / mo
                     </td>
                     <td className="p-3 text-center">
                       <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-black text-[10px] inline-flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        Active
+                        {gov.status}
                       </span>
                     </td>
                   </tr>

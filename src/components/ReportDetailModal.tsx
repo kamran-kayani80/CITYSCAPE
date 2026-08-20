@@ -72,7 +72,36 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   const [isForensicsOpen, setIsForensicsOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [isAcknowledged, setIsAcknowledged] = useState<boolean>(false);
+  const [isAcknowledging, setIsAcknowledging] = useState<boolean>(false);
   const { userCoords } = useUserLocation();
+
+  useEffect(() => {
+    if (report) {
+      setIsAcknowledged(Boolean(report.citizenAcknowledgedAssignment));
+    }
+  }, [report]);
+
+  const handleAcknowledgeAssignment = async () => {
+    if (!report || isAcknowledged || isAcknowledging) return;
+    setIsAcknowledging(true);
+    try {
+      const res = await fetch(`/api/reports/${report.id}/assignment-ack`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          acknowledgedBy: report.userName || 'Resident / Mr. Kamran',
+        }),
+      });
+      if (res.ok) {
+        setIsAcknowledged(true);
+      }
+    } catch (err) {
+      console.error('Failed to acknowledge assignment:', err);
+    } finally {
+      setIsAcknowledging(false);
+    }
+  };
 
   // Dynamically update Open Graph and Twitter card meta tags for deep-link social media previews
   useEffect(() => {
@@ -726,6 +755,127 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               </div>
             </div>
           </div>
+
+          {/* DEDICATED MUNICIPAL TASK ASSIGNMENT & EXECUTIVE DISPATCH STREAM CARD */}
+          {(report.assignedStaffName || report.assignedWorker || report.assignedByExecutiveName) && (
+            <div className="p-4 sm:p-5 bg-gradient-to-br from-[#FAF6F0] to-[#F3EDE2] dark:from-[#0A2540] dark:to-[#071B2F] border-2 border-[#006D5B] dark:border-teal-700/80 rounded-2xl space-y-3.5 shadow-md text-left">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[#006D5B]/30 dark:border-slate-700">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#006D5B] text-white flex items-center justify-center font-bold shadow-xs">
+                    <ShieldCheck className="w-4 h-4 text-amber-300" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#006D5B] dark:text-teal-300 block">
+                      Municipal Task Assignment Stream
+                    </span>
+                    <h4 className="font-bold text-sm text-[#0A2540] dark:text-white">
+                      Field Crew Dispatched &amp; Active
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
+                    ● Dispatched Specialist
+                  </span>
+                </div>
+              </div>
+
+              {/* Specialist & Executive Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                {/* Assigned Specialist */}
+                <div className="p-3 bg-white dark:bg-[#071B2F] rounded-xl border border-slate-300 dark:border-slate-700 space-y-1">
+                  <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 block">
+                    Assigned Field Specialist:
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <User className="w-4 h-4 text-[#006D5B]" />
+                    <strong className="text-sm text-[#111827] dark:text-white">
+                      {report.assignedStaffName || report.assignedWorker || 'Mr. Sagheer'}
+                    </strong>
+                  </div>
+                  {report.assignedStaffBadge && (
+                    <div className="text-[11px] text-slate-600 dark:text-slate-300 font-mono">
+                      Official Badge: <span className="font-bold text-[#006D5B] dark:text-teal-300">{report.assignedStaffBadge}</span>
+                    </div>
+                  )}
+                  {report.assignedStaffPhone && (
+                    <div className="text-[11px] text-slate-600 dark:text-slate-300">
+                      Emergency Direct: <span className="font-semibold">{report.assignedStaffPhone}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Assigned By Executive */}
+                <div className="p-3 bg-white dark:bg-[#071B2F] rounded-xl border border-slate-300 dark:border-slate-700 space-y-1">
+                  <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 block">
+                    Dispatched by Municipal Executive:
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <Building2 className="w-4 h-4 text-[#B45309]" />
+                    <strong className="text-sm text-[#111827] dark:text-white">
+                      {report.assignedByExecutiveName || 'Mr. Kamran (Chief Municipal Executive)'}
+                    </strong>
+                  </div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300">
+                    Authority: <span className="font-semibold">Executive Directorate &amp; SLA Control</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Directive */}
+              {report.officialDirective && (
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-900/60 text-xs text-amber-950 dark:text-amber-200 space-y-0.5">
+                  <span className="font-bold block uppercase text-[10px] tracking-wider text-amber-800 dark:text-amber-300">
+                    Executive Directive:
+                  </span>
+                  <p className="leading-relaxed font-medium">{report.officialDirective}</p>
+                </div>
+              )}
+
+              {/* Citizen Notification & Acknowledgment Bar */}
+              <div className="p-3 bg-teal-50 dark:bg-[#004D40]/50 rounded-xl border border-[#006D5B]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="space-y-0.5">
+                  <div className="flex items-center space-x-1.5 font-bold text-[#006D5B] dark:text-teal-200">
+                    {isAcknowledged ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    ) : (
+                      <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                    )}
+                    <span>
+                      {isAcknowledged
+                        ? 'Citizen Notification Acknowledged • Mr. Kamran / Resident is updated'
+                        : 'Citizen Notification Sent • Pending resident acknowledgment'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    {isAcknowledged
+                      ? 'The resident has confirmed receipt of the assigned specialist contact details.'
+                      : 'Tap below to confirm receipt of the dispatched specialist details.'}
+                  </p>
+                </div>
+
+                {!isAcknowledged && (
+                  <button
+                    type="button"
+                    onClick={handleAcknowledgeAssignment}
+                    disabled={isAcknowledging}
+                    className="px-4 py-2 bg-[#B45309] hover:bg-[#92400E] text-white font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-97 min-h-[40px]"
+                  >
+                    {isAcknowledging ? (
+                      <span>Updating...</span>
+                    ) : (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Acknowledge Assignment</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Official Municipal Work Order Status */}
           {report.officialNote && (

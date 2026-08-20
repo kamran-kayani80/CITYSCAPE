@@ -26,6 +26,7 @@ import {
   Share2,
   Gift,
   Landmark,
+  Lock,
 } from 'lucide-react';
 import { AppViewMode, ReportFilter } from '../types';
 
@@ -39,6 +40,8 @@ interface MobileNavigationProps {
   isAdminMode: boolean;
   filter: ReportFilter;
   setFilter: React.Dispatch<React.SetStateAction<ReportFilter>>;
+  isOwnerUnlocked?: boolean;
+  onRequestOwnerAccess?: () => void;
 }
 
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -51,6 +54,8 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   isAdminMode,
   filter,
   setFilter,
+  isOwnerUnlocked = false,
+  onRequestOwnerAccess,
 }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -60,6 +65,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
       items: [
         { id: 'map' as AppViewMode, label: 'Interactive Community Map', icon: MapIcon, badge: `${totalReportsCount} Active` },
         { id: 'estate' as AppViewMode, label: 'HOA & Gated Estate Portal', icon: Building2, badge: 'PRIVATE' },
+        { id: 'hoa_liaison' as AppViewMode, label: 'HOA ⇄ Gov Liaison Hub', icon: Building2, badge: 'BRIDGE' },
         { id: 'bulletin' as AppViewMode, label: 'Public Notices & Alerts', icon: Bell },
         { id: 'sla' as AppViewMode, label: 'Resolution Timeline Tracker', icon: Clock },
       ],
@@ -77,6 +83,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     {
       category: 'Administration & Strategy',
       items: [
+        { id: 'owner_oversight' as AppViewMode, label: 'Owner Oversight & 80+ Cities', icon: Landmark, badge: isOwnerUnlocked ? 'MRR' : 'LOCK' },
         { id: 'admin' as AppViewMode, label: 'Municipal Desk Portal', icon: ShieldCheck, badge: isAdminMode ? 'STAFF' : 'PASS' },
         { id: 'analytics' as AppViewMode, label: 'City Stats & Data', icon: BarChart3 },
         { id: 'strategic' as AppViewMode, label: 'Strategic AI Roadmap', icon: Sparkles, badge: 'AI' },
@@ -86,6 +93,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   ];
 
   const handleSelectView = (view: AppViewMode) => {
+    if (view === 'owner_oversight' && !isOwnerUnlocked) {
+      onRequestOwnerAccess?.();
+      setIsDrawerOpen(false);
+      return;
+    }
     setActiveView(view);
     setIsDrawerOpen(false);
   };

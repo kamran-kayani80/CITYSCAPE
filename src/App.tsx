@@ -23,6 +23,9 @@ import { BrandIdentitySystem } from './components/BrandIdentitySystem';
 import { StrategicArchitectureView } from './components/StrategicArchitectureView';
 import { EstatePortalView } from './components/EstatePortalView';
 import { CityAttractionsView } from './components/CityAttractionsView';
+import { OwnerOversightDashboard } from './components/OwnerOversightDashboard';
+import { OwnerPasswordModal } from './components/OwnerPasswordModal';
+import { GovernanceLiaisonHub } from './components/GovernanceLiaisonHub';
 import { MobileNavigation } from './components/MobileNavigation';
 import { SEOHead } from './components/SEOHead';
 import { UndoSnackbar, UndoUpvoteState } from './components/UndoSnackbar';
@@ -30,7 +33,7 @@ import { AdminControlPanel } from './components/AdminControlPanel';
 import { CivicLexiconModal } from './components/CivicLexiconModal';
 import { INITIAL_REPORTS } from './data/seedData';
 import { AccessibilityProvider } from './context/AccessibilityContext';
-import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode } from './types';
+import { Report, Comment, ReportFilter, CityStats, ReportStatus, IssueVerification, UserProfile, AppViewMode, UserPersona } from './types';
 import { CheckCircle, AlertCircle, Plus, Sparkles, SlidersHorizontal, Map as MapIcon, List } from 'lucide-react';
 import { useOfflineSync } from './hooks/useOfflineSync';
 import { OfflineSyncBanner } from './components/OfflineSyncBanner';
@@ -60,6 +63,15 @@ export default function App() {
   const [isCivicLexiconModalOpen, setIsCivicLexiconModalOpen] = useState(false);
   const [verificationReport, setVerificationReport] = useState<Report | null>(null);
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [userPersona, setUserPersona] = useState<UserPersona>('RESIDENT');
+  const [isOwnerUnlocked, setIsOwnerUnlocked] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('cityscape_owner_unlocked') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [isOwnerPasswordModalOpen, setIsOwnerPasswordModalOpen] = useState(false);
   const [isAdminControlPanelOpen, setIsAdminControlPanelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userKarma, setUserKarma] = useState(840);
@@ -729,12 +741,35 @@ export default function App() {
           onOpenCivicLexiconModal={() => setIsCivicLexiconModalOpen(true)}
           isAdminMode={isAdminMode}
           setIsAdminMode={setIsAdminMode}
+          userPersona={userPersona}
+          onUserPersonaChange={(p) => {
+            if (p === 'PLATFORM_OWNER' && !isOwnerUnlocked) {
+              setIsOwnerPasswordModalOpen(true);
+              return;
+            }
+            setUserPersona(p);
+            if (p === 'MUNICIPAL_STAFF' || p === 'PLATFORM_OWNER') {
+              setIsAdminMode(true);
+            } else {
+              setIsAdminMode(false);
+            }
+          }}
           totalReportsCount={reports.length}
           userKarma={userKarma}
           userProfile={userProfile}
           onUserProfileChange={(updated) => {
             setUserProfile(updated);
             setUserKarma(updated.civicKarma);
+          }}
+          isOwnerUnlocked={isOwnerUnlocked}
+          onRequestOwnerAccess={() => setIsOwnerPasswordModalOpen(true)}
+          onLockOwnerAccess={() => {
+            setIsOwnerUnlocked(false);
+            try { sessionStorage.removeItem('cityscape_owner_unlocked'); } catch {}
+            setUserPersona('RESIDENT');
+            setIsAdminMode(false);
+            setActiveView('map');
+            showToast('Platform Owner Terminal Locked.');
           }}
         />
 
@@ -881,6 +916,43 @@ export default function App() {
                 />
               )}
 
+              {/* VIEW 14: PLATFORM OWNER OVERSIGHT DASHBOARD (Global SaaS MRR & 80+ Subscribed Cities) */}
+              {activeView === 'owner_oversight' && (
+                <OwnerOversightDashboard
+                  isOwnerUnlocked={isOwnerUnlocked}
+                  onRequestOwnerAccess={() => setIsOwnerPasswordModalOpen(true)}
+                  onLockOwnerAccess={() => {
+                    setIsOwnerUnlocked(false);
+                    try { sessionStorage.removeItem('cityscape_owner_unlocked'); } catch {}
+                    setUserPersona('RESIDENT');
+                    setIsAdminMode(false);
+                    setActiveView('map');
+                    showToast('Platform Owner Terminal Locked.');
+                  }}
+                  onNavigateToGovDesk={() => {
+                    setUserPersona('MUNICIPAL_STAFF');
+                    setIsAdminMode(true);
+                    setActiveView('admin');
+                  }}
+                  onNavigateToHoaPortal={() => {
+                    setUserPersona('HOA_ADMIN');
+                    setIsAdminMode(false);
+                    setActiveView('estate');
+                  }}
+                />
+              )}
+
+              {/* VIEW 15: HOA ⇄ MUNICIPAL GOVERNANCE LIAISON HUB */}
+              {activeView === 'hoa_liaison' && (
+                <div className="bg-white dark:bg-[#0A2540] rounded-3xl border-2 border-slate-300 dark:border-slate-700 p-4 sm:p-6 shadow-sm">
+                  <GovernanceLiaisonHub
+                    currentPersona={userPersona === 'MUNICIPAL_STAFF' ? 'MUNICIPAL_STAFF' : 'HOA_ADMIN'}
+                    onOpenReportModal={() => setIsReportModalOpen(true)}
+                    onSelectReportDetail={(report) => setSelectedReport(report)}
+                  />
+                </div>
+              )}
+
               {/* VIEW 13: HASHTAG LANDING & VELOCITY FEED */}
               {activeView === 'hashtag' && (
                 <HashtagLandingView
@@ -906,11 +978,12 @@ export default function App() {
         onClose={() => setIsHashtagArchOpen(false)}
       />
 
-      {/* Multi-Step Issue Reporting Modal */}
+      {/* Multi-Step Issue Reporting Modal (With Dynamic HOA / General Scope Preselection) */}
       <ReportModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
         onSubmitReport={handleSubmitNewReport}
+        initialScope={userPersona === 'HOA_ADMIN' ? 'HOA_INTERNAL' : 'GENERAL_PUBLIC'}
       />
 
       {/* Individual Report Detail Modal */}
@@ -972,6 +1045,23 @@ export default function App() {
         isAdminMode={isAdminMode}
         filter={filter}
         setFilter={setFilter}
+        isOwnerUnlocked={isOwnerUnlocked}
+        onRequestOwnerAccess={() => setIsOwnerPasswordModalOpen(true)}
+      />
+
+      {/* Platform Owner Oversight Master Authentication Gate Modal */}
+      <OwnerPasswordModal
+        isOpen={isOwnerPasswordModalOpen}
+        onClose={() => setIsOwnerPasswordModalOpen(false)}
+        onSuccess={() => {
+          setIsOwnerUnlocked(true);
+          try { sessionStorage.setItem('cityscape_owner_unlocked', 'true'); } catch {}
+          setUserPersona('PLATFORM_OWNER');
+          setIsAdminMode(true);
+          setActiveView('owner_oversight');
+          setIsOwnerPasswordModalOpen(false);
+          showToast('Master Passcode Verified: Platform Owner Terminal Unlocked.');
+        }}
       />
 
       {/* App Download, PWA Installation & Neighbor Trial Invitation Modal */}

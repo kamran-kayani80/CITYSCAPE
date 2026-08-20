@@ -37,7 +37,8 @@ import {
   Lock,
   BadgeCheck,
   Award,
-  ArrowLeft
+  ArrowLeft,
+  History
 } from 'lucide-react';
 import {
   EstateContext,
@@ -58,6 +59,8 @@ import {
   INITIAL_STAFF_MEMBERS,
   MOCK_ESTATE_REPORTS
 } from '../data/estateData';
+import { HoaTaskAssignmentHistoryView } from './HoaTaskAssignmentHistoryView';
+import { GovernanceLiaisonHub } from './GovernanceLiaisonHub';
 
 interface EstatePortalViewProps {
   onOpenPublicReportModal?: () => void;
@@ -96,6 +99,7 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
   // Core Estate State
   const [estateContext, setEstateContext] = useState<EstateContext>(INITIAL_ESTATE_CONTEXT);
   const [activePortalRole, setActivePortalRole] = useState<'resident' | 'admin' | 'technician'>('resident');
+  const [activeAdminSubTab, setActiveAdminSubTab] = useState<'queue' | 'history' | 'contractors' | 'telemetry' | 'liaison'>('history');
   const [selectedScope, setSelectedScope] = useState<EstateScope>('INSIDE_ESTATE');
 
   // Customizer Edit Form State
@@ -2039,10 +2043,10 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
             <div className="bg-[#0A2540] text-white p-5 rounded-2xl shadow-md border-2 border-[#006D5B] flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <span className="px-2.5 py-0.5 rounded bg-[#006D5B] text-[#CCFF00] font-black text-[10px] uppercase tracking-wider">
-                  COMMAND DESK
+                  HOA COMMAND DESK
                 </span>
                 <h2 className="text-lg font-black mt-1">Estate Operations Desk & Dispatch Controller</h2>
-                <p className="text-xs text-slate-300">Phase 2 Royal Palms HOA • 148 Residential Units</p>
+                <p className="text-xs text-slate-300">{estateContext.estateName} • {estateContext.phaseSector} • 148 Residential Units</p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -2056,90 +2060,304 @@ export const EstatePortalView: React.FC<EstatePortalViewProps> = ({
               </div>
             </div>
 
-            {/* Dispatch & SLA Command Table */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-[#CBD5E1] dark:border-slate-800 p-5 space-y-4">
-              <h3 className="text-base font-black text-[#0A2540] dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#006D5B]" />
-                Private Estate Work Orders Queue & Vendor Contract SLA Tracking
-              </h3>
+            {/* HOA Admin Navigation Sub-Tabs */}
+            <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-300 dark:border-slate-700">
+              <button
+                onClick={() => setActiveAdminSubTab('history')}
+                className={`px-4 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer min-h-[44px] ${
+                  activeAdminSubTab === 'history'
+                    ? 'bg-[#0A2540] text-white shadow-md'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                <History className={`w-4 h-4 ${activeAdminSubTab === 'history' ? 'text-[#2DD4BF]' : 'text-slate-500'}`} />
+                <span>Task Assignment History & Audit Trail</span>
+                <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${
+                  activeAdminSubTab === 'history' ? 'bg-[#006D5B] text-[#CCFF00]' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                }`}>
+                  Live Audit
+                </span>
+              </button>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs font-['Montserrat']">
-                  <thead>
-                    <tr className="bg-slate-100 dark:bg-slate-800 text-[#0A2540] dark:text-slate-200 border-b-2 border-slate-300 dark:border-slate-700 font-extrabold uppercase">
-                      <th className="p-3">Ticket ID</th>
-                      <th className="p-3">Location / Plot</th>
-                      <th className="p-3">Category</th>
-                      <th className="p-3">Assigned Crew / Vendor</th>
-                      <th className="p-3">Contracted SLA Remaining</th>
-                      <th className="p-3 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
-                    {reports.map((report) => (
-                      <tr key={report.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                        <td className="p-3 font-mono font-bold text-[#006D5B]">#{report.id}</td>
-                        <td className="p-3 font-bold">{report.addressText}</td>
-                        <td className="p-3">
-                          <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-bold">
-                            {report.category}
-                          </span>
-                        </td>
-                        <td className="p-3 font-semibold text-slate-700 dark:text-slate-300">
-                          {report.assignedWorker || 'Unassigned Crew'}
-                        </td>
-                        <td className="p-3">
-                          <span className="px-2 py-1 rounded bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 font-mono font-black text-[10px]">
-                            01h 45m (URGENT)
-                          </span>
-                        </td>
-                        <td className="p-3 text-right">
-                          <button
-                            onClick={() => showToast(`Work order #${report.id} escalated to Senior Supervisor.`)}
-                            className="px-2.5 py-1 bg-[#006D5B] text-white rounded font-bold text-[11px] hover:bg-[#005244] cursor-pointer"
-                          >
-                            Dispatch / Escalated
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <button
+                onClick={() => setActiveAdminSubTab('queue')}
+                className={`px-4 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer min-h-[44px] ${
+                  activeAdminSubTab === 'queue'
+                    ? 'bg-[#0A2540] text-white shadow-md'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                <FileText className={`w-4 h-4 ${activeAdminSubTab === 'queue' ? 'text-[#2DD4BF]' : 'text-slate-500'}`} />
+                <span>Work Orders Queue & SLA Desk</span>
+                <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${
+                  activeAdminSubTab === 'queue' ? 'bg-[#006D5B] text-[#CCFF00]' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                }`}>
+                  {reports.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveAdminSubTab('contractors')}
+                className={`px-4 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer min-h-[44px] ${
+                  activeAdminSubTab === 'contractors'
+                    ? 'bg-[#0A2540] text-white shadow-md'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                <Users className={`w-4 h-4 ${activeAdminSubTab === 'contractors' ? 'text-[#2DD4BF]' : 'text-slate-500'}`} />
+                <span>Authorized Contractors Directory</span>
+                <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${
+                  activeAdminSubTab === 'contractors' ? 'bg-[#006D5B] text-[#CCFF00]' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                }`}>
+                  {staffMembers.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveAdminSubTab('telemetry')}
+                className={`px-4 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer min-h-[44px] ${
+                  activeAdminSubTab === 'telemetry'
+                    ? 'bg-[#0A2540] text-white shadow-md'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                <Navigation className={`w-4 h-4 ${activeAdminSubTab === 'telemetry' ? 'text-[#2DD4BF]' : 'text-slate-500'}`} />
+                <span>GIS Real-Time Patrol & Telemetry</span>
+              </button>
+
+              <button
+                id="btn-hoa-gov-liaison-tab"
+                onClick={() => setActiveAdminSubTab('liaison')}
+                className={`px-4 py-3 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer min-h-[44px] border ${
+                  activeAdminSubTab === 'liaison'
+                    ? 'bg-gradient-to-r from-[#006D5B] to-[#0A2540] text-white shadow-md border-teal-300'
+                    : 'bg-teal-50/70 dark:bg-teal-950/40 text-[#006D5B] dark:text-teal-200 border-teal-300 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60'
+                }`}
+              >
+                <Building2 className={`w-4 h-4 ${activeAdminSubTab === 'liaison' ? 'text-[#CCFF00]' : 'text-[#006D5B] dark:text-teal-300'}`} />
+                <span>Municipal Governance Liaison</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#006D5B] text-white font-bold">
+                  ESCALATION BRIDGE
+                </span>
+              </button>
             </div>
 
-            {/* REAL-TIME WORKFORCE & SECURITY PATROL MAP */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-[#CBD5E1] dark:border-slate-800 p-5 space-y-4">
-              <h3 className="text-base font-black text-[#0A2540] dark:text-white flex items-center gap-2">
-                <Navigation className="w-5 h-5 text-indigo-500" />
-                Real-time Workforce & Security Patrol Positions (GIS Sector Tracking)
-              </h3>
+            {/* TAB: MUNICIPAL GOVERNANCE LIAISON & ESCALATION HUB */}
+            {activeAdminSubTab === 'liaison' && (
+              <GovernanceLiaisonHub
+                userPersona="HOA_ADMIN"
+                onSelectReport={(repId) => {
+                  const rep = reports.find((r) => r.id === repId);
+                  if (rep && onSelectReportDetail) onSelectReportDetail(rep);
+                }}
+              />
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {staffMembers.map((staff) => (
-                  <div
-                    key={staff.id}
-                    className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 flex items-center gap-3"
+            {/* TAB 1: TASK ASSIGNMENT HISTORY & AUDIT LOG */}
+            {activeAdminSubTab === 'history' && (
+              <HoaTaskAssignmentHistoryView
+                estateContext={estateContext}
+                reports={reports}
+                onSelectReport={onSelectReportDetail}
+                isPlanFeatureAllowed={isPlanFeatureAllowed}
+              />
+            )}
+
+            {/* TAB 2: WORK ORDERS QUEUE & SLA DESK */}
+            {activeAdminSubTab === 'queue' && (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-[#CBD5E1] dark:border-slate-800 p-5 space-y-4 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-base font-black text-[#0A2540] dark:text-white flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-[#006D5B]" />
+                      Private Estate Work Orders Queue & Contract SLA Tracking
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Pending maintenance requests routed directly to contracted private society vendors
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveAdminSubTab('history')}
+                    className="px-3.5 py-2 bg-[#006D5B] hover:bg-teal-700 text-white font-extrabold text-xs rounded-xl flex items-center gap-2 min-h-[40px] cursor-pointer"
                   >
-                    <img
-                      src={staff.avatarUrl}
-                      alt={staff.name}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-[#006D5B]"
-                    />
-                    <div className="space-y-0.5">
-                      <h4 className="font-bold text-xs text-[#0A2540] dark:text-white">{staff.name}</h4>
-                      <p className="text-[11px] text-slate-500">{staff.roleTitle}</p>
-                      <div className="flex items-center gap-2 pt-1 text-[10px] font-mono">
-                        <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold">
-                          {staff.status}
-                        </span>
-                        <span className="text-slate-600 dark:text-slate-300">{staff.sectorAssigned}</span>
+                    <History className="w-4 h-4" />
+                    <span>View Full Assignment Audit History</span>
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs font-['Montserrat']">
+                    <thead>
+                      <tr className="bg-slate-100 dark:bg-slate-800 text-[#0A2540] dark:text-slate-200 border-b-2 border-slate-300 dark:border-slate-700 font-extrabold uppercase">
+                        <th className="p-3">Ticket ID</th>
+                        <th className="p-3">Location / Plot</th>
+                        <th className="p-3">Category</th>
+                        <th className="p-3">Assigned Contractor</th>
+                        <th className="p-3">Contracted SLA Target</th>
+                        <th className="p-3 text-right">Dispatch Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
+                      {reports.map((report) => (
+                        <tr key={report.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                          <td className="p-3 font-mono font-bold text-[#006D5B]">#{report.id}</td>
+                          <td className="p-3 font-bold">{report.addressText}</td>
+                          <td className="p-3">
+                            <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-bold">
+                              {report.category}
+                            </span>
+                          </td>
+                          <td className="p-3 font-semibold text-slate-700 dark:text-slate-300">
+                            {report.assignedWorker || 'Unassigned Contractor'}
+                          </td>
+                          <td className="p-3">
+                            <span className="px-2 py-1 rounded bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 font-mono font-black text-[10px]">
+                              SLA: {report.slaHoursTarget || 4}h (URGENT)
+                            </span>
+                          </td>
+                          <td className="p-3 text-right">
+                            <button
+                              onClick={() => {
+                                setActiveAdminSubTab('history');
+                                showToast(`Opening Assignment Audit & Dispatch Desk for Work Order #${report.id}...`);
+                              }}
+                              className="px-3 py-1.5 bg-[#006D5B] text-white rounded-xl font-bold text-[11px] hover:bg-[#005244] cursor-pointer inline-flex items-center gap-1"
+                            >
+                              <Wrench className="w-3 h-3" />
+                              <span>Dispatch / Audit</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: AUTHORIZED CONTRACTORS DIRECTORY */}
+            {activeAdminSubTab === 'contractors' && (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-[#CBD5E1] dark:border-slate-800 p-5 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-[#0A2540] dark:text-white flex items-center gap-2">
+                      <Users className="w-5 h-5 text-[#006D5B]" />
+                      Pre-Approved HOA Contractors & Trade Specialists
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Licensed vendors cleared for RFID access and priority dispatching
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveAdminSubTab('history')}
+                    className="px-3 py-2 bg-[#B45309] text-white text-xs font-black rounded-xl hover:bg-amber-700 cursor-pointer flex items-center gap-1.5 min-h-[40px]"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Dispatch Contractor</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {staffMembers.map((staff) => (
+                    <div
+                      key={staff.id}
+                      className="p-4 bg-slate-50 dark:bg-slate-800/70 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-3 hover:border-[#006D5B] transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={staff.avatarUrl}
+                          alt={staff.name}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-[#006D5B]"
+                        />
+                        <div className="space-y-0.5">
+                          <h4 className="font-extrabold text-sm text-[#0A2540] dark:text-white">{staff.name}</h4>
+                          <p className="text-xs text-slate-500">{staff.roleTitle}</p>
+                          <span className="font-mono text-[10px] text-[#006D5B] font-bold">
+                            Badge: {staff.badgeId || 'HOA-CERT-01'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-200 dark:border-slate-700 text-xs space-y-1.5 font-medium">
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Vendor Firm:</span>
+                          <strong className="text-slate-800 dark:text-slate-200">{staff.vendorCompany || 'Independent Specialist'}</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Hourly Rate:</span>
+                          <strong className="text-[#006D5B] font-mono font-bold">${staff.hourlyRateUsd || 65} / hr</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Assigned Sector:</span>
+                          <span className="font-bold text-slate-700 dark:text-slate-300">{staff.sectorAssigned}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Rating & Work Orders:</span>
+                          <span className="font-bold text-amber-600">★ {staff.rating || 4.9} ({staff.totalResolvedOrders || 40} resolved)</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex items-center gap-2">
+                        <a
+                          href={`tel:${staff.phone}`}
+                          className="flex-1 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-slate-100 min-h-[40px]"
+                        >
+                          <PhoneCall className="w-3.5 h-3.5 text-[#006D5B]" />
+                          <span>Call</span>
+                        </a>
+                        <button
+                          onClick={() => {
+                            setActiveAdminSubTab('history');
+                            showToast(`Selected ${staff.name} for new dispatch order.`);
+                          }}
+                          className="flex-1 py-2 bg-[#006D5B] hover:bg-teal-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 min-h-[40px] cursor-pointer"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Dispatch</span>
+                        </button>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* TAB 4: GIS REAL-TIME PATROL & TELEMETRY */}
+            {activeAdminSubTab === 'telemetry' && (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-[#CBD5E1] dark:border-slate-800 p-5 space-y-4 shadow-sm">
+                <h3 className="text-base font-black text-[#0A2540] dark:text-white flex items-center gap-2">
+                  <Navigation className="w-5 h-5 text-indigo-500" />
+                  Real-time Workforce & Security Patrol Positions (GIS Sector Tracking)
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {staffMembers.map((staff) => (
+                    <div
+                      key={staff.id}
+                      className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 flex items-center gap-3"
+                    >
+                      <img
+                        src={staff.avatarUrl}
+                        alt={staff.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-[#006D5B]"
+                      />
+                      <div className="space-y-0.5">
+                        <h4 className="font-bold text-xs text-[#0A2540] dark:text-white">{staff.name}</h4>
+                        <p className="text-[11px] text-slate-500">{staff.roleTitle}</p>
+                        <div className="flex items-center gap-2 pt-1 text-[10px] font-mono">
+                          <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold">
+                            {staff.status}
+                          </span>
+                          <span className="text-slate-600 dark:text-slate-300">{staff.sectorAssigned}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
         )}
